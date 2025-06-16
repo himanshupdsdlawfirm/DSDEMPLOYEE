@@ -10,7 +10,11 @@ import {
 } from 'react-native';
 import {colors} from '../../../config/theme';
 import ToastNotification from '../../../../components/common/CustomToast';
-import { AppImages } from '../../../config/Images';
+import {AppImages} from '../../../config/Images';
+import {topMarginText, topPadding} from '../../../config/CommonStyle';
+import {moderateScale} from '../../../utils/fontsize';
+import {CustomButton} from '../../../../components/common/CustomButton';
+import {LinearGradientHeader} from '../../../../components/common/LinerGradientHeader';
 
 const AddCaseScreen = ({navigation}) => {
   const [caseNumber, setCaseNumber] = useState(0);
@@ -37,8 +41,19 @@ const AddCaseScreen = ({navigation}) => {
 
   return (
     <>
-       <ImageBackground source={AppImages.themeFive} style={styles.container}>
-        <Text style={styles.title}>Track Case</Text>
+      <ImageBackground source={AppImages.loginTheme} style={styles.container}>
+        <LinearGradientHeader
+          goBack={() => navigation.goBack()}
+          showBackBtnContainer={true}
+          showBackBtn={true}
+          leftImg={AppImages.backIcon}
+          leftImgTint={colors.white}
+          headerText="Case Track"
+          isSecondEndImg={false}
+          isEndRightImg={false}
+          isHeaderBottomText={false}
+          headerBottomTitle={`Refreshed: ${new Date().toLocaleString()}`}
+        />
 
         <View style={styles.descriptionContainer}>
           <Text style={styles.descriptionTitle}>
@@ -84,20 +99,24 @@ const AddCaseScreen = ({navigation}) => {
             returnKeyType={'next'}
             editable={true}
             keyboardType={'default'}
-            style={[styles.textInput]}
+            style={[styles.caseNametextInput]}
           />
 
-          <TouchableOpacity
-            onPress={validFeilds}
-            style={[
+          <CustomButton
+            btnText="Add Case"
+            btnOnPress={validFeilds}
+            isBtnEnable={!caseNumber || caseNumber.length < 13 ? false : true}
+            isEnable={!caseNumber || caseNumber.length < 13 ? false : true}
+            btnViewStyle={[
               styles.addButton,
               {
                 backgroundColor:
-                  !caseNumber || caseNumber.length < 13 ? colors.gray : colors.themeColor,
+                  !caseNumber || caseNumber.length < 13
+                    ? colors.gray
+                    : colors.themeColor,
               },
-            ]}>
-            <Text style={styles.addButtonText}>Add Case</Text>
-          </TouchableOpacity>
+            ]}
+          />
         </View>
       </ImageBackground>
 
@@ -115,16 +134,12 @@ const AddCaseScreen = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingVertical: 10,
-    paddingTop:50,
-    alignItems: 'center',
-    backgroundColor: colors.white,
   },
   title: {
     justifyContent: 'center',
-    fontSize: 20,
+    fontSize: moderateScale(20),
     fontWeight: '600',
-    color: colors.themeColor,
+    color: colors.themeTextColor,
   },
   descriptionContainer: {
     paddingVertical: 20,
@@ -133,7 +148,7 @@ const styles = StyleSheet.create({
   },
   descriptionTitle: {
     justifyContent: 'center',
-    fontSize: 16,
+    fontSize: moderateScale(16),
     fontWeight: '600',
     color: colors.white,
     textAlign: 'center',
@@ -141,7 +156,8 @@ const styles = StyleSheet.create({
   descriptionText: {
     justifyContent: 'center',
     marginVertical: 5,
-    fontSize: 14,
+    fontSize: moderateScale(14),
+    paddingHorizontal: 15,
     fontWeight: '400',
     color: colors.white,
     textAlign: 'center',
@@ -150,7 +166,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 15,
     marginTop: 3,
-    fontSize: 14,
+    fontSize: moderateScale(14),
     fontWeight: '400',
     color: colors.white,
     textAlign: 'left',
@@ -166,12 +182,23 @@ const styles = StyleSheet.create({
   textInput: {
     color: colors.white,
     width: '100%',
-    height: 50,
+    height: 55,
     marginTop: 10,
     borderRadius: 8,
     paddingHorizontal: 15,
     borderWidth: 1,
-    paddingTop:15,
+    paddingTop: 15,
+    borderColor: colors.white,
+    marginBottom: 20,
+  },
+  caseNametextInput: {
+    color: colors.white,
+    width: '100%',
+    height: 55,
+    marginTop: 10,
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    borderWidth: 1,
     borderColor: colors.white,
     marginBottom: 20,
   },
@@ -180,30 +207,26 @@ const styles = StyleSheet.create({
     borderColor: '#E06158',
   },
   inputLabel: {
-    fontSize: 16,
+    fontSize: moderateScale(12),
     color: colors.white,
     fontWeight: '400',
     position: 'absolute',
     textAlign: 'center',
+    paddingVertical: 6,
     width: 110,
-    height: 24,
-    borderRadius:12,
+    borderRadius: 12,
     backgroundColor: '#333333',
     top: 0,
     left: 11,
   },
   addButton: {
-    width: '100%',
-    height: 40,
-    marginTop: 10,
-    backgroundColor: colors.gray,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 10,
+    backgroundColor: 'transparent',
   },
   addButtonText: {
-    fontSize: 16,
+    fontSize: moderateScale(18),
+    textAlign: 'center',
     color: colors.white,
+    fontWeight: '600',
   },
 });
 

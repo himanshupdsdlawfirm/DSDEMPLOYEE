@@ -7,23 +7,30 @@ import {
   View,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import { moderateScale, scale } from '../../app/utils/fontsize';
-import { colors } from '../../app/config/theme';
+import {moderateScale, scale} from '../../app/utils/fontsize';
+import {colors} from '../../app/config/theme';
 
 export const CustomButton = ({
   btnText,
   isLoadingTrue,
   btnViewStyle,
   btnOnPress,
+  isEnable,
+  isBtnEnable,
 }) => {
   return (
     <View style={[styles.LinearGradientStyle, btnViewStyle]}>
       <LinearGradient
-        colors={['#00E9B6', '#00FFEC']}
+        colors={
+          isEnable ? ['#00E9B6', '#00FFEC'] : [colors.gray, colors.lightGray]
+        }
         locations={[0, 1]}
         start={{x: 1, y: 1}}
         end={{x: 0, y: 0.5}}>
-        <TouchableOpacity style={styles.button} onPress={btnOnPress}>
+        <TouchableOpacity
+          activeOpacity={isBtnEnable ? 0 : 0.8}
+          style={styles.button}
+          onPress={btnOnPress}>
           {isLoadingTrue ? (
             <ActivityIndicator color="#fff" />
           ) : (
@@ -38,7 +45,6 @@ export const CustomButton = ({
 const styles = StyleSheet.create({
   LinearGradientStyle: {
     height: 50,
-    marginBottom: 10,
     overflow: 'hidden',
     width: '100%',
     borderRadius: 12,

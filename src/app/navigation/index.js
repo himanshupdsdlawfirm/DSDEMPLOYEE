@@ -1,24 +1,20 @@
 import React from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
-import { useAuth } from '../context';
-import MainStack from './MainStackNavigator';
+import {createStackNavigator} from '@react-navigation/stack';
+import {useAuth} from '../context';
 import AuthStack from './AuthStack';
+import BottomTabNavigator from './BottomTabNavigator';
 
 const RootStack = createStackNavigator();
 
 const MainNavigator = () => {
-  const { user } = useAuth();
+  const {user} = useAuth();
 
   console.log('user state::', user);
-  
 
   return (
-    <RootStack.Navigator screenOptions={{ headerShown: false }}>
-      {user ? (
-        <RootStack.Screen name="Main" component={MainStack} />
-      ) : (
-        <RootStack.Screen name="Auth" component={AuthStack} />
-      )}
+    <RootStack.Navigator screenOptions={{headerShown: false}}>
+      <RootStack.Screen name="Auth" component={AuthStack} />
+      {/* <RootStack.Screen name="MainTabs" component={BottomTabNavigator} /> */}
     </RootStack.Navigator>
   );
 };

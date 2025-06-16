@@ -7,7 +7,6 @@ import {
   TouchableOpacity
 } from 'react-native';
 import {colors} from '../../app/config/theme';
-import {AppImages} from '../../app/config/Images';
 
 export const UserInputText = ({
   props,
@@ -27,13 +26,15 @@ export const UserInputText = ({
   onFocus,
   onBlur,
   autoFocus,
-  isPassSecure
+  isPassSecure,
+  inputTextContainerStyle,
+  rightImgTintColor
 }) => {
   console.log('isEnterValue::', isEnterValue);
 
   return (
     <View style={styles.inputWrapper}>
-      <View style={styles.inputContainer}>
+      <View style={[styles.inputContainer, inputTextContainerStyle]}>
         <View
           style={{
             flexDirection: 'row',
@@ -46,6 +47,7 @@ export const UserInputText = ({
               style={{
                 height: 24,
                 width: 24,
+                tintColor:rightImgTintColor
               }}
             />
           )}
@@ -57,7 +59,7 @@ export const UserInputText = ({
             value={value}
             placeholder={placeholderText}
             maxLength={maxLength}
-            placeholderTextColor={isvalid ? '#E06158' : colors.gray}
+            placeholderTextColor={colors.gray}
             autoCapitalize={'none'}
             autoFocus={autoFocus}
             returnKeyType={'next'}
@@ -129,7 +131,7 @@ const styles = StyleSheet.create({
     width: 95,
     height:24,
     borderRadius:11,
-    backgroundColor:colors.themeBgColor,
+    backgroundColor:colors.themeTextColor,
     top: 0,
     left: 11,
   },

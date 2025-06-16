@@ -6,7 +6,6 @@ import { AuthProvider } from './src/app/context';
 import MainNavigator from './src/app/navigation';
 
 const App = () => {
-    console.log('user state::');
 
   return (
 

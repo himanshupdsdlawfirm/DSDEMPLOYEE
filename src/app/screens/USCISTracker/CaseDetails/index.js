@@ -8,12 +8,12 @@ import {
   Linking,
   ImageBackground,
 } from 'react-native';
-import { AppImages } from '../../../config/Images';
-import { colors } from '../../../config/theme';
+import {AppImages} from '../../../config/Images';
+import {colors} from '../../../config/theme';
+import {moderateScale} from '../../../utils/fontsize';
+import {LinearGradientHeader} from '../../../../components/common/LinerGradientHeader';
 
-const CaseDetailsScreen = ({route}) => {
-  const {caseId} = route.params;
-
+const CaseDetailsScreen = ({navigation}) => {
   // Mock data - replace with your actual data fetching
   const caseDetails = {
     id: 'EAC2101350505',
@@ -68,140 +68,168 @@ const CaseDetailsScreen = ({route}) => {
 
   return (
     <>
-    <ImageBackground source={AppImages.themeFive} style={styles.container}>
-       <ScrollView style={styles.container}>
-      {/* Case Header */}
-      <View style={styles.header}>
-        <Text style={styles.caseId}>{caseDetails.id}</Text>
-        <Text style={styles.caseTitle}>{caseDetails.title}</Text>
-        <View style={styles.divider} />
-      </View>
-
-      {/* Current Status */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{caseDetails.currentStatus}</Text>
-      </View>
-
-      {/* Form Details */}
-      <View style={styles.detailRow}>
-        <Text style={styles.detailLabel}>{caseDetails.formType}</Text>
-        <Text style={styles.detailValue}>{caseDetails.lastUpdated}</Text>
-        <Text style={styles.detailNote}>Form Last Updated</Text>
-      </View>
-
-      <View style={styles.detailRow}>
-        <Text style={styles.daysSinceUpdate}>
-          {caseDetails.daysSinceUpdate} Days Since Last Update
-        </Text>
-      </View>
-
-      {/* Description */}
-      <View style={styles.description}>
-        <Text style={styles.descriptionText}>{caseDetails.description}</Text>
-        <Text style={styles.addressChangeText}>
-          If you move, go to www.uscis.gov/addresschange to give us your new
-          mailing address.
-        </Text>
-      </View>
-
-      {/* History Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>History</Text>
-        <View style={styles.historyContainer}>
-          {caseDetails.history.map((item, index) => {
-            // Determine status color based on event type
-            let statusColor = '#1a73e8'; // Default blue
-            if (item.event.includes('Request For Evidence'))
-              statusColor = '#fbbc04'; // Yellow
-            if (item.event.includes('transferred')) statusColor = '#34a853'; // Green
-            if (
-              item.event.includes('reopened') ||
-              item.event.includes('appeal')
-            )
-              statusColor = '#ea4335'; // Red
-
-            return (
-              <View key={index} style={styles.historyItem}>
-                <View style={styles.historyTimeline}>
-                  <View
-                    style={[styles.timelineDot, {backgroundColor: statusColor}]}
-                  />
-                  {index !== caseDetails.history.length - 1 && (
-                    <View style={styles.timelineLine} />
-                  )}
-                </View>
-                <View style={styles.historyContent}>
-                  <View style={styles.historyHeader}>
-                    <Text style={styles.historyDate}>{item.date}</Text>
-                    <View
-                      style={[
-                        styles.statusIndicator,
-                        {backgroundColor: statusColor},
-                      ]}
-                    />
-                  </View>
-                  <Text style={styles.historyEvent}>{item.event}</Text>
-                </View>
-              </View>
-            );
-          })}
+      <ImageBackground source={AppImages.loginTheme} style={styles.BIContainer}>
+        {/* Screen Header */}
+        <View
+          style={{
+            width: '100%',
+          }}>
+          <LinearGradientHeader
+            goBack={() => navigation.goBack()}
+            showBackBtnContainer={true}
+            showBackBtn={true}
+            leftImg={AppImages.backIcon}
+            leftImgTint={colors.white}
+            headerText="Case Detail"
+            isSecondEndImg={false}
+            isEndRightImg={false}
+            isHeaderBottomText={true}
+            headerBottomTitle={caseDetails.title}
+          />
         </View>
-      </View>
+        <View style={styles.container}>
+          <ScrollView
+            contentContainerStyle={{
+              padding: 10,
+              paddingBottom: 70,
+            }}>
+            {/* Case Header */}
+            <View style={styles.header}>
+              <Text style={styles.caseId}>{caseDetails.id}</Text>
+              <View style={styles.divider} />
+            </View>
 
-      {/* Action Buttons */}
-      <View style={styles.actions}>
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={handleShareTimeline}>
-          <Text style={styles.actionButtonText}>SHARE MY TIMELINE</Text>
-        </TouchableOpacity>
+            {/* Current Status */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>
+                {caseDetails.currentStatus}
+              </Text>
+            </View>
 
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={handleViewOnline}>
-          <Text style={styles.actionButtonText}>VIEW ONLINE</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
-    </ImageBackground>
+            {/* Form Details */}
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>{caseDetails.formType}</Text>
+              <Text style={styles.detailValue}>{caseDetails.lastUpdated}</Text>
+              <Text style={styles.detailNote}>Form Last Updated</Text>
+            </View>
+
+            <View style={styles.detailRow}>
+              <Text style={styles.daysSinceUpdate}>
+                {caseDetails.daysSinceUpdate} Days Since Last Update
+              </Text>
+            </View>
+
+            {/* Description */}
+            <View style={styles.description}>
+              <Text style={styles.descriptionText}>
+                {caseDetails.description}
+              </Text>
+              <Text style={styles.addressChangeText}>
+                If you move, go to www.uscis.gov/addresschange to give us your
+                new mailing address.
+              </Text>
+            </View>
+
+            {/* History Section */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>History</Text>
+              <View style={styles.historyContainer}>
+                {caseDetails.history.map((item, index) => {
+                  // Determine status color based on event type
+                  let statusColor = '#1a73e8'; // Default blue
+                  if (item.event.includes('Request For Evidence'))
+                    statusColor = '#fbbc04'; // Yellow
+                  if (item.event.includes('transferred'))
+                    statusColor = '#34a853'; // Green
+                  if (
+                    item.event.includes('reopened') ||
+                    item.event.includes('appeal')
+                  )
+                    statusColor = '#ea4335'; // Red
+
+                  return (
+                    <View key={index} style={styles.historyItem}>
+                      <View style={styles.historyTimeline}>
+                        <View
+                          style={[
+                            styles.timelineDot,
+                            {backgroundColor: statusColor},
+                          ]}
+                        />
+                        {index !== caseDetails.history.length - 1 && (
+                          <View style={styles.timelineLine} />
+                        )}
+                      </View>
+                      <View style={styles.historyContent}>
+                        <View style={styles.historyHeader}>
+                          <Text style={styles.historyDate}>{item.date}</Text>
+                          <View
+                            style={[
+                              styles.statusIndicator,
+                              {backgroundColor: statusColor},
+                            ]}
+                          />
+                        </View>
+                        <Text style={styles.historyEvent}>{item.event}</Text>
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            </View>
+
+            {/* Action Buttons */}
+            <View style={styles.actions}>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={handleShareTimeline}>
+                <Text style={styles.actionButtonText}>SHARE MY TIMELINE</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={handleViewOnline}>
+                <Text style={styles.actionButtonText}>VIEW ONLINE</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </View>
+      </ImageBackground>
     </>
-   
   );
 };
 
 const styles = StyleSheet.create({
+  BIContainer: {flex: 1},
+  title: {
+    justifyContent: 'center',
+    fontSize: moderateScale(20),
+    fontWeight: '600',
+    color: colors.themeTextColor,
+  },
   container: {
     flex: 1,
-    padding: 16,
-    opacity:0.9
+    padding: 10,
   },
   header: {
     marginBottom: 16,
+    borderBottomWidth: 2,
+    borderBottomColor: colors.borderColor,
   },
   caseId: {
-    fontSize: 20,
+    fontSize: moderateScale(20),
     fontWeight: 'bold',
-    marginBottom: 8,
-    color:colors.white
-  },
-  caseTitle: {
-    fontSize: 16,
-    marginBottom: 12,
-    color:colors.white
+    color: colors.white,
   },
   divider: {
-    height: 1,
-    backgroundColor: '#e0e0e0',
+    height: 2,
     marginVertical: 8,
-  },
-  section: {
-    marginVertical: 16,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 12,
-    color:colors.themeColor
+    color: colors.themeTextColor,
   },
   detailRow: {
     flexDirection: 'row',
@@ -212,22 +240,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginRight: 8,
-    color:colors.white
+    color: colors.white,
   },
   detailValue: {
     fontSize: 16,
     marginRight: 8,
-    color:colors.white
+    color: colors.white,
   },
   detailNote: {
     fontSize: 14,
     // color: '#666',
-    color:colors.white
+    color: colors.white,
   },
   daysSinceUpdate: {
     fontSize: 14,
     // color: '#666',
-    color:colors.white
+    color: colors.white,
   },
   description: {
     marginVertical: 16,
@@ -236,13 +264,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     marginBottom: 12,
-    color:colors.white
+    color: colors.white,
   },
   addressChangeText: {
     fontSize: 14,
     // color: '#666',
     fontStyle: 'italic',
-    color:colors.white
+    color: colors.white,
   },
   historyContainer: {
     marginTop: 8,
@@ -288,7 +316,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     marginRight: 8,
-    color:colors.white
+    color: colors.white,
   },
   statusIndicator: {
     width: 12,
@@ -299,7 +327,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     // color: '#555',
-    color:colors.white
+    color: colors.white,
   },
   actions: {
     flexDirection: 'row',

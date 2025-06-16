@@ -1,7 +1,8 @@
 import React, {useEffect} from 'react';
-import {View, Text} from 'react-native';
+import {View, Text, Image} from 'react-native';
 import Animated, {FadeInUp, FadeOutUp} from 'react-native-reanimated';
 import LinearGradient from 'react-native-linear-gradient';
+import {colors} from '../../app/config/theme';
 
 function ToastNotification({
   visible,
@@ -33,8 +34,17 @@ function ToastNotification({
           padding: 14,
           flexDirection: 'row',
         }}>
-        {icon}
-        <View>
+        <Image
+          source={icon}
+          style={{
+            width: 24,
+            height: 30,
+          }}
+        />
+        <View
+          style={{
+            height: 70,
+          }}>
           <Text style={{color: '#F6F4F4', fontWeight: 'bold', marginLeft: 10}}>
             {title}
           </Text>
