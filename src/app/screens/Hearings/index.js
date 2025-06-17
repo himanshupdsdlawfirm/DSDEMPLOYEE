@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,6 @@ import {
   Image,
   TouchableOpacity,
   FlatList,
-  ScrollView,
   Platform,
 } from 'react-native';
 import useApi from '../../hooks/useApi';
@@ -18,7 +17,9 @@ import {LinearGradientHeader} from '../../../components/common/LinerGradientHead
 import {colors} from '../../config/theme';
 import LinearGradient from 'react-native-linear-gradient';
 import {responsiveSize} from '../../utils/responsiveFontSize';
-// import FilterBottomSheet from '../../../components/common/FilterBottomSheet';
+import FilterBottomSheet from '../../../components/common/FilterBottomSheet';
+import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
+import {dropdownOptions} from '../../config/StaticDataList';
 
 const clientsData = [
   {name: 'Himanshu', ClientImage: AppImages.userAnimyPlaceholder},
@@ -34,7 +35,8 @@ const clientsData = [
 const HearingsScreen = ({navigation}) => {
   const getUserApi = useApi(getUserProfile);
 
-  const [isFilterVisible, setIsFilterVisible] = useState(false);
+  // Create a ref for the bottom sheet
+  const filterBottomSheetRef = useRef(null);
 
   useEffect(() => {
     getUserApi.request();
@@ -255,10 +257,16 @@ const HearingsScreen = ({navigation}) => {
     );
   };
 
-  // const handleApplyFilters = filters => {
-  //   console.log('Applied filters:', filters);
-  //   // Apply your filters here
-  // };
+  //  Function to open filter
+  const openFilter = () => {
+    filterBottomSheetRef.current?.present();
+  };
+
+  // Handle filter application
+  const handleApplyFilters = filters => {
+    console.log('Applied filters:', filters);
+    // Apply your filters here
+  };
 
   return (
     <View style={styles.container}>
@@ -266,63 +274,78 @@ const HearingsScreen = ({navigation}) => {
         <Loader />
       ) : (
         <ImageBackground source={AppImages.loginTheme} style={styles.container}>
-          <LinearGradientHeader
-            goBack={() => navigation.goBack()}
-            showBackBtnContainer={true}
-            showBackBtn={true}
-            leftImg={AppImages.backIcon}
-            leftImgTint={colors.white}
-            headerText="Hearings"
-            isSecondEndImg={false}
-            isEndRightImg={false}
-            isHeaderBottomText={false}
-          />
-
-          <TouchableOpacity
-            onPress={() => setIsFilterVisible(true)}
-            style={{
-              width: '100%',
-              paddingHorizontal: 15,
-              marginTop: 20,
-              marginBottom: 10,
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}>
-            <Image
-              style={{
-                height: 24,
-                width: 24,
-                tintColor: colors.white,
-              }}
-              source={AppImages.filter}
+          <BottomSheetModalProvider>
+            <LinearGradientHeader
+              goBack={() => navigation.goBack()}
+              showBackBtnContainer={true}
+              showBackBtn={true}
+              leftImg={AppImages.backIcon}
+              leftImgTint={colors.white}
+              headerText="Hearings"
+              isSecondEndImg={false}
+              isEndRightImg={false}
+              isHeaderBottomText={false}
             />
-            <Text
-              style={{
-                fontSize: responsiveSize(20, 'font'),
-                fontWeight: '600',
-                color: colors.white,
-                marginLeft: 10,
-                letterSpacing: 0.5,
-              }}>
-              Filter
-            </Text>
-          </TouchableOpacity>
 
-          <FlatList
-            numColumns={2}
-            keyExtractor={(item, index) => index.toString()}
-            contentContainerStyle={styles.hearingsList}
-            columnWrapperStyle={styles.hearingsColumnWrapper}
-            showsVerticalScrollIndicator={false}
-            scrollEnabled={false} // Important when nested in ScrollView
-            data={[{}, {}, {}]}
-            renderItem={renderHearings}
-          />
-          {/* <FilterBottomSheet
-            isVisible={isFilterVisible}
-            onClose={() => setIsFilterVisible(false)}
-            // onApply={handleApplyFilters}
-          /> */}
+            <TouchableOpacity
+              onPress={openFilter}
+              style={{
+                width: '100%',
+                paddingHorizontal: 15,
+                marginTop: 20,
+                marginBottom: 10,
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
+              <Image
+                style={{
+                  height: 24,
+                  width: 24,
+                  tintColor: colors.white,
+                }}
+                source={AppImages.filter}
+              />
+              <Text
+                style={{
+                  fontSize: responsiveSize(20, 'font'),
+                  fontWeight: '600',
+                  color: colors.white,
+                  marginLeft: 10,
+                  letterSpacing: 0.5,
+                }}>
+                Filter
+              </Text>
+            </TouchableOpacity>
+
+            <FlatList
+              numColumns={2}
+              keyExtractor={(item, index) => index.toString()}
+              contentContainerStyle={styles.hearingsList}
+              columnWrapperStyle={styles.hearingsColumnWrapper}
+              showsVerticalScrollIndicator={false}
+              scrollEnabled={false} // Important when nested in ScrollView
+              data={[{}, {}, {}]}
+              renderItem={renderHearings}
+            />
+            {/* Filter Component */}
+            <FilterBottomSheet
+              dropdownOptions={dropdownOptions}
+              pickerOnePlaceholder={{label: 'Select case worker', value: null}}
+              pickerTwoPlaceholder={{label: 'Select attorney', value: null}}
+              pickerThreePlaceholder = {{label: 'Select hearing type', value: null}}
+              pickerFourPlaceholder= {{label: 'Select schedule hearing', value: null}}
+              ref={filterBottomSheetRef}
+              onApply={handleApplyFilters}
+              isDatePickerVisible={true}
+              isDropdownOneVisible={true}
+              isDropdownTwoVisible={true}
+              isDropdownThreeVisible={true}
+              isDropdownFourVisible={true}
+              isTextInputOneVisible={false}
+              isTextInputTwoVisible={true}
+              secondInputPlaceholder="Enter judge name"
+            />
+          </BottomSheetModalProvider>
         </ImageBackground>
       )}
     </View>

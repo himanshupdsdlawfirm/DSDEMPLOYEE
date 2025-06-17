@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -18,24 +18,40 @@ import {LinearGradientHeader} from '../../../components/common/LinerGradientHead
 import {colors} from '../../config/theme';
 import LinearGradient from 'react-native-linear-gradient';
 import {responsiveSize} from '../../utils/responsiveFontSize';
+import FilterBottomSheet from '../../../components/common/FilterBottomSheet';
+import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
+import { dropdownApoointmentOptions, dropdownOptions } from '../../config/StaticDataList';
 
-const clientsData = [
-  {name: 'Himanshu', ClientImage: AppImages.userAnimyPlaceholder},
-  {name: 'Ankit', ClientImage: AppImages.userAnimyPlaceholder},
-  {name: 'Aditiya', ClientImage: AppImages.userAnimyPlaceholder},
-  {name: 'Ashish', ClientImage: AppImages.userAnimyPlaceholder},
-  {name: 'Himanshu', ClientImage: AppImages.userAnimyPlaceholder},
-  {name: 'Ankit', ClientImage: AppImages.userAnimyPlaceholder},
-  {name: 'Aditiya', ClientImage: AppImages.userAnimyPlaceholder},
-  {name: 'Ashish', ClientImage: AppImages.userAnimyPlaceholder},
-];
+// const clientsData = [
+//   {name: 'Himanshu', ClientImage: AppImages.userAnimyPlaceholder},
+//   {name: 'Ankit', ClientImage: AppImages.userAnimyPlaceholder},
+//   {name: 'Aditiya', ClientImage: AppImages.userAnimyPlaceholder},
+//   {name: 'Ashish', ClientImage: AppImages.userAnimyPlaceholder},
+//   {name: 'Himanshu', ClientImage: AppImages.userAnimyPlaceholder},
+//   {name: 'Ankit', ClientImage: AppImages.userAnimyPlaceholder},
+//   {name: 'Aditiya', ClientImage: AppImages.userAnimyPlaceholder},
+//   {name: 'Ashish', ClientImage: AppImages.userAnimyPlaceholder},
+// ];
 
 const AppointmentsScreen = ({navigation}) => {
+  const filterBottomSheetRef = useRef(null);
+
   const getUserApi = useApi(getUserProfile);
 
   useEffect(() => {
     getUserApi.request();
   }, []);
+
+  //  Function to open filter
+  const openFilter = () => {
+    filterBottomSheetRef.current?.present();
+  };
+
+  // Handle filter application
+  const handleApplyFilters = filters => {
+    console.log('Applied filters:', filters);
+    // Apply your filters here
+  };
 
   const renderAppointments = ({item, index}) => {
     console.log('asasas::', index);
@@ -146,25 +162,75 @@ const AppointmentsScreen = ({navigation}) => {
         <Loader />
       ) : (
         <ImageBackground source={AppImages.loginTheme} style={styles.container}>
-          <LinearGradientHeader
-            goBack={() => navigation.goBack()}
-            showBackBtnContainer={true}
-            showBackBtn={true}
-            leftImg={AppImages.backIcon}
-            leftImgTint={colors.white}
-            headerText="Appointments"
-            isSecondEndImg={false}
-            isEndRightImg={false}
-            isHeaderBottomText={false}
-          />
+          <BottomSheetModalProvider>
+            <LinearGradientHeader
+              goBack={() => navigation.goBack()}
+              showBackBtnContainer={true}
+              showBackBtn={true}
+              leftImg={AppImages.backIcon}
+              leftImgTint={colors.white}
+              headerText="Appointments"
+              isSecondEndImg={false}
+              isEndRightImg={false}
+              isHeaderBottomText={false}
+            />
 
-          <FlatList
-            keyExtractor={(item, index) => index.toString()}
-            contentContainerStyle={styles.appointmentList}
-            showsVerticalScrollIndicator={false}
-            data={[{}, {}, {}]}
-            renderItem={renderAppointments}
-          />
+            <TouchableOpacity
+              onPress={openFilter}
+              style={{
+                width: '100%',
+                paddingHorizontal: 15,
+                marginTop: 20,
+                marginBottom: 10,
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
+              <Image
+                style={{
+                  height: 24,
+                  width: 24,
+                  tintColor: colors.white,
+                }}
+                source={AppImages.filter}
+              />
+              <Text
+                style={{
+                  fontSize: responsiveSize(20, 'font'),
+                  fontWeight: '600',
+                  color: colors.white,
+                  marginLeft: 10,
+                  letterSpacing: 0.5,
+                }}>
+                Filter
+              </Text>
+            </TouchableOpacity>
+
+            <FlatList
+              keyExtractor={(item, index) => index.toString()}
+              contentContainerStyle={styles.appointmentList}
+              showsVerticalScrollIndicator={false}
+              data={[{}, {}, {}]}
+              renderItem={renderAppointments}
+            />
+
+            {/* Filter Component */}
+            <FilterBottomSheet
+              dropdownOptions={dropdownApoointmentOptions}
+              ref={filterBottomSheetRef}
+              onApply={handleApplyFilters}
+              pickerOnePlaceholder={{label: 'Select client', value: null}}
+              pickerTwoPlaceholder={{label: 'Select payment mode', value: null}}
+              isDatePickerVisible={false}
+              isDropdownOneVisible={true}
+              isDropdownTwoVisible={true}
+              isDropdownThreeVisible={false}
+              isDropdownFourVisible={false}
+              isTextInputOneVisible={true}
+              isTextInputTwoVisible={true}
+              firstInputPlaceholder="Search Appointments..."
+              secondInputPlaceholder="Transaction Id"
+            />
+          </BottomSheetModalProvider>
         </ImageBackground>
       )}
     </View>
@@ -188,7 +254,7 @@ const styles = StyleSheet.create({
     padding: 15,
   },
   appointmentList: {
-    paddingTop: 20,
+    paddingTop: 0,
     paddingBottom: 20,
     paddingHorizontal: 15,
   },

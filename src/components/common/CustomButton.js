@@ -17,6 +17,7 @@ export const CustomButton = ({
   btnOnPress,
   isEnable,
   isBtnEnable,
+  btnTextColor
 }) => {
   return (
     <View style={[styles.LinearGradientStyle, btnViewStyle]}>
@@ -34,7 +35,7 @@ export const CustomButton = ({
           {isLoadingTrue ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>{btnText}</Text>
+            <Text style={[styles.buttonText, btnTextColor]}>{btnText}</Text>
           )}
         </TouchableOpacity>
       </LinearGradient>

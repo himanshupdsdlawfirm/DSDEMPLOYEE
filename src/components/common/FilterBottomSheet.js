@@ -1,237 +1,401 @@
-// import React, { useRef, useState } from 'react';
-// import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-// import BottomSheet from '@gorhom/bottom-sheet';
-// import { GestureHandlerRootView } from 'react-native-gesture-handler';
-// import RNPickerSelect from 'react-native-picker-select';
-// import DatePicker from 'react-native-date-picker';
+import React, {forwardRef, useState, useMemo} from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+} from 'react-native';
+import {BottomSheetModal, BottomSheetScrollView} from '@gorhom/bottom-sheet';
+import RNPickerSelect from 'react-native-picker-select';
+import DatePicker from 'react-native-date-picker';
+import Ionicons from '@react-native-vector-icons/ionicons';
+import {colors} from '../../app/config/theme';
+import {responsiveSize} from '../../app/utils/responsiveFontSize';
+import {CustomButton} from './CustomButton';
 
-// const FilterBottomSheet = ({ isVisible, onClose, onApply }) => {
-//   const bottomSheetRef = useRef(null);
-//   const snapPoints = ['80%']; // 80% dynamic height
+const FilterBottomSheet = forwardRef(({onApply, ...props}, ref) => {
+  const {
+    isDatePickerVisible,
+    isDropdownOneVisible,
+    isDropdownTwoVisible,
+    isDropdownThreeVisible,
+    isDropdownFourVisible,
+    isTextInputOneVisible,
+    isTextInputTwoVisible,
+    firstInputPlaceholder,
+    secondInputPlaceholder,
+    dropdownOptions,
+    pickerOnePlaceholder,
+    pickerTwoPlaceholder,
+    pickerThreePlaceholder,
+    pickerFourPlaceholder,
+  } = props;
 
-//   // Form state
-//   const [searchText, setSearchText] = useState('');
-//   const [selectedOption1, setSelectedOption1] = useState(null);
-//   const [selectedOption2, setSelectedOption2] = useState(null);
-//   const [selectedOption3, setSelectedOption3] = useState(null);
-//   const [selectedDate, setSelectedDate] = useState(new Date());
-//   const [datePickerVisible, setDatePickerVisible] = useState(false);
+  // State for filters
+  const [filters, setFilters] = useState({
+    searchText: '',
+    searchSecondText: '',
+    caseWorker: null,
+    attorney: null,
+    judge: null,
+    hearingType: null,
+    hearing: null,
+    startDate: new Date(),
+    endDate: new Date(),
+  });
 
-//   // Dropdown options
-//   const options1 = [
-//     { label: 'Category', value: null },
-//     { label: 'Electronics', value: 'electronics' },
-//     { label: 'Clothing', value: 'clothing' },
-//     { label: 'Food', value: 'food' },
-//   ];
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 
-//   const options2 = [
-//     { label: 'Status', value: null },
-//     { label: 'Active', value: 'active' },
-//     { label: 'Inactive', value: 'inactive' },
-//     { label: 'Pending', value: 'pending' },
-//   ];
+  // Memoized snap points for performance
+  const snapPoints = useMemo(() => ['80%'], []);
 
-//   const options3 = [
-//     { label: 'Sort By', value: null },
-//     { label: 'Price: Low to High', value: 'price_asc' },
-//     { label: 'Price: High to Low', value: 'price_desc' },
-//     { label: 'Newest', value: 'newest' },
-//   ];
+  // Handle filter changes
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({...prev, [key]: value}));
+  };
 
-//   const handleApply = () => {
-//     const filters = {
-//       searchText,
-//       category: selectedOption1,
-//       status: selectedOption2,
-//       sortBy: selectedOption3,
-//       date: selectedDate,
-//     };
-//     onApply(filters);
-//     onClose();
-//   };
+  // Handle apply filters
+  const handleApply = () => {
+    const {startDate, endDate} = filters;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-//   const handleReset = () => {
-//     setSearchText('');
-//     setSelectedOption1(null);
-//     setSelectedOption2(null);
-//     setSelectedOption3(null);
-//     setSelectedDate(new Date());
-//   };
+    if (!startDate || !endDate) {
+      Alert.alert('Validation Error', 'Please select both start and end dates');
+      return;
+    }
 
-//   return (
-//     <GestureHandlerRootView style={{ flex: 1 }}>
-//       <BottomSheet
-//         ref={bottomSheetRef}
-//         index={isVisible ? 0 : -1}
-//         snapPoints={snapPoints}
-//         enablePanDownToClose
-//         onClose={onClose}
-//       >
-//         <View style={styles.container}>
-//           <Text style={styles.title}>Filter Options</Text>
-          
-//           {/* Search Input */}
-//           <TextInput
-//             style={styles.input}
-//             placeholder="Search..."
-//             value={searchText}
-//             onChangeText={setSearchText}
-//           />
-          
-//           {/* Dropdown 1 */}
-//           <View style={styles.dropdownContainer}>
-//             <RNPickerSelect
-//               placeholder={{}}
-//               items={options1}
-//               onValueChange={setSelectedOption1}
-//               value={selectedOption1}
-//               style={pickerSelectStyles}
-//             />
-//           </View>
-          
-//           {/* Dropdown 2 */}
-//           <View style={styles.dropdownContainer}>
-//             <RNPickerSelect
-//               placeholder={{}}
-//               items={options2}
-//               onValueChange={setSelectedOption2}
-//               value={selectedOption2}
-//               style={pickerSelectStyles}
-//             />
-//           </View>
-          
-//           {/* Dropdown 3 */}
-//           <View style={styles.dropdownContainer}>
-//             <RNPickerSelect
-//               placeholder={{}}
-//               items={options3}
-//               onValueChange={setSelectedOption3}
-//               value={selectedOption3}
-//               style={pickerSelectStyles}
-//             />
-//           </View>
-          
-//           {/* Date Picker */}
-//           <TouchableOpacity 
-//             style={styles.dateButton} 
-//             onPress={() => setDatePickerVisible(true)}
-//           >
-//             <Text style={styles.dateButtonText}>
-//               {selectedDate.toLocaleDateString()}
-//             </Text>
-//           </TouchableOpacity>
-          
-//           <DatePicker
-//             modal
-//             open={datePickerVisible}
-//             date={selectedDate}
-//             mode="date"
-//             onConfirm={(date) => {
-//               setDatePickerVisible(false);
-//               setSelectedDate(date);
-//             }}
-//             onCancel={() => {
-//               setDatePickerVisible(false);
-//             }}
-//           />
-          
-//           {/* Action Buttons */}
-//           <View style={styles.buttonContainer}>
-//             <TouchableOpacity 
-//               style={[styles.button, styles.cancelButton]} 
-//               onPress={handleReset}
-//             >
-//               <Text style={styles.buttonText}>Reset</Text>
-//             </TouchableOpacity>
-            
-//             <TouchableOpacity 
-//               style={[styles.button, styles.applyButton]} 
-//               onPress={handleApply}
-//             >
-//               <Text style={styles.buttonText}>Apply Filters</Text>
-//             </TouchableOpacity>
-//           </View>
-//         </View>
-//       </BottomSheet>
-//     </GestureHandlerRootView>
-//   );
-// };
+    if (startDate > endDate) {
+      Alert.alert('Validation Error', 'End date cannot be before start date');
+      return;
+    }
 
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     padding: 20,
-//   },
-//   title: {
-//     fontSize: 20,
-//     fontWeight: 'bold',
-//     marginBottom: 20,
-//     textAlign: 'center',
-//   },
-//   input: {
-//     height: 50,
-//     borderColor: '#ccc',
-//     borderWidth: 1,
-//     borderRadius: 8,
-//     paddingHorizontal: 15,
-//     marginBottom: 15,
-//   },
-//   dropdownContainer: {
-//     borderColor: '#ccc',
-//     borderWidth: 1,
-//     borderRadius: 8,
-//     marginBottom: 15,
-//     paddingHorizontal: 10,
-//     justifyContent: 'center',
-//     height: 50,
-//   },
-//   dateButton: {
-//     height: 50,
-//     borderColor: '#ccc',
-//     borderWidth: 1,
-//     borderRadius: 8,
-//     justifyContent: 'center',
-//     paddingHorizontal: 15,
-//     marginBottom: 20,
-//   },
-//   dateButtonText: {
-//     color: '#333',
-//   },
-//   buttonContainer: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     marginTop: 10,
-//   },
-//   button: {
-//     flex: 1,
-//     height: 50,
-//     borderRadius: 8,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     marginHorizontal: 5,
-//   },
-//   cancelButton: {
-//     backgroundColor: '#f0f0f0',
-//   },
-//   applyButton: {
-//     backgroundColor: '#007AFF',
-//   },
-//   buttonText: {
-//     color: '#fff',
-//     fontWeight: 'bold',
-//   },
-// });
+    if (startDate > today || endDate > today) {
+      Alert.alert('Validation Error', 'Dates cannot be in the future');
+      return;
+    }
 
-// const pickerSelectStyles = StyleSheet.create({
-//   inputIOS: {
-//     fontSize: 16,
-//     color: 'black',
-//   },
-//   inputAndroid: {
-//     fontSize: 16,
-//     color: 'black',
-//   },
-// });
+    onApply(filters);
+    ref.current?.dismiss();
+  };
 
-// export default FilterBottomSheet;
+  // Reset all filters
+  const handleReset = () => {
+    setFilters({
+      searchText: '',
+      searchSecondText: '',
+      caseWorker: null,
+      attorney: null,
+      judge: null,
+      hearingType: null,
+      hearing: null,
+      startDate: new Date(),
+      endDate: new Date(),
+    });
+  };
+
+  // Common picker icon component
+  const PickerIcon = () => (
+    <Ionicons name="chevron-down" size={16} color={colors.gray} />
+  );
+
+  return (
+    <BottomSheetModal
+      ref={ref}
+      index={0}
+      // snapPoints={snapPoints}
+      backgroundStyle={styles.background}
+      handleIndicatorStyle={styles.handle}>
+      <BottomSheetScrollView contentContainerStyle={styles.contentContainer}>
+        {/* Text Input One */}
+        {isTextInputOneVisible && (
+          <TextInput
+            style={styles.input}
+            placeholder={firstInputPlaceholder}
+            placeholderTextColor={colors.gray}
+            value={filters.searchText}
+            onChangeText={text => handleFilterChange('searchText', text)}
+          />
+        )}
+
+        {/* Dropdown One */}
+        {isDropdownOneVisible && (
+          <View style={styles.dropdownWrapper}>
+            <RNPickerSelect
+              onValueChange={value => handleFilterChange('caseWorker', value)}
+              items={dropdownOptions.categoryOne}
+              value={filters.caseWorker}
+              placeholder={pickerOnePlaceholder}
+              style={pickerSelectStyles}
+              useNativeAndroidPickerStyle={false}
+              Icon={PickerIcon}
+              fixAndroidTouchableBug
+            />
+          </View>
+        )}
+
+        {/* Dropdown Two */}
+        {isDropdownTwoVisible && (
+          <View style={styles.dropdownWrapper}>
+            <RNPickerSelect
+              onValueChange={value => handleFilterChange('attorney', value)}
+              items={dropdownOptions.categoryTwo}
+              value={filters.attorney}
+              placeholder={pickerTwoPlaceholder}
+              style={pickerSelectStyles}
+              useNativeAndroidPickerStyle={false}
+              Icon={PickerIcon}
+              fixAndroidTouchableBug
+            />
+          </View>
+        )}
+
+        {/* Text Input Two */}
+        {isTextInputTwoVisible && (
+          <TextInput
+            style={styles.input}
+            placeholder={secondInputPlaceholder}
+            placeholderTextColor={colors.gray}
+            value={filters.searchSecondText}
+            onChangeText={text => handleFilterChange('searchSecondText', text)}
+          />
+        )}
+
+        {/* Dropdown Three */}
+        {isDropdownThreeVisible && (
+          <View style={styles.dropdownWrapper}>
+            <RNPickerSelect
+              onValueChange={value => handleFilterChange('hearingType', value)}
+              items={dropdownOptions.categoryFour}
+              value={filters.hearingType}
+              placeholder={pickerThreePlaceholder}
+              style={pickerSelectStyles}
+              useNativeAndroidPickerStyle={false}
+              Icon={PickerIcon}
+              fixAndroidTouchableBug
+            />
+          </View>
+        )}
+
+        {/* Dropdown Four */}
+        {isDropdownFourVisible && (
+          <View style={styles.dropdownWrapper}>
+            <RNPickerSelect
+              onValueChange={value => handleFilterChange('hearing', value)}
+              items={dropdownOptions.categoryFive}
+              value={filters.hearing}
+              placeholder={pickerFourPlaceholder}
+              style={pickerSelectStyles}
+              useNativeAndroidPickerStyle={false}
+              Icon={PickerIcon}
+              fixAndroidTouchableBug
+            />
+          </View>
+        )}
+
+        {/* Date Picker */}
+        {isDatePickerVisible && (
+          <View>
+            <Text style={styles.dateRangeLabel}>Select date range</Text>
+            <View style={styles.dateRangeContainer}>
+              <TouchableOpacity
+                style={styles.dateButton}
+                onPress={() => setShowStartDatePicker(true)}>
+                <Text style={styles.dateText}>
+                  {filters.startDate.toLocaleDateString()}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.dateButton}
+                onPress={() => setShowEndDatePicker(true)}>
+                <Text style={styles.dateText}>
+                  {filters.endDate.toLocaleDateString()}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        {/* Date Pickers */}
+        <DatePicker
+          modal
+          open={showStartDatePicker}
+          date={filters.startDate || new Date()}
+          mode="date"
+          maximumDate={new Date()}
+          onConfirm={selectedDate => {
+            setShowStartDatePicker(false);
+            const date = new Date(selectedDate);
+            date.setHours(0, 0, 0, 0);
+
+            if (filters.endDate && date > filters.endDate) {
+              handleFilterChange('endDate', null);
+            }
+
+            handleFilterChange('startDate', date);
+          }}
+          onCancel={() => setShowStartDatePicker(false)}
+        />
+
+        <DatePicker
+          modal
+          open={showEndDatePicker}
+          date={filters.endDate || filters.startDate || new Date()}
+          mode="date"
+          minimumDate={filters.startDate}
+          maximumDate={new Date()}
+          disabled={!filters.startDate}
+          onConfirm={selectedDate => {
+            setShowEndDatePicker(false);
+            const date = new Date(selectedDate);
+            date.setHours(0, 0, 0, 0);
+            handleFilterChange('endDate', date);
+          }}
+          onCancel={() => setShowEndDatePicker(false)}
+        />
+
+        {/* Action Buttons */}
+        <View style={styles.buttonRow}>
+          <CustomButton
+            btnText="Reset"
+            btnOnPress={handleReset}
+            isEnable={false}
+            isBtnEnable={true}
+            btnViewStyle={[styles.button, styles.resetButton]}
+            btnTextColor={styles.resetButtonText}
+          />
+
+          <CustomButton
+            btnText="Apply Filters"
+            btnOnPress={handleApply}
+            isEnable={true}
+            isBtnEnable={true}
+            btnViewStyle={styles.button}
+            btnTextColor={styles.applyButtonText}
+          />
+        </View>
+      </BottomSheetScrollView>
+    </BottomSheetModal>
+  );
+});
+
+// Styles
+const styles = StyleSheet.create({
+  background: {
+    backgroundColor: colors.bottomTabSignOut,
+    borderRadius: 20,
+  },
+  handle: {
+    backgroundColor: '#ccc',
+    width: 40,
+  },
+  contentContainer: {
+    padding: 20,
+  },
+  input: {
+    height: 50,
+    borderWidth: 0.7,
+    fontSize: responsiveSize(14),
+    color: colors.white,
+    borderColor: colors.inputBorderColor,
+    borderRadius: 8,
+    backgroundColor: colors.inputBgColor,
+    paddingHorizontal: 15,
+    marginBottom: 15,
+  },
+  dropdownWrapper: {
+    borderWidth: 0.7,
+    borderColor: colors.inputBorderColor,
+    borderRadius: 8,
+    backgroundColor: colors.inputBgColor,
+    marginBottom: 15,
+    justifyContent: 'center',
+    height: 50,
+    paddingHorizontal: 5,
+  },
+  dateRangeLabel: {
+    fontSize: responsiveSize(14),
+    fontWeight: '500',
+    marginBottom: 10,
+    color: colors.white,
+  },
+  dateRangeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  dateButton: {
+    height: 50,
+    width: '45%',
+    borderWidth: 1,
+    borderColor: colors.inputBorderColor,
+    borderRadius: 8,
+    justifyContent: 'center',
+    paddingHorizontal: 15,
+    marginBottom: 15,
+    backgroundColor: colors.inputBgColor,
+  },
+  dateText: {
+    color: colors.white,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: 20,
+    backgroundColor: colors.bottomTabSignOut,
+  },
+  button: {
+    flex: 1,
+    height: 50,
+    borderRadius: 8,
+    marginBottom: 20,
+  },
+  resetButton: {
+    marginRight: 10,
+  },
+  resetButtonText: {
+    color: colors.themeBgColor,
+    fontSize: responsiveSize(14),
+  },
+  applyButtonText: {
+    color: colors.themeBgColor,
+    fontSize: responsiveSize(14),
+  },
+});
+
+const pickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    fontSize: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    backgroundColor: colors.inputBgColor,
+    color: colors.white,
+    zIndex: 9999,
+    paddingRight: 30,
+  },
+  inputAndroid: {
+    fontSize: responsiveSize(14),
+    backgroundColor: colors.inputBgColor,
+    paddingHorizontal: 10,
+    paddingVertical: 0,
+    color: colors.white,
+    paddingRight: 30,
+    height: '100%',
+    width: '100%',
+    includeFontPadding: false,
+    textAlignVertical: 'center',
+  },
+  placeholder: {
+    color: colors.gray,
+  },
+  iconContainer: {
+    top: '50%',
+    right: 10,
+    marginTop: -7,
+  },
+});
+
+export default FilterBottomSheet;

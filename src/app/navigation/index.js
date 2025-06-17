@@ -14,7 +14,6 @@ const MainNavigator = () => {
   return (
     <RootStack.Navigator screenOptions={{headerShown: false}}>
       <RootStack.Screen name="Auth" component={AuthStack} />
-      {/* <RootStack.Screen name="MainTabs" component={BottomTabNavigator} /> */}
     </RootStack.Navigator>
   );
 };
