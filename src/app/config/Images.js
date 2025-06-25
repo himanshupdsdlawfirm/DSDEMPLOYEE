@@ -40,4 +40,7 @@ export const AppImages = {
   notificationBell: require('../../assets/notificationBell.png'),
   uscisTracker: require('../../assets/uscisTracker.png'),
   filter: require('../../assets/filter.png'),
+  alienNumber: require('../../assets/alienNumber.png'),
+  call: require('../../assets/call.png'),
+  rightArrow: require('../../assets/arrow.png'),
 };

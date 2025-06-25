@@ -104,26 +104,35 @@ const CustomDrawer = props => {
           name: 'Contact Us',
           image: AppImages.contactUs,
         },
-      
       ],
     },
   ];
 
   const handleNavigation = name => {
+    console.log('name::', name);
+
     switch (name) {
       case 'Home':
         break;
-      case 'Case':
-        name = 'Cases';
+      case 'USCIS Tracker':
+        props.navigation.navigate('CaseList');
+        break;
+        case 'Appointments':
+         props.navigation.navigate('AppointmentList');
         break;
       case 'Hearings':
+         props.navigation.navigate('HearingList');
         break;
-      case 'USCIS':
-        props.navigation.navigate('CaseList');
+         case 'Cases':
+        // props.navigation.navigate('CaseList');
+        break;
+         case 'Clients':
+        props.navigation.navigate('ClientList');
         break;
       default:
     }
   };
+  
   return (
     <LinearGradient
       colors={[colors.themeBgColor, colors.bottomTabLightGray]}
@@ -144,82 +153,85 @@ const CustomDrawer = props => {
         </View>
         <View style={styles.overlay} />
       </View>
-      <ScrollView contentContainerStyle= {{paddingBottom: Platform.OS === 'android' ? 120 : 160}}>
-      <View contentContainerStyle={styles.drawerContent}>
-        {people.map(item => {
-          return (
-            <View
-              key={item.id}
-              style={{
-                width: '100%',
-              }}>
-              <Text
-                style={{
-                  fontSize: responsiveSize(16, 'font'),
-                  fontWeight: '00',
-                  color: colors.white,
-                  paddingHorizontal: 15,
-                  marginBottom: 5,
-                  marginTop: item.id === 1 ? 5 : 15,
-                }}>
-                {item?.title}
-              </Text>
+      <ScrollView
+        contentContainerStyle={{
+          paddingBottom: Platform.OS === 'android' ? 120 : 160,
+        }}>
+        <View contentContainerStyle={styles.drawerContent}>
+          {people.map(item => {
+            return (
               <View
+                key={item.id}
                 style={{
-                  backgroundColor: colors.bottomTabLightGray,
-                  borderTopWidth: 1,
-                  borderBottomWidth: 1,
-                  borderColor: colors.borderColor,
+                  width: '100%',
                 }}>
-                {item?.data.map(i => {
-                  return (
-                    <TouchableOpacity
-                      key={i?.itemId}
-                      onPress={() => handleNavigation(i.name)}
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        paddingHorizontal: 30,
-                        paddingVertical: 10,
-                        borderBottomWidth: item.data.length - 1 ? 0.2 : 0,
-                        borderColor: colors.borderColor,
-                      }}>
-                      <Image
-                        source={i?.image}
+                <Text
+                  style={{
+                    fontSize: responsiveSize(16, 'font'),
+                    fontWeight: '00',
+                    color: colors.white,
+                    paddingHorizontal: 15,
+                    marginBottom: 5,
+                    marginTop: item.id === 1 ? 5 : 15,
+                  }}>
+                  {item?.title}
+                </Text>
+                <View
+                  style={{
+                    backgroundColor: colors.bottomTabLightGray,
+                    borderTopWidth: 1,
+                    borderBottomWidth: 1,
+                    borderColor: colors.borderColor,
+                  }}>
+                  {item?.data.map(i => {
+                    return (
+                      <TouchableOpacity
+                        key={i?.itemId}
+                        onPress={() => handleNavigation(i?.name)}
                         style={{
-                          height: 22,
-                          width: 22,
-                          tintColor: colors.themeActiveTint,
-                        }}
-                      />
-                      <View
-                        style={{
-                          width: 150,
-                          marginLeft: 10,
-                          justifyContent:'center'
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          paddingHorizontal: 30,
+                          paddingVertical: 10,
+                          borderBottomWidth: item.data.length - 1 ? 0.2 : 0,
+                          borderColor: colors.borderColor,
                         }}>
-                        <Text
+                        <Image
+                          source={i?.image}
                           style={{
-                            fontSize: moderateScale(14),
-                            color: colors.white,
-                            fontWeight: '400',
-                            textAlign: 'left',
-                            paddingBottom:3,
+                            height: 22,
+                            width: 22,
+                            tintColor: colors.themeActiveTint,
+                          }}
+                        />
+                        <View
+                          style={{
+                            width: 150,
+                            marginLeft: 10,
+                            justifyContent: 'center',
                           }}>
-                          {i?.name}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
+                          <Text
+                            style={{
+                              fontSize: moderateScale(14),
+                              color: colors.white,
+                              fontWeight: '400',
+                              textAlign: 'left',
+                              paddingBottom: 3,
+                            }}>
+                            {i?.name}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
               </View>
-            </View>
-          );
-        })}
-        <View></View>
+            );
+          })}
+          <View></View>
 
-        {/* Add more DrawerItems as needed */}
-      </View>
+          {/* Add more DrawerItems as needed */}
+        </View>
       </ScrollView>
 
       <View style={styles.footer}>
@@ -285,13 +297,14 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     width: '100%',
     position: 'absolute',
-    bottom:0,
-    paddingBottom: Platform.OS === 'android' ? verticalScale(90) : verticalScale(130),
+    bottom: 0,
+    paddingBottom:
+      Platform.OS === 'android' ? verticalScale(90) : verticalScale(130),
     borderTopColor: 'rgba(0, 255, 236, 0.2)',
     paddingVertical: 15,
     paddingHorizontal: 20,
     justifyContent: 'space-between',
-    backgroundColor:colors.bottomTabSignOut
+    backgroundColor: colors.bottomTabSignOut,
   },
   footerButton: {
     flexDirection: 'row',

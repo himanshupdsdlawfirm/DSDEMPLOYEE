@@ -27,7 +27,7 @@ export const LinearGradientHeader = ({
   isHeaderBottomText,
   headerBottomTitle,
   leftImgTint,
-  isHeaderWithoutGradient
+  isHeaderWithoutGradient,
 }) => {
   return (
     <>
@@ -93,7 +93,7 @@ export const LinearGradientHeader = ({
                 {isSecondEndImg && (
                   <View style={style.boxesC}>
                     <TouchableOpacity
-                      style={[style.headerc,, {paddingRight:20}]}
+                      style={[style.headerc, , {paddingRight: 20}]}
                       onPress={rightSecondImgOnPress}>
                       <Image
                         source={secondRightIcon}
@@ -172,10 +172,13 @@ export const LinearGradientHeader = ({
                     <TouchableOpacity
                       onPress={goBack}
                       style={{
-                        width: 50,
-                        height: 50,
+                        width: 44,
+                        height: 44,
+                        borderRadius: 8,
+                        borderWidth: 1,
+                        borderColor: colors.inputBorderColor,
                         justifyContent: 'center',
-                        alignItems: 'flex-start',
+                        alignItems: 'center',
                       }}>
                       <Image
                         source={leftImg}

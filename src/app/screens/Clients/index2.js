@@ -25,7 +25,7 @@ import {responsiveSize} from '../../utils/responsiveFontSize';
 import {GradientBorderHalfCircle} from '../../../components/common/LinearBorderColor';
 
 const clientsData = [
-  {name: 'Himanshu', ClientImage: AppImages.userAnimyPlaceholder},
+  {name: 'Himanshu Pathak', ClientImage: AppImages.userAnimyPlaceholder},
   {name: 'Ankit', ClientImage: AppImages.userAnimyPlaceholder},
   {name: 'Aditiya', ClientImage: AppImages.userAnimyPlaceholder},
   {name: 'Ashish', ClientImage: AppImages.userAnimyPlaceholder},
@@ -35,152 +35,67 @@ const clientsData = [
   {name: 'Ashish', ClientImage: AppImages.userAnimyPlaceholder},
 ];
 
-const HomeScreen = ({navigation}) => {
-  const renderAppointments = ({item, index}) => {
-    console.log('asasas::', index);
+const ClientsScreen = ({navigation}) => {
+  const [searchText, setSearchText] = useState('');
 
-    const lastIndex = index === clientsData.length - 1;
-    return (
-      <LinearGradient
-        style={[
-          styles.appointmentContainer,
-          {
-            marginLeft: index === 0 ? 0 : 10,
-            marginRight: lastIndex ? 0 : 10,
-          },
-        ]}
-        colors={['#F7A80E', '#114A4A', '#21415F']}
-        start={{x: 1, y: 1}}
-        end={{x: 0.4, y: 0}} // Left to right
-        locations={[0, 0.6, 1]}
-        // angle={}
-        useAngle={false}>
-        <TouchableOpacity style={styles.appointmentSubContainer}>
-          <Text
-            numberOfLines={1}
-            style={{
-              fontSize: responsiveSize(20, 'font'),
-              fontWeight: '600',
-              color: colors.white,
-              letterSpacing: 0.5,
-            }}>
-            {'Ranjan Kumar'}
-          </Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              width: '100%',
-              alignItems: 'center',
-            }}>
-            <Image
-              source={AppImages.calendarClock}
-              style={{
-                height: 15,
-                width: 15,
-              }}
-            />
-            <Text
-              numberOfLines={1}
-              style={{
-                marginVertical: 10,
-                fontSize: responsiveSize(12, 'font'),
-                fontWeight: '400',
-                color: colors.white,
-                marginLeft: 5,
-                letterSpacing: 0.5,
-              }}>
-              {`${'26/01/2024'} ${'3:00 PM'} - ${'5:00 PM'}`}
-            </Text>
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              // justifyContent: 'space-between',
-              width: '100%',
-              flexWrap: 'wrap',
-              gap: 7,
-            }}>
-            <View
-              style={{
-                backgroundColor: colors.white,
-                paddingHorizontal: 10,
-                paddingVertical: 5,
-                borderRadius: 6,
-              }}>
-              <Text
-                numberOfLines={1}
-                style={{
-                  fontSize: responsiveSize(14, 'font'),
-                  fontWeight: '400',
-                  color: colors.black,
-                  letterSpacing: 0.5,
-                }}>
-                {`${'Immigration'}`}
-              </Text>
-            </View>
-            <View
-              style={{
-                backgroundColor: colors.white,
-                paddingHorizontal: 10,
-                paddingVertical: 5,
-                borderRadius: 6,
-                marginHorizontal: 0,
-              }}>
-              <Text
-                numberOfLines={1}
-                style={{
-                  fontSize: responsiveSize(14, 'font'),
-                  fontWeight: '400',
-                  color: colors.black,
-                  letterSpacing: 0.5,
-                }}>
-                {`${'3'} ${'Guest'}`}
-              </Text>
-            </View>
-            <View
-              style={{
-                backgroundColor: colors.white,
-                paddingHorizontal: 10,
-                paddingVertical: 5,
-                borderRadius: 6,
-              }}>
-              <Text
-                numberOfLines={1}
-                style={{
-                  fontSize: responsiveSize(14, 'font'),
-                  fontWeight: '400',
-                  color: colors.black,
-                  letterSpacing: 0.5,
-                }}>
-                {`${'online'}`}
-              </Text>
-            </View>
-          </View>
-        </TouchableOpacity>
-      </LinearGradient>
-    );
+  const searchHandle = text => {
+    setSearchText(text);
   };
 
   const renderClients = ({item, index}) => {
     const lastIndex = index === clientsData.length - 1;
     return (
-      <TouchableOpacity
-        style={[
-          styles.clientItem,
-          {
-            marginLeft: index === 0 ? 0 : 5,
-            marginRight: lastIndex ? 0 : 5,
-          },
-        ]}>
+      <TouchableOpacity style={[styles.clientItem]}>
         <View style={styles.clientImageContainer}>
           <Image source={item?.ClientImage} style={styles.clientImage} />
         </View>
-        <Text numberOfLines={2} style={styles.clientName}>
-          {item?.name}
-        </Text>
-        <Text numberOfLines={1} style={styles.clientId}>
-          ABC2028937666
-        </Text>
+        <View>
+          <Text numberOfLines={1} style={styles.clientName}>
+            {item?.name}
+          </Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}>
+            <Image
+              source={AppImages.alienNumber}
+              style={{
+                height: 12,
+                width: 12,
+                tintColor: colors.white,
+              }}
+            />
+            <Text numberOfLines={1} style={styles.clientId}>
+              ABC2028937666
+            </Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
+              <View
+                style={{
+                  width: 1,
+                  height: 15,
+                  marginHorizontal: 10,
+                  backgroundColor: colors.white,
+                }}
+              />
+              <Image
+                source={AppImages.call}
+                style={{
+                  height: 12,
+                  width: 12,
+                  tintColor: colors.white,
+                }}
+              />
+              <Text numberOfLines={1} style={styles.clientId}>
+                +919540634090
+              </Text>
+            </View>
+          </View>
+        </View>
       </TouchableOpacity>
     );
   };
@@ -415,82 +330,43 @@ const HomeScreen = ({navigation}) => {
       ) : (
         <ImageBackground source={AppImages.loginTheme} style={styles.container}>
           <LinearGradientHeader
-            isHeaderWithoutGradient={true}
-            goBack={() => navigation.toggleDrawer()}
+            goBack={() => navigation.goBack()}
             showBackBtnContainer={true}
             showBackBtn={true}
-            leftImg={AppImages.drawerMenu}
+            leftImg={AppImages.backArrow}
             leftImgTint={colors.white}
-            headerText="Home"
-            isSecondEndImg={true}
-            isEndRightImg={true}
-            secondRightIcon={AppImages.userAnimyPlaceholder}
-            rightIcon={AppImages.notification}
+            headerText="Clients"
+            isSecondEndImg={false}
+            isEndRightImg={false}
             isHeaderBottomText={false}
-            headerBottomTitle={`Refreshed: ${new Date().toLocaleString()}`}
           />
-
-          <View style={styles.searchContainer}>
-            <TouchableOpacity
-              onPress={() => navigation.navigate('Search')}
-              style={styles.searchButton}>
+          <View style={styles.searchMainContainer}>
+            <View style={styles.searchContainer}>
               <Image source={AppImages.searchIcon} style={styles.searchIcon} />
-              <Text style={styles.searchText}>Search</Text>
-            </TouchableOpacity>
+              <TextInput
+                onChangeText={searchHandle}
+                value={searchText}
+                placeholder="Search"
+                placeholderTextColor={colors.gray}
+                onFocus={console.log('shkjasdkakjdgjak::::::::')}
+                onBlur={() => {
+                  Keyboard.dismiss();
+                }}
+                style={styles.searchInput}
+              />
+            </View>
           </View>
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Clients</Text>
-              <TouchableOpacity
-                onPress={() => navigation.navigate('ClientList')}>
-                <Text style={styles.sectionViewAll}>View All</Text>
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              horizontal
-              keyExtractor={(item, index) => index.toString()}
-              contentContainerStyle={styles.clientsList}
-              showsHorizontalScrollIndicator={false}
-              data={clientsData}
-              renderItem={renderClients}
-            />
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Appointments</Text>
-              <TouchableOpacity
-                onPress={() => navigation.navigate('AppointmentList')}>
-                <Text style={styles.sectionViewAll}>View All</Text>
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              horizontal
-              keyExtractor={(item, index) => index.toString()}
-              contentContainerStyle={styles.appointmentList}
-              showsHorizontalScrollIndicator={false}
-              data={[{}, {}, {}]}
-              renderItem={renderAppointments}
-            />
-
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Hearings</Text>
-              <TouchableOpacity
-                onPress={() => navigation.navigate('HearingList')}>
-                <Text style={styles.sectionViewAll}>View All</Text>
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              numColumns={2}
-              keyExtractor={(item, index) => index.toString()}
-              contentContainerStyle={styles.hearingsList}
-              columnWrapperStyle={styles.hearingsColumnWrapper}
-              showsVerticalScrollIndicator={false}
-              scrollEnabled={false} // Important when nested in ScrollView
-              data={[{}, {}, {}]}
-              renderItem={renderHearings}
-            />
-          </ScrollView>
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Clients</Text>
+          </View>
+          <FlatList
+            showsVerticalScrollIndicator={false}
+            keyExtractor={(item, index) => index.toString()}
+            contentContainerStyle={styles.clientsList}
+            showsHorizontalScrollIndicator={false}
+            data={clientsData}
+            renderItem={renderClients}
+          />
         </ImageBackground>
       )}
     </View>
@@ -508,16 +384,15 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
     // flex:1,
   },
-  searchContainer: {
-    width: '100%',
+  searchMainContainer: {
     paddingHorizontal: 15,
+    marginTop:30,
   },
-  searchButton: {
+  searchContainer: {
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 10,
-    marginBottom: 5,
     justifyContent: 'space-between',
     backgroundColor: colors.bottomTabLightGray,
     borderWidth: 1,
@@ -526,6 +401,14 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     height: 42,
   },
+  searchInput: {
+    flex: 1,
+    paddingHorizontal: 10,
+    fontSize: 14,
+    fontWeight: '400',
+    color: colors.white,
+  },
+
   searchIcon: {
     height: 24,
     width: 24,
@@ -541,6 +424,8 @@ const styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
     paddingHorizontal: 15,
+    marginTop: 20,
+    marginBottom: 10,
     justifyContent: 'space-between',
   },
   sectionTitle: {
@@ -549,34 +434,16 @@ const styles = StyleSheet.create({
     color: colors.white,
     letterSpacing: 0.5,
   },
-  sectionViewAll: {
-    fontSize: 16,
-    fontWeight: '400',
-    color: colors.themeTextColor,
-  },
-  appointmentContainer: {
-    width: responsiveSize(240),
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  appointmentSubContainer: {
-    width: '100%',
-    borderRadius: 12,
-    padding: 15,
-  },
-  appointmentList: {
-    paddingTop: 20,
-    paddingBottom: 40,
-    paddingHorizontal: 15,
-  },
   clientsList: {
-    paddingTop: 20,
     paddingBottom: 40,
-    paddingHorizontal: 15,
+    paddingTop: 10,
+    // paddingHorizontal: 15,
   },
   clientItem: {
     width: 110,
+    marginBottom: 20,
     alignItems: 'center',
+    flexDirection: 'row',
   },
   clientImageContainer: {
     height: 60,
@@ -601,40 +468,16 @@ const styles = StyleSheet.create({
   clientName: {
     fontSize: moderateScale(12),
     fontWeight: '400',
-    textAlign: 'center',
-    marginTop: 5,
     color: colors.white,
     letterSpacing: 0.5,
   },
   clientId: {
     fontSize: moderateScale(12),
     fontWeight: '400',
+    width: 120,
     textAlign: 'center',
     color: colors.textGray,
     letterSpacing: 0.5,
-  },
-  hearingsList: {
-    paddingTop: 20,
-    paddingBottom: 20,
-    paddingHorizontal: 15,
-  },
-  hearingsColumnWrapper: {
-    justifyContent: 'space-between',
-    marginBottom: 3,
-  },
-  hearingLinearCard: {
-    width: '48%',
-    marginBottom: 15,
-    borderRadius: 10,
-    elevation: 5,
-    shadowOffset: {width: 0, height: 0},
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    shadowColor: colors.borderColor,
-  },
-  hearingItem: {
-    width: '100%',
-    padding: 10,
   },
   buttonContainer: {
     paddingHorizontal: 15,
@@ -642,4 +485,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeScreen;
+export default ClientsScreen;

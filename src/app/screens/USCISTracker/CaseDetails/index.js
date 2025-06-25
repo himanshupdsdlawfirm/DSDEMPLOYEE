@@ -78,7 +78,7 @@ const CaseDetailsScreen = ({navigation}) => {
             goBack={() => navigation.goBack()}
             showBackBtnContainer={true}
             showBackBtn={true}
-            leftImg={AppImages.backIcon}
+            leftImg={AppImages.backArrow}
             leftImgTint={colors.white}
             headerText="Case Detail"
             isSecondEndImg={false}

@@ -1,32 +1,41 @@
-import React, {useRef, useCallback, useState} from 'react';
-import {View, Text, StyleSheet, TextInput, ImageBackground} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  Text,
+  Button,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  ImageBackground,
+} from 'react-native';
 import {colors} from '../../../config/theme';
 import ToastNotification from '../../../../components/common/CustomToast';
 import {AppImages} from '../../../config/Images';
+import {topMarginText, topPadding} from '../../../config/CommonStyle';
 import {moderateScale} from '../../../utils/fontsize';
 import {CustomButton} from '../../../../components/common/CustomButton';
 import {LinearGradientHeader} from '../../../../components/common/LinerGradientHeader';
-import {AddCaseViewModel} from './viewModel/addCaseViewModel';
 
 const AddCaseScreen = ({navigation}) => {
-  const viewModel = useRef(new AddCaseViewModel()).current;
+  const [caseNumber, setCaseNumber] = useState(0);
+  const [caseName, setCaseName] = useState('');
+  const [isvalid, setIsvalid] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [toastVisible, setToastVisible] = useState(false);
 
-  const triggerUpdate = () => forceUpdate(prev => !prev);
+  const showToast = message => {
+    setErrorMsg(message);
+    setToastVisible(true);
+    setTimeout(() => setToastVisible(false), 3000);
+  };
 
-  const [_, forceUpdate] = useState(false);
-  const [isLoderOn, setLoderOn] = useState(false);
-
-  const handleAddCase = async () => {
-    setLoderOn(true)
-    const result = await viewModel.addCase();
-
-    console.log('result::', result);
-
-    forceUpdate(prev => !prev); // Trigger re-render
-
-    if (result.success) {
-      navigation.navigate('CaseList', {caseData: result.data});
-       setLoderOn(false);
+  const validFeilds = () => {
+    if (!caseNumber || caseNumber.length < 13) {
+      setIsvalid(true);
+      showToast('Please enter USCIS receipt number');
+    } else {
+      setIsvalid(false);
+      navigation.goBack();
     }
   };
 
@@ -63,27 +72,27 @@ const AddCaseScreen = ({navigation}) => {
         <View style={styles.inputContainer}>
           <View style={styles.inputWrapper}>
             <TextInput
-              onChangeText={text => {
-                viewModel.setCaseNumber(text);
-                triggerUpdate(); // Notify View to update
-              }}
-              value={viewModel.caseNumber}
+              onChangeText={e => setCaseNumber(e)}
+              value={caseNumber}
               placeholder={'ABC1234567890'}
               maxLength={13}
-              placeholderTextColor={viewModel.error ? '#E06158' : colors.gray}
+              placeholderTextColor={isvalid ? '#E06158' : colors.gray}
               autoCapitalize={'none'}
               autoFocus={true}
               returnKeyType={'next'}
               editable={true}
               keyboardType={'default'}
-              style={[styles.textInput, viewModel.error && styles.errorInput]}
+              style={[styles.textInput, isvalid && styles.errorInput]}
             />
             <Text style={styles.inputLabel}>Case number</Text>
           </View>
 
           <TextInput
-            onChangeText={viewModel.setCaseName}
-            value={viewModel.caseName}
+            onChangeText={e => {
+              let fullNameRegex = e.replace(/[^a-zA-Z\s]/g, '');
+              setCaseName(fullNameRegex);
+            }}
+            value={caseName}
             placeholder={'Case Name (optional)'}
             placeholderTextColor={colors.gray}
             autoCapitalize={'none'}
@@ -95,15 +104,14 @@ const AddCaseScreen = ({navigation}) => {
 
           <CustomButton
             btnText="Add Case"
-            btnOnPress={handleAddCase}
-            isBtnEnable={!viewModel.error && viewModel.caseNumber.length >= 13}
-            isEnable={!viewModel.error && viewModel.caseNumber.length >= 13}
-            isLoadingTrue = {isLoderOn}
+            btnOnPress={validFeilds}
+            isBtnEnable={!caseNumber || caseNumber.length < 13 ? false : true}
+            isEnable={!caseNumber || caseNumber.length < 13 ? false : true}
             btnViewStyle={[
               styles.addButton,
               {
                 backgroundColor:
-                  viewModel.error || viewModel.caseNumber.length < 13
+                  !caseNumber || caseNumber.length < 13
                     ? colors.gray
                     : colors.themeColor,
               },
@@ -113,9 +121,9 @@ const AddCaseScreen = ({navigation}) => {
       </ImageBackground>
 
       <ToastNotification
-        visible={viewModel.toastVisible}
+        visible={toastVisible}
         title="Invalid Input"
-        message={viewModel.error}
+        message={errorMsg}
         colorLight={'#E06158'}
         colorDark={'#FC867D'}
       />

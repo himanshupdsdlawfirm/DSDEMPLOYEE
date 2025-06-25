@@ -2,24 +2,19 @@ import React, {useState, useEffect, useCallback} from 'react';
 import {
   View,
   Text,
-  FlatList,
   StyleSheet,
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
   ImageBackground,
-  Image,
+  Dimensions,
 } from 'react-native';
 import {AppImages} from '../../../config/Images';
 import {colors} from '../../../config/theme';
-import {topPadding} from '../../../config/CommonStyle';
 import {LinearGradientHeader} from '../../../../components/common/LinerGradientHeader';
+import {SwipeListView} from 'react-native-swipe-list-view';
 
-// Api's Doc
-const USCIS_AUTH_URL = 'https://api.uscis.gov/oauth/v1/token';
-const USCIS_API_BASE_URL = 'https://api.uscis.gov/v1/';
-const CLIENT_ID = 'bN3at0YDMGRmKhfSq5ZvwLCHIAzFgkvU';
-const CLIENT_SECRET = 'GzCUm3jpfd0Z7j3s';
+const {width} = Dimensions.get('window');
 
 const CaseListScreen = ({navigation}) => {
   const [cases, setCases] = useState([]);
@@ -28,82 +23,62 @@ const CaseListScreen = ({navigation}) => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
-  // Mock data fetch function - replace with your actual API call
   const fetchCases = async (currentPage = 1, isRefreshing = false) => {
     try {
-      if (isRefreshing) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
+      isRefreshing ? setRefreshing(true) : setLoading(true);
 
-      // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Mock data - replace with your actual data
       const mockData = [
         {
+          key: '1',
           id: 'EAC2101350505',
           status: "Response To USCIS' Request For Evidence Was Received",
-          caseNumber: 'Case 1',
           caseDate: 'Apr 27, 2025',
           lastChange: '68 days ago',
           caseFileId: 'I-589',
         },
         {
+          key: '2',
           id: 'EAC2101350506',
           status: 'Case Was Approved',
-          caseNumber: 'Case 2',
           caseDate: 'Feb 18, 2025',
           lastChange: '45 days ago',
           caseFileId: 'I-467',
         },
         {
+          key: '3',
           id: 'EAC2101350507',
           status: 'Interview Was Scheduled',
-          caseNumber: 'Case 3',
           caseDate: 'Nov 20, 2024',
           lastChange: '30 days ago',
           caseFileId: 'I-485',
         },
-        // Add more mock cases as needed
       ];
 
-      if (isRefreshing) {
+      if (isRefreshing || currentPage === 1) {
         setCases(mockData);
-        setPage(1);
-      } else if (currentPage === 1) {
-        setCases(mockData);
+        if (isRefreshing) setPage(1);
       } else {
-        console.log('asasasasasaddfddd:::::', currentPage, isRefreshing);
-
         setCases(prev => [...prev, ...mockData]);
       }
 
-      // For demo purposes, we'll assume there's always more data
       setHasMore(true);
     } catch (error) {
       console.error('Error fetching cases:', error);
     } finally {
-      if (isRefreshing) {
-        setRefreshing(false);
-      } else {
-        setLoading(false);
-      }
+      isRefreshing ? setRefreshing(false) : setLoading(false);
     }
   };
 
-  // Initial load
   useEffect(() => {
     fetchCases();
   }, []);
 
-  // Handle refresh
   const onRefresh = useCallback(() => {
     fetchCases(1, true);
   }, []);
 
-  // Handle pagination
   const loadMoreCases = () => {
     if (!loading && hasMore) {
       fetchCases(page + 1);
@@ -111,73 +86,113 @@ const CaseListScreen = ({navigation}) => {
     }
   };
 
-  // Render each case item
+  const deleteRow = (rowMap, rowKey) => {
+    if (rowMap[rowKey]) {
+      rowMap[rowKey].closeRow();
+    }
+    setCases(prev => prev.filter(item => item.key !== rowKey));
+  };
+
+  const renderHiddenItem = (data, rowMap) => (
+    <View style={styles.rowBack}>
+      <View style={styles.underlayContainer}>
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => deleteRow(rowMap, data.item.key)}>
+          <Text style={styles.deleteText}>Delete</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
   const renderItem = ({item}) => (
     <TouchableOpacity
+    activeOpacity={1}
       onPress={() => navigation.navigate('CaseDetails', {caseId: item.id})}
-      style={styles.caseItem}>
-      <View style={styles.caseStatusColor} />
-      <View
-        style={{
-          paddingHorizontal: 15,
-          paddingVertical: 5,
-        }}>
-        <View style={styles.caseIdContainer}>
-          <Text style={styles.caseId}>{item.id}</Text>
-          <Text style={styles.casedate}>{item.caseDate}</Text>
-        </View>
-        {/* <Text style={styles.caseStatus}>{item.status}</Text> */}
-        <Text style={styles.caseNumber}>{item.caseNumber}</Text>
-        <View style={styles.caseIdContainer}>
-          <Text style={styles.lastChange}>
-            Last Status Change: {item.lastChange}
-          </Text>
-          <Text style={styles.casedate}>{item.caseFileId}</Text>
+      style={styles.frontViewContainer}>
+      <View style={styles.caseItem}>
+        <View style={styles.caseStatusColor} />
+        <View style={styles.caseContent}>
+          <View style={styles.caseIdContainer}>
+            <Text style={styles.caseId}>{item.id}</Text>
+            <Text style={styles.caseDate}>{item.caseDate}</Text>
+          </View>
+          <Text style={styles.caseStatus}>{item.status}</Text>
+          <View style={styles.caseIdContainer}>
+            <Text style={styles.lastChange}>
+              Last Change: {item.lastChange}
+            </Text>
+            <Text style={styles.caseFileId}>{item.caseFileId}</Text>
+          </View>
         </View>
       </View>
     </TouchableOpacity>
   );
 
-  // Render footer for loading indicator
   const renderFooter = () => {
     if (!loading) return null;
     return (
       <View style={styles.footer}>
-        <ActivityIndicator size="small" />
+        <ActivityIndicator size="small" color={colors.white} />
       </View>
     );
   };
 
   return (
     <ImageBackground source={AppImages.loginTheme} style={styles.container}>
-      {/* Header with refresh button */}
       <LinearGradientHeader
-        // goBack={() => navigation.goBack()}
+        goBack={() => navigation.goBack()}
+        leftImg={AppImages.backArrow}
+        leftImgTint={colors.white}
         showBackBtnContainer={true}
         headerText="Cases"
         isSecondEndImg={true}
         isEndRightImg={true}
-        showBackBtn={false}
+        showBackBtn={true}
         isHeaderBottomText={true}
         headerBottomTitle={`Refreshed: ${new Date().toLocaleString()}`}
         rightIcon={AppImages.addIcon}
-        rightSecondImgOnPress = {onRefresh}
-        rightImgOnPress= {()=> navigation.navigate('AddCase')}
-        secondRightIcon = {AppImages.refreshIcon}
+        rightSecondImgOnPress={onRefresh}
+        rightImgOnPress={() => navigation.navigate('AddCase')}
+        secondRightIcon={AppImages.refreshIcon}
       />
-    
-      {/* Main FlatList */}
-      <FlatList
+
+      <SwipeListView
         data={cases}
         renderItem={renderItem}
-        keyExtractor={item => item.id}
+        renderHiddenItem={renderHiddenItem}
+        keyExtractor={item => item.key}
+        leftOpenValue={75} // Width of delete button
+        rightOpenValue={-75} // Same as left for consistency
+        disableRightSwipe={true} // Enable both directions
+        stopLeftSwipe={75} // Stop at delete button width
+        stopRightSwipe={-75} // Stop at delete button width
+        swipeToOpenPercent={30} // Percentage to trigger open
+        swipeToClosePercent={30} // Percentage to trigger close
+        closeOnRowPress={true} // Close when row is pressed
+        closeOnRowBeginSwipe={false} // Don't close when beginning to swipe
+        closeOnScroll={true} // Close when scrolling
+        useNativeDriver={false}
+        previewRowKey={'1'} // Optional: set a key to enable preview
+        previewOpenValue={-40} // Optional: preview swipe amount
+        previewOpenDelay={3000} // Optional: delay before preview appears
+        directionalDistanceChangeThreshold={2} // More sensitive swipe detection
+        friction={10} // Higher value makes swipe less sensitive
+        tension={100} // Higher value makes swipe more stiff
         contentContainerStyle={styles.listContent}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.white}
+          />
         }
         onEndReached={loadMoreCases}
         onEndReachedThreshold={0.1}
         ListFooterComponent={renderFooter}
+        style={styles.swipeList}
+        bounces={false}
+        overScrollMode="never"
       />
     </ImageBackground>
   );
@@ -187,122 +202,88 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
-    padding: 16,
-    marginBottom: 5,
-    paddingBottom: 21,
-    borderBottomWidth: 2,
-    borderBottomColor: colors.borderColor,
-  },
-  rowHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.themeTextColor,
-  },
-  addRefreshRow: {
-    justifyContent: 'flex-end',
-    width: 150,
-    alignItems: 'center',
-    flexDirection: 'row',
-  },
-  addCaseBtn: {marginRight: 20, width: 50, alignItems: 'center'},
-  refreshText: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 8,
-    color: colors.white,
-  },
-  refrestButton: {
-    alignSelf: 'flex-start',
-    padding: 8,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 4,
-  },
-  refreshButtonText: {
-    // color: '#333',
-    color: colors.white,
-  },
-  categoryContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  category: {
-    marginRight: 16,
-    color: '#666',
-  },
-  categoryActive: {
-    marginRight: 16,
-    color: '#000',
-    fontWeight: 'bold',
+  swipeList: {
+    flex: 1,
   },
   listContent: {
-    paddingHorizontal: 16,
-    marginVertical: 15,
+    paddingHorizontal: 10,
+    paddingVertical: 20,
+  },
+  rowBack: {
+    flex: 1,
+    borderRadius: 10,
+    marginBottom: 10,
+    overflow: 'hidden',
+  },
+  underlayContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  deleteButton: {
+    width: '80%',
+    justifyContent: 'center',
+    paddingRight: 15,
+    alignItems: 'flex-end',
+    backgroundColor: '#F95D5D',
+    height: '100%',
+  },
+  deleteText: {
+    color: colors.white,
+    fontWeight: 'bold',
+  },
+  frontViewContainer: {
+    flex: 1,
+    borderRadius: 8,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: colors.themeLightBg,
+    backgroundColor: colors.themeBgColor,
+    overflow: 'hidden',
+  },
+  caseItem: {
+    flexDirection: 'row',
+    backgroundColor: colors.transparent,
+    height: 100,
   },
   caseStatusColor: {
     width: 10,
     backgroundColor: colors.blue,
   },
-  caseItem: {
-    marginVertical: 3,
-    flexDirection: 'row',
-    overflow: 'hidden',
-    backgroundColor: colors.transparent,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.themeLightBg,
+  caseContent: {
+    flex: 1,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    justifyContent: 'space-between',
   },
   caseIdContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '100%',
-    paddingRight: 5,
   },
   caseId: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 4,
     color: colors.white,
   },
-  casedate: {
+  caseDate: {
     fontSize: 14,
-    fontWeight: '400',
-    marginBottom: 4,
     color: colors.gray,
   },
   caseStatus: {
     fontSize: 14,
-    marginBottom: 4,
-    color: colors.white,
-    paddingRight: 5,
-  },
-  caseNumber: {
-    fontSize: 14,
-    marginBottom: 4,
     color: colors.white,
   },
   lastChange: {
     fontSize: 12,
-    marginBottom: 8,
     color: colors.gray,
   },
-  divider: {
-    height: 1,
-    marginVertical: 8,
-    backgroundColor: colors.white,
+  caseFileId: {
+    fontSize: 12,
+    color: colors.gray,
   },
   footer: {
     paddingVertical: 20,
     alignItems: 'center',
-    borderColor: colors.white,
   },
 });
 

@@ -10,7 +10,6 @@ import {
   Platform,
 } from 'react-native';
 import useApi from '../../hooks/useApi';
-import {getUserProfile} from '../../services/uathServices';
 import Loader from '../../../components/common/Loader';
 import {AppImages} from '../../config/Images';
 import {LinearGradientHeader} from '../../../components/common/LinerGradientHeader';
@@ -33,14 +32,9 @@ const clientsData = [
 ];
 
 const HearingsScreen = ({navigation}) => {
-  const getUserApi = useApi(getUserProfile);
 
   // Create a ref for the bottom sheet
   const filterBottomSheetRef = useRef(null);
-
-  useEffect(() => {
-    getUserApi.request();
-  }, []);
 
   const renderHearings = ({item, index}) => {
     return (
@@ -270,7 +264,7 @@ const HearingsScreen = ({navigation}) => {
 
   return (
     <View style={styles.container}>
-      {getUserApi.loading ? (
+      {false ? (
         <Loader />
       ) : (
         <ImageBackground source={AppImages.loginTheme} style={styles.container}>
@@ -279,7 +273,7 @@ const HearingsScreen = ({navigation}) => {
               goBack={() => navigation.goBack()}
               showBackBtnContainer={true}
               showBackBtn={true}
-              leftImg={AppImages.backIcon}
+              leftImg={AppImages.backArrow}
               leftImgTint={colors.white}
               headerText="Hearings"
               isSecondEndImg={false}

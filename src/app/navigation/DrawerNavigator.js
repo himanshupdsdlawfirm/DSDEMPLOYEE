@@ -24,7 +24,7 @@ const DrawerNavigator = () => {
         headerShown: false,
       }}
     >
-      <Drawer.Screen name="Home" component={HomeScreen} />
+      <Drawer.Screen name="HomeScreen" component={HomeScreen} />
       {/* <Drawer.Screen name="CaseList" component={CaseListScreen} />
       <Drawer.Screen name="CaseDetails" component={CaseDetailsScreen} /> */}
       {/* Add more screens as needed */}

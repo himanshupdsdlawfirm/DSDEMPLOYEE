@@ -24,7 +24,9 @@ export const colors = {
   hearingCardLinearTwo: '#05111C',
   textGray: 'rgba(255, 255, 255, 0.7)',
   textGrayTwo: 'rgba(255, 255, 255, 0.2)',
-  sheildIconColor: '#DBFFFC'
+  sheildIconColor: '#DBFFFC',
+  clientListBg: '#081B2C',
+  textViewBg: '#F2F2F21F'
 };
 
 export const fonts = {

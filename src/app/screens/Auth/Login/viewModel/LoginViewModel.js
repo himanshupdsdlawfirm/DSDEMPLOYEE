@@ -41,7 +41,7 @@ export const useLoginViewModel = (navigation) => {
 
   const handleLogin = async () => {
 
-      navigation.navigate('Otp')
+      navigation.navigate('Otp', state.email)
     // if (state.email && state.password.length > 3) {
     //   updateState({loading: true});
 

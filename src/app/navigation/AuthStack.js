@@ -13,6 +13,7 @@ import HomeScreen from '../screens/Home';
 import SearchScreen from '../screens/Search';
 import HearingsScreen from '../screens/Hearings';
 import AppointmentsScreen from '../screens/Appointments';
+import ClientsScreen from '../screens/Clients';
 
 const Stack = createNativeStackNavigator();
 
@@ -34,7 +35,7 @@ const AuthStack = () => {
       <Stack.Screen name="Search" component={SearchScreen} />
       <Stack.Screen name="HearingList" component={HearingsScreen} />
       <Stack.Screen name="AppointmentList" component={AppointmentsScreen} />
-
+      <Stack.Screen name="ClientList" component={ClientsScreen} />
     </Stack.Navigator>
   );
 };

@@ -10,8 +10,6 @@ import {
   ScrollView,
   Platform,
 } from 'react-native';
-import useApi from '../../hooks/useApi';
-import {getUserProfile} from '../../services/uathServices';
 import Loader from '../../../components/common/Loader';
 import {AppImages} from '../../config/Images';
 import {LinearGradientHeader} from '../../../components/common/LinerGradientHeader';
@@ -36,12 +34,7 @@ import { dropdownApoointmentOptions, dropdownOptions } from '../../config/Static
 const AppointmentsScreen = ({navigation}) => {
   const filterBottomSheetRef = useRef(null);
 
-  const getUserApi = useApi(getUserProfile);
-
-  useEffect(() => {
-    getUserApi.request();
-  }, []);
-
+ 
   //  Function to open filter
   const openFilter = () => {
     filterBottomSheetRef.current?.present();
@@ -158,7 +151,7 @@ const AppointmentsScreen = ({navigation}) => {
 
   return (
     <View style={styles.container}>
-      {getUserApi.loading ? (
+      {false ? (
         <Loader />
       ) : (
         <ImageBackground source={AppImages.loginTheme} style={styles.container}>
@@ -167,7 +160,7 @@ const AppointmentsScreen = ({navigation}) => {
               goBack={() => navigation.goBack()}
               showBackBtnContainer={true}
               showBackBtn={true}
-              leftImg={AppImages.backIcon}
+              leftImg={AppImages.backArrow}
               leftImgTint={colors.white}
               headerText="Appointments"
               isSecondEndImg={false}
