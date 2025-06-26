@@ -14,6 +14,7 @@ import Ionicons from '@react-native-vector-icons/ionicons';
 import {colors} from '../../app/config/theme';
 import {responsiveSize} from '../../app/utils/responsiveFontSize';
 import {CustomButton} from './CustomButton';
+import LinearGradient from 'react-native-linear-gradient';
 
 const FilterBottomSheet = forwardRef(({onApply, ...props}, ref) => {
   const {
@@ -31,6 +32,7 @@ const FilterBottomSheet = forwardRef(({onApply, ...props}, ref) => {
     pickerTwoPlaceholder,
     pickerThreePlaceholder,
     pickerFourPlaceholder,
+    bottomBtnStyle
   } = props;
 
   // State for filters
@@ -106,178 +108,192 @@ const FilterBottomSheet = forwardRef(({onApply, ...props}, ref) => {
     <BottomSheetModal
       ref={ref}
       index={0}
-      // snapPoints={snapPoints}
+      // snapPoints={'80%'}
       backgroundStyle={styles.background}
       handleIndicatorStyle={styles.handle}>
       <BottomSheetScrollView contentContainerStyle={styles.contentContainer}>
         {/* Text Input One */}
-        {isTextInputOneVisible && (
-          <TextInput
-            style={styles.input}
-            placeholder={firstInputPlaceholder}
-            placeholderTextColor={colors.gray}
-            value={filters.searchText}
-            onChangeText={text => handleFilterChange('searchText', text)}
-          />
-        )}
+        <LinearGradient
+          colors={[colors.bottomTabSignOut, colors.themeBgColor]}
+          style={{
+            flex: 1,
+          }}>
+          <View style={{padding: 20}}>
+            {isTextInputOneVisible && (
+              <TextInput
+                style={styles.input}
+                placeholder={firstInputPlaceholder}
+                placeholderTextColor={colors.gray}
+                value={filters.searchText}
+                onChangeText={text => handleFilterChange('searchText', text)}
+              />
+            )}
 
-        {/* Dropdown One */}
-        {isDropdownOneVisible && (
-          <View style={styles.dropdownWrapper}>
-            <RNPickerSelect
-              onValueChange={value => handleFilterChange('caseWorker', value)}
-              items={dropdownOptions.categoryOne}
-              value={filters.caseWorker}
-              placeholder={pickerOnePlaceholder}
-              style={pickerSelectStyles}
-              useNativeAndroidPickerStyle={false}
-              Icon={PickerIcon}
-              fixAndroidTouchableBug
+            {/* Dropdown One */}
+            {isDropdownOneVisible && (
+              <View style={styles.dropdownWrapper}>
+                <RNPickerSelect
+                  onValueChange={value =>
+                    handleFilterChange('caseWorker', value)
+                  }
+                  items={dropdownOptions.categoryOne}
+                  value={filters.caseWorker}
+                  placeholder={pickerOnePlaceholder}
+                  style={pickerSelectStyles}
+                  useNativeAndroidPickerStyle={false}
+                  Icon={PickerIcon}
+                  fixAndroidTouchableBug
+                />
+              </View>
+            )}
+
+            {/* Dropdown Two */}
+            {isDropdownTwoVisible && (
+              <View style={styles.dropdownWrapper}>
+                <RNPickerSelect
+                  onValueChange={value => handleFilterChange('attorney', value)}
+                  items={dropdownOptions.categoryTwo}
+                  value={filters.attorney}
+                  placeholder={pickerTwoPlaceholder}
+                  style={pickerSelectStyles}
+                  useNativeAndroidPickerStyle={false}
+                  Icon={PickerIcon}
+                  fixAndroidTouchableBug
+                />
+              </View>
+            )}
+
+            {/* Text Input Two */}
+            {isTextInputTwoVisible && (
+              <TextInput
+                style={styles.input}
+                placeholder={secondInputPlaceholder}
+                placeholderTextColor={colors.gray}
+                value={filters.searchSecondText}
+                onChangeText={text =>
+                  handleFilterChange('searchSecondText', text)
+                }
+              />
+            )}
+
+            {/* Dropdown Three */}
+            {isDropdownThreeVisible && (
+              <View style={styles.dropdownWrapper}>
+                <RNPickerSelect
+                  onValueChange={value =>
+                    handleFilterChange('hearingType', value)
+                  }
+                  items={dropdownOptions.categoryFour}
+                  value={filters.hearingType}
+                  placeholder={pickerThreePlaceholder}
+                  style={pickerSelectStyles}
+                  useNativeAndroidPickerStyle={false}
+                  Icon={PickerIcon}
+                  fixAndroidTouchableBug
+                />
+              </View>
+            )}
+
+            {/* Dropdown Four */}
+            {isDropdownFourVisible && (
+              <View style={styles.dropdownWrapper}>
+                <RNPickerSelect
+                  onValueChange={value => handleFilterChange('hearing', value)}
+                  items={dropdownOptions.categoryFive}
+                  value={filters.hearing}
+                  placeholder={pickerFourPlaceholder}
+                  style={pickerSelectStyles}
+                  useNativeAndroidPickerStyle={false}
+                  Icon={PickerIcon}
+                  fixAndroidTouchableBug
+                />
+              </View>
+            )}
+
+            {/* Date Picker */}
+            {isDatePickerVisible && (
+              <View>
+                <Text style={styles.dateRangeLabel}>Select date range</Text>
+                <View style={styles.dateRangeContainer}>
+                  <TouchableOpacity
+                    style={styles.dateButton}
+                    onPress={() => setShowStartDatePicker(true)}>
+                    <Text style={styles.dateText}>
+                      {filters.startDate.toLocaleDateString()}
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.dateButton}
+                    onPress={() => setShowEndDatePicker(true)}>
+                    <Text style={styles.dateText}>
+                      {filters.endDate.toLocaleDateString()}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
+            {/* Date Pickers */}
+            <DatePicker
+              modal
+              open={showStartDatePicker}
+              date={filters.startDate || new Date()}
+              mode="date"
+              maximumDate={new Date()}
+              onConfirm={selectedDate => {
+                setShowStartDatePicker(false);
+                const date = new Date(selectedDate);
+                date.setHours(0, 0, 0, 0);
+
+                if (filters.endDate && date > filters.endDate) {
+                  handleFilterChange('endDate', null);
+                }
+
+                handleFilterChange('startDate', date);
+              }}
+              onCancel={() => setShowStartDatePicker(false)}
             />
-          </View>
-        )}
 
-        {/* Dropdown Two */}
-        {isDropdownTwoVisible && (
-          <View style={styles.dropdownWrapper}>
-            <RNPickerSelect
-              onValueChange={value => handleFilterChange('attorney', value)}
-              items={dropdownOptions.categoryTwo}
-              value={filters.attorney}
-              placeholder={pickerTwoPlaceholder}
-              style={pickerSelectStyles}
-              useNativeAndroidPickerStyle={false}
-              Icon={PickerIcon}
-              fixAndroidTouchableBug
+            <DatePicker
+              modal
+              open={showEndDatePicker}
+              date={filters.endDate || filters.startDate || new Date()}
+              mode="date"
+              minimumDate={filters.startDate}
+              maximumDate={new Date()}
+              disabled={!filters.startDate}
+              onConfirm={selectedDate => {
+                setShowEndDatePicker(false);
+                const date = new Date(selectedDate);
+                date.setHours(0, 0, 0, 0);
+                handleFilterChange('endDate', date);
+              }}
+              onCancel={() => setShowEndDatePicker(false)}
             />
-          </View>
-        )}
 
-        {/* Text Input Two */}
-        {isTextInputTwoVisible && (
-          <TextInput
-            style={styles.input}
-            placeholder={secondInputPlaceholder}
-            placeholderTextColor={colors.gray}
-            value={filters.searchSecondText}
-            onChangeText={text => handleFilterChange('searchSecondText', text)}
-          />
-        )}
+            {/* Action Buttons */}
+            <View style={[styles.buttonRow, bottomBtnStyle]}>
+              <CustomButton
+                btnText="Reset"
+                btnOnPress={handleReset}
+                isEnable={false}
+                isBtnEnable={true}
+                btnViewStyle={[styles.button, styles.resetButton]}
+                btnTextColor={styles.resetButtonText}
+              />
 
-        {/* Dropdown Three */}
-        {isDropdownThreeVisible && (
-          <View style={styles.dropdownWrapper}>
-            <RNPickerSelect
-              onValueChange={value => handleFilterChange('hearingType', value)}
-              items={dropdownOptions.categoryFour}
-              value={filters.hearingType}
-              placeholder={pickerThreePlaceholder}
-              style={pickerSelectStyles}
-              useNativeAndroidPickerStyle={false}
-              Icon={PickerIcon}
-              fixAndroidTouchableBug
-            />
-          </View>
-        )}
-
-        {/* Dropdown Four */}
-        {isDropdownFourVisible && (
-          <View style={styles.dropdownWrapper}>
-            <RNPickerSelect
-              onValueChange={value => handleFilterChange('hearing', value)}
-              items={dropdownOptions.categoryFive}
-              value={filters.hearing}
-              placeholder={pickerFourPlaceholder}
-              style={pickerSelectStyles}
-              useNativeAndroidPickerStyle={false}
-              Icon={PickerIcon}
-              fixAndroidTouchableBug
-            />
-          </View>
-        )}
-
-        {/* Date Picker */}
-        {isDatePickerVisible && (
-          <View>
-            <Text style={styles.dateRangeLabel}>Select date range</Text>
-            <View style={styles.dateRangeContainer}>
-              <TouchableOpacity
-                style={styles.dateButton}
-                onPress={() => setShowStartDatePicker(true)}>
-                <Text style={styles.dateText}>
-                  {filters.startDate.toLocaleDateString()}
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.dateButton}
-                onPress={() => setShowEndDatePicker(true)}>
-                <Text style={styles.dateText}>
-                  {filters.endDate.toLocaleDateString()}
-                </Text>
-              </TouchableOpacity>
+              <CustomButton
+                btnText="Apply Filters"
+                btnOnPress={handleApply}
+                isEnable={true}
+                isBtnEnable={true}
+                btnViewStyle={styles.button}
+                btnTextColor={styles.applyButtonText}
+              />
             </View>
           </View>
-        )}
-
-        {/* Date Pickers */}
-        <DatePicker
-          modal
-          open={showStartDatePicker}
-          date={filters.startDate || new Date()}
-          mode="date"
-          maximumDate={new Date()}
-          onConfirm={selectedDate => {
-            setShowStartDatePicker(false);
-            const date = new Date(selectedDate);
-            date.setHours(0, 0, 0, 0);
-
-            if (filters.endDate && date > filters.endDate) {
-              handleFilterChange('endDate', null);
-            }
-
-            handleFilterChange('startDate', date);
-          }}
-          onCancel={() => setShowStartDatePicker(false)}
-        />
-
-        <DatePicker
-          modal
-          open={showEndDatePicker}
-          date={filters.endDate || filters.startDate || new Date()}
-          mode="date"
-          minimumDate={filters.startDate}
-          maximumDate={new Date()}
-          disabled={!filters.startDate}
-          onConfirm={selectedDate => {
-            setShowEndDatePicker(false);
-            const date = new Date(selectedDate);
-            date.setHours(0, 0, 0, 0);
-            handleFilterChange('endDate', date);
-          }}
-          onCancel={() => setShowEndDatePicker(false)}
-        />
-
-        {/* Action Buttons */}
-        <View style={styles.buttonRow}>
-          <CustomButton
-            btnText="Reset"
-            btnOnPress={handleReset}
-            isEnable={false}
-            isBtnEnable={true}
-            btnViewStyle={[styles.button, styles.resetButton]}
-            btnTextColor={styles.resetButtonText}
-          />
-
-          <CustomButton
-            btnText="Apply Filters"
-            btnOnPress={handleApply}
-            isEnable={true}
-            isBtnEnable={true}
-            btnViewStyle={styles.button}
-            btnTextColor={styles.applyButtonText}
-          />
-        </View>
+        </LinearGradient>
       </BottomSheetScrollView>
     </BottomSheetModal>
   );
@@ -287,14 +303,14 @@ const FilterBottomSheet = forwardRef(({onApply, ...props}, ref) => {
 const styles = StyleSheet.create({
   background: {
     backgroundColor: colors.bottomTabSignOut,
-    borderRadius: 20,
+    borderRadius: 20
   },
   handle: {
     backgroundColor: '#ccc',
     width: 40,
   },
   contentContainer: {
-    padding: 20,
+    width: '100%',
   },
   input: {
     height: 50,
@@ -345,7 +361,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingTop: 20,
-    backgroundColor: colors.bottomTabSignOut,
   },
   button: {
     flex: 1,
@@ -368,17 +383,15 @@ const styles = StyleSheet.create({
 
 const pickerSelectStyles = StyleSheet.create({
   inputIOS: {
-    fontSize: 16,
+    fontSize: responsiveSize(16),
     paddingVertical: 12,
     paddingHorizontal: 10,
-    backgroundColor: colors.inputBgColor,
     color: colors.white,
     zIndex: 9999,
     paddingRight: 30,
   },
   inputAndroid: {
     fontSize: responsiveSize(14),
-    backgroundColor: colors.inputBgColor,
     paddingHorizontal: 10,
     paddingVertical: 0,
     color: colors.white,

@@ -18,7 +18,10 @@ import LinearGradient from 'react-native-linear-gradient';
 import {responsiveSize} from '../../utils/responsiveFontSize';
 import FilterBottomSheet from '../../../components/common/FilterBottomSheet';
 import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
-import { dropdownApoointmentOptions, dropdownOptions } from '../../config/StaticDataList';
+import {
+  dropdownApoointmentOptions,
+  dropdownOptions,
+} from '../../config/StaticDataList';
 
 // const clientsData = [
 //   {name: 'Himanshu', ClientImage: AppImages.userAnimyPlaceholder},
@@ -34,7 +37,6 @@ import { dropdownApoointmentOptions, dropdownOptions } from '../../config/Static
 const AppointmentsScreen = ({navigation}) => {
   const filterBottomSheetRef = useRef(null);
 
- 
   //  Function to open filter
   const openFilter = () => {
     filterBottomSheetRef.current?.present();
@@ -163,40 +165,13 @@ const AppointmentsScreen = ({navigation}) => {
               leftImg={AppImages.backArrow}
               leftImgTint={colors.white}
               headerText="Appointments"
-              isSecondEndImg={false}
-              isEndRightImg={false}
+              isSecondEndImg={true}
+              isEndRightImg={true}
               isHeaderBottomText={false}
+              isFilterShow={true}
+              rightIcon={AppImages.filter}
+              rightImgOnPress={openFilter}
             />
-
-            <TouchableOpacity
-              onPress={openFilter}
-              style={{
-                width: '100%',
-                paddingHorizontal: 15,
-                marginTop: 20,
-                marginBottom: 10,
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}>
-              <Image
-                style={{
-                  height: 24,
-                  width: 24,
-                  tintColor: colors.white,
-                }}
-                source={AppImages.filter}
-              />
-              <Text
-                style={{
-                  fontSize: responsiveSize(20, 'font'),
-                  fontWeight: '600',
-                  color: colors.white,
-                  marginLeft: 10,
-                  letterSpacing: 0.5,
-                }}>
-                Filter
-              </Text>
-            </TouchableOpacity>
 
             <FlatList
               keyExtractor={(item, index) => index.toString()}
@@ -247,8 +222,7 @@ const styles = StyleSheet.create({
     padding: 15,
   },
   appointmentList: {
-    paddingTop: 0,
-    paddingBottom: 20,
+    marginVertical: 30,
     paddingHorizontal: 15,
   },
 });

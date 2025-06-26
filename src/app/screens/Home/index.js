@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -17,7 +17,11 @@ import Loader from '../../../components/common/Loader';
 import {AppImages} from '../../config/Images';
 import {LinearGradientHeader} from '../../../components/common/LinerGradientHeader';
 import {colors} from '../../config/theme';
-import {CommonActions, StackActions} from '@react-navigation/native';
+import {
+  CommonActions,
+  StackActions,
+  useFocusEffect,
+} from '@react-navigation/native';
 import {TextInput} from 'react-native-gesture-handler';
 import {moderateScale} from '../../utils/fontsize';
 import LinearGradient from 'react-native-linear-gradient';
@@ -36,9 +40,16 @@ const clientsData = [
 ];
 
 const HomeScreen = ({navigation}) => {
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+      navigation.closeDrawer();
+      }
+    }, [])
+  );
+
   const renderAppointments = ({item, index}) => {
     console.log('asasas::', index);
-
     const lastIndex = index === clientsData.length - 1;
     return (
       <LinearGradient
@@ -416,7 +427,7 @@ const HomeScreen = ({navigation}) => {
         <ImageBackground source={AppImages.loginTheme} style={styles.container}>
           <LinearGradientHeader
             isHeaderWithoutGradient={true}
-            goBack={() => navigation.toggleDrawer()}
+            goBack={() => navigation.openDrawer()}
             showBackBtnContainer={true}
             showBackBtn={true}
             leftImg={AppImages.drawerMenu}
@@ -427,7 +438,6 @@ const HomeScreen = ({navigation}) => {
             secondRightIcon={AppImages.userAnimyPlaceholder}
             rightIcon={AppImages.notification}
             isHeaderBottomText={false}
-            headerBottomTitle={`Refreshed: ${new Date().toLocaleString()}`}
           />
 
           <View style={styles.searchContainer}>

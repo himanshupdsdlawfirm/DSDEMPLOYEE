@@ -28,6 +28,7 @@ export const LinearGradientHeader = ({
   headerBottomTitle,
   leftImgTint,
   isHeaderWithoutGradient,
+  isFilterShow,
 }) => {
   return (
     <>
@@ -71,7 +72,6 @@ export const LinearGradientHeader = ({
                           height: 28,
                           width: 28,
                           resizeMode: 'contain',
-                          //   alignSelf:'flex-start',
                           tintColor: (colors.white, leftImgTint),
                         }}
                       />
@@ -93,7 +93,7 @@ export const LinearGradientHeader = ({
                 {isSecondEndImg && (
                   <View style={style.boxesC}>
                     <TouchableOpacity
-                      style={[style.headerc, , {paddingRight: 20}]}
+                      style={style.headerc}
                       onPress={rightSecondImgOnPress}>
                       <Image
                         source={secondRightIcon}
@@ -225,13 +225,25 @@ export const LinearGradientHeader = ({
                 {isEndRightImg && (
                   <View style={style.boxesC}>
                     <TouchableOpacity
-                      style={style.headerc}
+                      style={
+                        !isFilterShow
+                          ? style.headerc
+                          : {
+                              width: 44,
+                              height: 44,
+                              borderRadius: 8,
+                              borderWidth: 1,
+                              borderColor: colors.inputBorderColor,
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                            }
+                      }
                       onPress={rightImgOnPress}>
                       <Image
                         source={rightIcon}
                         style={{
-                          height: 16,
-                          width: 16,
+                          height: 28,
+                          width: 28,
                           resizeMode: 'contain',
                           tintColor: colors.white,
                         }}
@@ -263,13 +275,13 @@ const style = StyleSheet.create({
   containerHeaderFlex: {
     flexDirection: 'row',
     marginBottom: 5,
+    paddingHorizontal: 15,
     marginTop: Platform.OS === 'android' ? 30 : 30,
     paddingTop: Platform.OS === 'android' ? 10 : 10,
   },
   boxesA: {
     width: 90,
     justifyContent: 'center',
-    paddingLeft: 15,
     height: 40,
   },
   boxesB: {
@@ -300,7 +312,6 @@ const style = StyleSheet.create({
     height: 40,
     justifyContent: 'center',
     alignItems: 'flex-end',
-    paddingRight: 15,
   },
   caseTitle: {
     fontSize: moderateScale(14),

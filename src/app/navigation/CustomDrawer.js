@@ -33,11 +33,6 @@ const CustomDrawer = props => {
       data: [
         {
           itemId: 1,
-          name: 'Update Profile',
-          image: AppImages.userUpdate,
-        },
-        {
-          itemId: 2,
           name: 'Notification',
           image: AppImages.notificationBell,
         },
@@ -121,10 +116,10 @@ const CustomDrawer = props => {
          props.navigation.navigate('AppointmentList');
         break;
       case 'Hearings':
-         props.navigation.navigate('HearingList');
+         props.navigation.navigate('HearingList', {backScreen : 'Drawer'});
         break;
          case 'Cases':
-        // props.navigation.navigate('CaseList');
+        props.navigation.navigate('CasesScreenList', {backScreen : 'Drawer'});
         break;
          case 'Clients':
         props.navigation.navigate('ClientList');

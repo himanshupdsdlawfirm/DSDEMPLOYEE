@@ -1,208 +1,397 @@
-import React, {useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
+  View,
   Text,
   StyleSheet,
   ImageBackground,
-  Alert,
-  Platform,
-  TouchableWithoutFeedback,
-  Keyboard,
+  Image,
+  TouchableOpacity,
+  FlatList,
 } from 'react-native';
-import {useAuth} from '../../context';
+import Loader from '../../../components/common/Loader';
 import {AppImages} from '../../config/Images';
-import {UserInputText} from '../../../components/common/CustomInputText';
-import ToastNotification from '../../../components/common/CustomToast';
+import {LinearGradientHeader} from '../../../components/common/LinerGradientHeader';
 import {colors} from '../../config/theme';
-import CustomHeader from '../../../components/common/CustomHeader';
-import {CustomButton} from '../../../components/common/CustomButton';
-import {topMargin, topPadding} from '../../config/CommonStyle';
+import {moderateScale} from '../../utils/fontsize';
+import LinearGradient from 'react-native-linear-gradient';
+import {responsiveSize} from '../../utils/responsiveFontSize';
+import {useFocusEffect} from '@react-navigation/native';
+import FilterBottomSheet from '../../../components/common/FilterBottomSheet';
+import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
+import {dropdownOptions} from '../../config/StaticDataList';
 
-const Cases = ({navigation}) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const {signIn, loading} = useAuth();
-  const [isEmailValid, setIsEmailValid] = useState(false);
-  const [isPassValid, setIsPassValid] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
-  const [toastVisible, setToastVisible] = useState(false);
-  const [isEmailFocus, setIsEmailFocus] = useState(false);
-  const [isPassFocus, setIsPassFocus] = useState(false);
-  const [isPassShow, setIsPassShow] = useState(false);
+const dummyClientsData = [
+  {
+    id: 1,
+    case_type_name: 'Asylum',
+    status: 'Open',
+    contract_amount: 200,
+    total_paid: 50,
+    remaining_amount: 150,
+    filing_date: '20-04-2024',
+  },
+  {
+    id: 2,
+    case_type_name: 'Asylum',
+    status: 'Closed',
+    contract_amount: 200,
+    total_paid: 50,
+    remaining_amount: 150,
+    filing_date: '20-04-2024',
+  },
+  {
+    id: 3,
+    case_type_name: 'Asylum',
+    status: 'Open',
+    contract_amount: 200,
+    total_paid: 50,
+    remaining_amount: 150,
+    filing_date: '20-04-2024',
+  },
+  {
+    id: 4,
+    case_type_name: 'Asylum',
+    status: 'Open',
+    contract_amount: 200,
+    total_paid: 50,
+    remaining_amount: 150,
+    filing_date: '20-04-2024',
+  },
+  {
+    id: 5,
+    case_type_name: 'Asylum',
+    status: 'Closed',
+    contract_amount: 200,
+    total_paid: 50,
+    remaining_amount: 150,
+    filing_date: '20-04-2024',
+  },
+  {
+    id: 6,
+    case_type_name: 'Asylum',
+    status: 'Open',
+    contract_amount: 200,
+    total_paid: 50,
+    remaining_amount: 150,
+    filing_date: '20-04-2024',
+  },
+];
 
-  console.log('isPassFocusisPassFocus::', isPassFocus);
+const CasesScreen = ({navigation, route}) => {
+  const {backScreen = undefined} = route?.params || {};
 
-  const showToast = message => {
-    setErrorMsg(message);
-    setToastVisible(true);
-    setTimeout(() => setToastVisible(false), 3000);
+  // Create a ref for the bottom sheet
+  const filterBottomSheetRef = useRef(null);
+
+  const formattedDate = useCallback(item => {
+    if (item) {
+      const dateObj = new Date(item + 'T00:00:00');
+      const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const day = String(dateObj.getDate()).padStart(2, '0');
+      const year = String(dateObj.getFullYear()).slice(-2);
+      return `${month}-${day}-${year}`;
+    }
+    return '-- -- --';
+  }, []);
+
+  //  Function to open filter
+  const openFilter = () => {
+    filterBottomSheetRef.current?.present();
   };
 
-  const validationCheck = text => {
-    console.log('tested');
-    setEmail(text);
-    const EmailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-    if (EmailRegex.test(text)) {
-      console.log('tested true');
-      setIsEmailValid(true);
-    } else {
-      console.log('tested false');
-      setIsEmailValid(false);
-    }
+  // Handle filter application
+  const handleApplyFilters = filters => {
+    console.log('Applied filters:', filters);
+    // Apply your filters here
   };
 
-  const passValidationCheck = text => {
-    setPassword(text);
-    if (text.length > 3) {
-      setIsPassValid(true);
-    } else {
-      setIsPassValid(false);
-    }
-  };
-
-  const handleLogin = async () => {
-    if (!email) {
-      setIsEmailValid(true);
-      showToast('Please enter valid email receipt number');
-    } else {
-      setIsEmailValid(false);
-      try {
-        // await signIn({email, password});
-      } catch (error) {
-        Alert(error.message);
-      }
-    }
+  const renderCases = ({item, index}) => {
+    return (
+      <View key={item?.id} style={styles.caseCardContainer}>
+        <LinearGradient
+          colors={[colors.bottomTabLightGray, colors.textGray]}
+          locations={[0, 1]}
+          start={{x: 0.1, y: 0}}
+          end={{x: 1, y: 3}}
+          style={styles.caseGradient}>
+          <View style={styles.AppointmentNotifitionBox}>
+            <View style={styles.caseHeader}>
+              <Text style={styles.Appointment}>
+                {item?.case_type_name.length > 18
+                  ? `${item?.case_type_name.slice(0, 18)}...`
+                  : item?.case_type_name}
+              </Text>
+              <View
+                style={[
+                  styles.statusContainer,
+                  {
+                    backgroundColor:
+                      item?.status.trim() === 'Open'
+                        ? '#50ad6d'
+                        : item?.status.trim() === 'Closed'
+                        ? '#EB5757'
+                        : colors.gray,
+                  },
+                ]}>
+                <Image
+                  source={
+                    item?.status.trim() === 'Open'
+                      ? AppImages.show
+                      : AppImages.hide
+                  }
+                  style={styles.statusIcon}
+                />
+                <Text style={styles.AppointmentTime}>{item?.status}</Text>
+              </View>
+            </View>
+            <View style={styles.AppointmentTabs}>
+              <View style={styles.Appointmentwith}>
+                <Text style={styles.amountLabel}>
+                  {'Contract \n'}
+                  <Text style={styles.amountValue}>
+                    {`$${item?.contract_amount}`}
+                  </Text>
+                </Text>
+              </View>
+              <View style={styles.paidContainer}>
+                <Text style={styles.amountLabel}>
+                  {'Paid \n'}
+                  <Text style={styles.amountValue}>
+                    {`$${item?.total_paid}`}
+                  </Text>
+                </Text>
+              </View>
+              {item?.remaining_amount != 0 && (
+                <View style={styles.Appointmenttype}>
+                  <Text style={styles.amountLabel}>
+                    {'Due \n'}
+                    <Text style={styles.amountValue}>
+                      {`$${item?.remaining_amount}`}
+                    </Text>
+                  </Text>
+                </View>
+              )}
+              <View style={styles.Appointmentwith}>
+                <Text style={styles.amountLabel}>
+                  {'Retaining Date \n'}
+                  <Text style={styles.amountValue}>
+                    {`${formattedDate(item?.retention_date)}`}
+                  </Text>
+                </Text>
+              </View>
+              <View style={styles.Appointmentwith}>
+                <Text style={styles.amountLabel}>
+                  {'Filing Date \n'}
+                  <Text style={styles.amountValue}>
+                    {`${formattedDate(item?.filing_date)}`}
+                  </Text>
+                </Text>
+              </View>
+            </View>
+          </View>
+        </LinearGradient>
+      </View>
+    );
   };
 
   return (
-    <TouchableWithoutFeedback
-      style={styles.scrollView}
-      onPress={() => Keyboard.dismiss()}>
-      <ImageBackground source={AppImages.loginTheme} style={styles.container}>
-        <CustomHeader
-          leftImageSource={AppImages.backArrow}
-          leftImageContainerStyle={{
-            with: 44,
-            height: 44,
-            borderRadius: 8,
-            borderWidth: 1,
-            borderColor: colors.inputBorderColor,
-            backgroundColor: '#061623',
-          }}
-          onLeftPress={() => console.log('Left pressed')}
-          headerStyle={{
-            backgroundColor: 'transparent',
-          }}
-        />
-
-        <Text style={styles.title}>Login</Text>
-        <UserInputText
-          onChangeText={e => validationCheck(e)}
-          value={email}
-          placeholderText={'Enter your email'}
-          isvalid={isEmailValid}
-          inputBoxText={'Email'}
-          rightImg={AppImages.mail}
-          onFocus={() => setIsEmailFocus(true)}
-          onBlur={() => setIsEmailFocus(false)}
-          isEnterValue={isEmailFocus}
-          autoFocus={true}
-          rightImgTintColor={
-            email.length > 0 && !isEmailValid ? colors.redError : colors.white
-          }
-          inputStyle={{
-            color:
-              email.length > 0 && !isEmailValid
-                ? colors.redError
-                : colors.white,
-          }}
-          inputTextStyle={{
-            backgroundColor: colors.themeBgColor,
-            width: 70,
-          }}
-          inputTextContainerStyle={{
-            borderColor:
-              email.length > 0 && !isEmailValid
-                ? colors.redError
-                : colors.inputBorderColor,
-          }}
-        />
-        <UserInputText
-          onChangeText={e => passValidationCheck(e)}
-          value={password}
-          placeholderText={'Enter your password'}
-          inputBoxText={'Password'}
-          isvalid={isPassValid}
-          rightImg={AppImages.key}
-          isPassExist={true}
-          passHideShowImg={isPassShow ? AppImages.hide : AppImages.show}
-          onFocus={() => setIsPassFocus(true)}
-          onBlur={() => setIsPassFocus(false)}
-          isEnterValue={isPassFocus}
-          passHideShowOnPress={() => {
-            setIsPassShow(!isPassShow);
-          }}
-          isPassSecure={isPassShow}
-          inputTextStyle={{
-            backgroundColor: colors.themeBgColor,
-          }}
-        />
-        <CustomButton
-          btnText={'Login'}
-          btnOnPress={() =>
-            (isEmailValid && email !== '' && isPassValid) && handleLogin
-          }
-          isBtnEnable={
-            (isEmailValid && email !== '' && isPassValid) ? true : false
-          }
-          isEnable={
-            (isEmailValid && email !== '' && isPassValid) ? true : false
-          }
-          btnViewStyle={{
-            position: 'absolute',
-            bottom: Platform.OS === 'android' ? 20 : 40,
-          }}
-        />
-
-        <ToastNotification
-          visible={toastVisible}
-          title="Invalid Input"
-          message={errorMsg}
-          colorLight={'#E06158'}
-          colorDark={'#FC867D'}
-        />
-      </ImageBackground>
-    </TouchableWithoutFeedback>
+    <View style={styles.container}>
+      {false ? (
+        <Loader />
+      ) : (
+        <ImageBackground source={AppImages.loginTheme} style={styles.container}>
+          <LinearGradientHeader
+            goBack={() => navigation.goBack()}
+            showBackBtnContainer={true}
+            showBackBtn={backScreen === 'Drawer' ? true : false}
+            leftImg={AppImages.backArrow}
+            leftImgTint={colors.white}
+            headerText="Cases"
+            isSecondEndImg={true}
+            isFilterShow={true}
+            isEndRightImg={true}
+            rightIcon={AppImages.filter}
+            rightImgOnPress={openFilter}
+            isHeaderBottomText={false}
+          />
+          <BottomSheetModalProvider>
+            <FlatList
+              keyExtractor={(item, index) => index.toString()}
+              contentContainerStyle={[
+                styles.clientsList,
+                {paddingBottom: backScreen === 'Drawer' ? 30 : 120},
+              ]}
+              showsHorizontalScrollIndicator={false}
+              data={dummyClientsData}
+              renderItem={renderCases}
+            />
+            {/* Filter Component */}
+            <FilterBottomSheet
+              dropdownOptions={dropdownOptions}
+              pickerOnePlaceholder={{label: 'Select case worker', value: null}}
+              pickerTwoPlaceholder={{label: 'Select attorney', value: null}}
+              pickerThreePlaceholder={{
+                label: 'Select hearing type',
+                value: null,
+              }}
+              pickerFourPlaceholder={{
+                label: 'Select schedule hearing',
+                value: null,
+              }}
+              ref={filterBottomSheetRef}
+              onApply={handleApplyFilters}
+              isDatePickerVisible={true}
+              isDropdownOneVisible={true}
+              isDropdownTwoVisible={true}
+              isDropdownThreeVisible={true}
+              isDropdownFourVisible={true}
+              isTextInputOneVisible={false}
+              isTextInputTwoVisible={true}
+              bottomBtnStyle={{
+                marginBottom: backScreen === 'Drawer' ? 10 : 90,
+              }}
+              secondInputPlaceholder="Enter judge name"
+            />
+          </BottomSheetModalProvider>
+        </ImageBackground>
+      )}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: topPadding(),
-  },
-  scrollView: {
-    flex: 1,
+    backgroundColor: colors.themeBgColor,
   },
   scrollContent: {
     flexGrow: 1,
+    paddingTop: 20,
+    paddingBottom: 100,
+    // flex:1,
   },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    marginTop: 60,
-    marginBottom: 30,
-    textAlign: 'left',
+  searchContainer: {
+    width: '100%',
+    paddingHorizontal: 15,
+  },
+  searchButton: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    marginBottom: 5,
+    justifyContent: 'space-between',
+    backgroundColor: colors.bottomTabLightGray,
+    borderWidth: 1,
+    borderColor: colors.inputBorderColor,
+    borderRadius: 8,
+    alignSelf: 'center',
+    height: 42,
+  },
+  searchIcon: {
+    height: 24,
+    width: 24,
+  },
+  searchText: {
+    flex: 1,
+    paddingHorizontal: 10,
+    fontSize: moderateScale(14),
+    fontWeight: '400',
+    color: colors.gray,
+  },
+  clientsList: {
+    paddingBottom: 20,
+    paddingTop: 20,
+  },
+  caseCardContainer: {
+    shadowColor: colors.themeBgColor,
+    shadowOffset: {width: 3, height: 3},
+    shadowOpacity: 0.5,
+    shadowRadius: 3.5,
+    borderRadius: 12,
+    marginVertical: 10,
+    width: '90%',
+    alignSelf: 'center',
+    elevation: 10,
+  },
+  caseGradient: {
+    justifyContent: 'space-around',
+    borderRadius: 12,
+    // height: 200,
+  },
+  AppointmentNotifitionBox: {
+    width: '100%',
+    borderRadius: 8,
+    padding: 15,
+  },
+  caseHeader: {
+    width: '100%',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  Appointment: {
+    fontSize: responsiveSize(16),
     color: colors.white,
   },
-  footerText: {
-    marginTop: 20,
-    textAlign: 'center',
+  statusContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    paddingVertical: 4,
   },
-  footerLink: {
-    color: 'blue',
-    fontWeight: 'bold',
+  statusIcon: {
+    height: 20,
+    width: 20,
+    tintColor: colors.white,
+  },
+  AppointmentTime: {
+    fontSize: responsiveSize(12),
+    marginLeft: 5,
+    color: 'white',
+  },
+  AppointmentTabs: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    rowGap: 10,
+    paddingTop: 20,
+    paddingBottom: 5,
+    marginRight: 20,
+  },
+  Appointmentwith: {
+    flexDirection: 'row',
+    backgroundColor: colors.themeLightBg,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  paidContainer: {
+    flexDirection: 'row',
+    backgroundColor: colors.themeLightBg,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  Appointmenttype: {
+    flexDirection: 'row',
+    backgroundColor: '#EB5757',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  amountLabel: {
+    color: colors.white,
+    fontSize: responsiveSize(12),
+    textAlign: 'left',
+  },
+  amountValue: {
+    color: colors.white,
+    fontSize: responsiveSize(12),
+    fontWeight: '700',
   },
 });
 
-export default Cases;
+export default CasesScreen;

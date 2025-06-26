@@ -31,7 +31,8 @@ const clientsData = [
   {name: 'Ashish', ClientImage: AppImages.userAnimyPlaceholder},
 ];
 
-const HearingsScreen = ({navigation}) => {
+const HearingsScreen = ({navigation, route}) => {
+  const {backScreen = undefined} = route?.params || {};
 
   // Create a ref for the bottom sheet
   const filterBottomSheetRef = useRef(null);
@@ -272,49 +273,25 @@ const HearingsScreen = ({navigation}) => {
             <LinearGradientHeader
               goBack={() => navigation.goBack()}
               showBackBtnContainer={true}
-              showBackBtn={true}
+              showBackBtn={backScreen === 'Drawer' ? true : false}
               leftImg={AppImages.backArrow}
               leftImgTint={colors.white}
               headerText="Hearings"
-              isSecondEndImg={false}
-              isEndRightImg={false}
+              isSecondEndImg={true}
+              isFilterShow={true}
+              isEndRightImg={true}
+              rightIcon={AppImages.filter}
+              rightImgOnPress={openFilter}
               isHeaderBottomText={false}
             />
-
-            <TouchableOpacity
-              onPress={openFilter}
-              style={{
-                width: '100%',
-                paddingHorizontal: 15,
-                marginTop: 20,
-                marginBottom: 10,
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}>
-              <Image
-                style={{
-                  height: 24,
-                  width: 24,
-                  tintColor: colors.white,
-                }}
-                source={AppImages.filter}
-              />
-              <Text
-                style={{
-                  fontSize: responsiveSize(20, 'font'),
-                  fontWeight: '600',
-                  color: colors.white,
-                  marginLeft: 10,
-                  letterSpacing: 0.5,
-                }}>
-                Filter
-              </Text>
-            </TouchableOpacity>
 
             <FlatList
               numColumns={2}
               keyExtractor={(item, index) => index.toString()}
-              contentContainerStyle={styles.hearingsList}
+              contentContainerStyle={[
+                styles.hearingsList,
+                {paddingBottom: backScreen === 'Drawer' ? 30 : 120},
+              ]}
               columnWrapperStyle={styles.hearingsColumnWrapper}
               showsVerticalScrollIndicator={false}
               scrollEnabled={false} // Important when nested in ScrollView
@@ -326,8 +303,14 @@ const HearingsScreen = ({navigation}) => {
               dropdownOptions={dropdownOptions}
               pickerOnePlaceholder={{label: 'Select case worker', value: null}}
               pickerTwoPlaceholder={{label: 'Select attorney', value: null}}
-              pickerThreePlaceholder = {{label: 'Select hearing type', value: null}}
-              pickerFourPlaceholder= {{label: 'Select schedule hearing', value: null}}
+              pickerThreePlaceholder={{
+                label: 'Select hearing type',
+                value: null,
+              }}
+              pickerFourPlaceholder={{
+                label: 'Select schedule hearing',
+                value: null,
+              }}
               ref={filterBottomSheetRef}
               onApply={handleApplyFilters}
               isDatePickerVisible={true}
@@ -338,6 +321,9 @@ const HearingsScreen = ({navigation}) => {
               isTextInputOneVisible={false}
               isTextInputTwoVisible={true}
               secondInputPlaceholder="Enter judge name"
+              bottomBtnStyle={{
+                marginBottom: backScreen === 'Drawer' ? 10 : 90,
+              }}
             />
           </BottomSheetModalProvider>
         </ImageBackground>
@@ -352,6 +338,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.themeBgColor,
   },
   hearingsList: {
+    paddingTop:30,
     paddingHorizontal: 15,
   },
   hearingsColumnWrapper: {

@@ -20,13 +20,14 @@ export const colors = {
   borderColor: 'rgba(255,255,255,0.1)',
   bottomTabLightGray: 'rgba(41, 76, 96, 0.71)',
   bottomTabSignOut: 'rgb(25, 53, 69)',
-  hearingCardLinearOne: '#033B6E',
+  hearingCardLinearOne: '#114A4A',
   hearingCardLinearTwo: '#05111C',
   textGray: 'rgba(255, 255, 255, 0.7)',
   textGrayTwo: 'rgba(255, 255, 255, 0.2)',
   sheildIconColor: '#DBFFFC',
   clientListBg: '#081B2C',
-  textViewBg: '#F2F2F21F'
+  textViewBg: '#F2F2F21F',
+  underline: 'rgba(255, 255, 255, 0.05)',
 };
 
 export const fonts = {

@@ -9,6 +9,7 @@ import Cases from '../screens/Cases';
 import LinearGradient from 'react-native-linear-gradient';
 import DrawerNavigator from './DrawerNavigator';
 import {responsiveSize} from '../utils/responsiveFontSize';
+import HearingsScreen from '../screens/Hearings';
 
 const Tab = createBottomTabNavigator();
 
@@ -23,8 +24,8 @@ const BottomTabNavigator = () => {
             iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === 'Cases') {
             iconName = focused ? 'document-text' : 'document-text-outline';
-          } else if (route.name === 'Profile') {
-            iconName = focused ? 'person' : 'person-outline';
+          } else if (route.name === 'Hearing') {
+            iconName = focused ? 'people' : 'people-outline';
           }
           // else if (route.name === 'Settings') {
           //   iconName = focused ? 'settings' : 'settings-outline';
@@ -62,7 +63,7 @@ const BottomTabNavigator = () => {
 
       <Tab.Screen name="Home" component={DrawerNavigator} />
       <Tab.Screen name="Cases" component={Cases} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Hearing" component={HearingsScreen} />
       {/* <Tab.Screen name="Settings" component={SettingsScreen} /> */}
     </Tab.Navigator>
   );
