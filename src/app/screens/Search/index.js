@@ -597,14 +597,16 @@ const styles = StyleSheet.create({
   },
   Appointmentwith: {
     flexDirection: 'row',
-    backgroundColor: colors.themeLightBg,
+    // backgroundColor: colors.themeLightBg,
+    backgroundColor: colors.textViewBg,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
   },
   paidContainer: {
     flexDirection: 'row',
-    backgroundColor: colors.themeLightBg,
+    // backgroundColor: colors.themeLightBg,
+    backgroundColor: colors.textViewBg,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,

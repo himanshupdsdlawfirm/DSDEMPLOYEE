@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -18,24 +18,31 @@ import LinearGradient from 'react-native-linear-gradient';
 import {responsiveSize} from '../../utils/responsiveFontSize';
 import FilterBottomSheet from '../../../components/common/FilterBottomSheet';
 import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
-import {dropdownOptions} from '../../config/StaticDataList';
-
-const clientsData = [
-  {name: 'Himanshu', ClientImage: AppImages.userAnimyPlaceholder},
-  {name: 'Ankit', ClientImage: AppImages.userAnimyPlaceholder},
-  {name: 'Aditiya', ClientImage: AppImages.userAnimyPlaceholder},
-  {name: 'Ashish', ClientImage: AppImages.userAnimyPlaceholder},
-  {name: 'Himanshu', ClientImage: AppImages.userAnimyPlaceholder},
-  {name: 'Ankit', ClientImage: AppImages.userAnimyPlaceholder},
-  {name: 'Aditiya', ClientImage: AppImages.userAnimyPlaceholder},
-  {name: 'Ashish', ClientImage: AppImages.userAnimyPlaceholder},
-];
+import {
+  dropdownApoointmentOptions,
+  dropdownOptions,
+} from '../../config/StaticDataList';
+import {useFocusEffect} from '@react-navigation/native';
 
 const HearingsScreen = ({navigation, route}) => {
   const {backScreen = undefined} = route?.params || {};
 
   // Create a ref for the bottom sheet
   const filterBottomSheetRef = useRef(null);
+  const scrollRef = useRef(null);
+
+  const [scrollOffset, setScrollOffset] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      filterBottomSheetRef.current.dismiss();
+      scrollRef.current.scrollToOffset({
+        offset: scrollOffset,
+        animated: true,
+      });
+      return () => {};
+    }, []),
+  );
 
   const renderHearings = ({item, index}) => {
     return (
@@ -286,6 +293,7 @@ const HearingsScreen = ({navigation, route}) => {
             />
 
             <FlatList
+              ref={scrollRef}
               numColumns={2}
               keyExtractor={(item, index) => index.toString()}
               contentContainerStyle={[
@@ -296,11 +304,15 @@ const HearingsScreen = ({navigation, route}) => {
               showsVerticalScrollIndicator={false}
               scrollEnabled={false} // Important when nested in ScrollView
               data={[{}, {}, {}]}
+              onScroll={event => {
+                setScrollOffset(event.nativeEvent.contentOffset.y);
+              }}
+              scrollEventThrottle={16}
               renderItem={renderHearings}
             />
             {/* Filter Component */}
             <FilterBottomSheet
-              dropdownOptions={dropdownOptions}
+              dropdownOptions={dropdownApoointmentOptions}
               pickerOnePlaceholder={{label: 'Select case worker', value: null}}
               pickerTwoPlaceholder={{label: 'Select attorney', value: null}}
               pickerThreePlaceholder={{
@@ -338,7 +350,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.themeBgColor,
   },
   hearingsList: {
-    paddingTop:30,
+    paddingTop: 30,
     paddingHorizontal: 15,
   },
   hearingsColumnWrapper: {

@@ -1,11 +1,15 @@
-// import ApiStore from './apiStore';
+import AuthStore from "./authStore";
+import ClientStore from "./clientStore";
+import HomeStore from "./homeStore";
 
-// class RootStore {
-//   constructor() {
-//     this.apiStore = new ApiStore();
-//   }
-// }
+class RootStore {
+  constructor() {
+    this.authStore = new AuthStore();
+    this.homeStore = new HomeStore();
+    this.clientStore = new ClientStore();
+  }
+}
 
-// const rootStore = new RootStore();
+const rootStore = new RootStore();
 
-// export default rootStore;
+export default rootStore;

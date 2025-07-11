@@ -30,253 +30,241 @@ export const LinearGradientHeader = ({
   isHeaderWithoutGradient,
   isFilterShow,
 }) => {
-  return (
-    <>
-      {isHeaderWithoutGradient ? (
-        <View
-          style={{
-            width: '100%',
-            paddingTop: 10,
-            backgroundColor: colors.transparent,
-          }}>
-          <StatusBar
-            backgroundColor={'transparent'}
-            translucent
-            barStyle="light-content"
-          />
+    return (
+      <>
+        {isHeaderWithoutGradient ? (
           <View
             style={{
               width: '100%',
-              borderBottomLeftRadius: 30,
-              borderBottomRightRadius: 30,
+              backgroundColor: colors.transparent,
             }}>
+            <StatusBar
+              backgroundColor={'transparent'}
+              translucent
+              barStyle="light-content" />
             <View
-              style={[
-                style.containerHeaderFlex,
-                {marginBottom: isHeaderBottomText ? 5 : 20},
-              ]}>
-              {showBackBtnContainer && (
-                <View style={style.boxesA}>
-                  {showBackBtn && (
-                    <TouchableOpacity
-                      onPress={goBack}
-                      style={{
-                        width: 50,
-                        height: 50,
-                        justifyContent: 'center',
-                        alignItems: 'flex-start',
-                      }}>
-                      <Image
-                        source={leftImg}
-                        style={{
-                          height: 28,
-                          width: 28,
-                          resizeMode: 'contain',
-                          tintColor: (colors.white, leftImgTint),
-                        }}
-                      />
-                    </TouchableOpacity>
-                  )}
-                </View>
-              )}
-              <View style={style.boxesB}>
-                <View style={style.headerbox}>
-                  <Text style={style.header}>{headerText}</Text>
-                </View>
-              </View>
+              style={{
+                width: '100%',
+                borderBottomLeftRadius: 30,
+                borderBottomRightRadius: 30,
+              }}>
               <View
-                style={{
-                  justifyContent: 'space-between',
-                  flexDirection: 'row',
-                  width: 90,
-                }}>
-                {isSecondEndImg && (
-                  <View style={style.boxesC}>
-                    <TouchableOpacity
-                      style={style.headerc}
-                      onPress={rightSecondImgOnPress}>
-                      <Image
-                        source={secondRightIcon}
-                        style={{
-                          height: 28,
-                          width: 28,
-                          resizeMode: 'contain',
-                        }}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                )}
-                {isEndRightImg && (
-                  <View style={style.boxesC}>
-                    <TouchableOpacity
-                      style={style.headerc}
-                      onPress={rightImgOnPress}>
-                      <Image
-                        source={rightIcon}
-                        style={{
-                          height: 28,
-                          width: 28,
-                          resizeMode: 'contain',
-                          tintColor: colors.white,
-                        }}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                )}
-              </View>
-            </View>
-            {isHeaderBottomText && (
-              <Text
                 style={[
-                  style.caseTitle,
-                  {
-                    marginBottom: Platform.OS === 'android' ? 10 : 20,
-                  },
+                  style.containerHeaderFlex,
+                  { marginBottom: isHeaderBottomText ? 5 : 20 },
                 ]}>
-                {headerBottomTitle}
-              </Text>
-            )}
+                {showBackBtnContainer && (
+                  <View style={style.boxesA}>
+                    {showBackBtn && (
+                      <TouchableOpacity
+                        onPress={goBack}
+                        style={{
+                          width: 50,
+                          height: 50,
+                          justifyContent: 'center',
+                          alignItems: 'flex-start',
+                        }}>
+                        <Image
+                          source={leftImg}
+                          style={{
+                            height: 28,
+                            width: 28,
+                            resizeMode: 'contain',
+                            tintColor: (colors.white, leftImgTint),
+                          }} />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                )}
+                <View style={style.boxesB}>
+                  <View style={style.headerbox}>
+                    <Text style={style.header}>{headerText}</Text>
+                  </View>
+                </View>
+                <View
+                  style={{
+                    justifyContent: 'space-between',
+                    flexDirection: 'row',
+                    width: 90,
+                  }}>
+                  {isSecondEndImg && (
+                    <View style={style.boxesC}>
+                      <TouchableOpacity
+                        style={style.headerc}
+                        onPress={rightSecondImgOnPress}>
+                        <Image
+                          source={secondRightIcon}
+                          style={{
+                            height: 28,
+                            width: 28,
+                            resizeMode: 'contain',
+                          }} />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                  {isEndRightImg && (
+                    <View style={style.boxesC}>
+                      <TouchableOpacity
+                        style={style.headerc}
+                        onPress={rightImgOnPress}>
+                        <Image
+                          source={rightIcon}
+                          style={{
+                            height: 28,
+                            width: 28,
+                            resizeMode: 'contain',
+                            tintColor: colors.white,
+                          }} />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
+              </View>
+              {isHeaderBottomText && (
+                <Text
+                  style={[
+                    style.caseTitle,
+                    {
+                      marginBottom: Platform.OS === 'android' ? 10 : 20,
+                    },
+                  ]}>
+                  {headerBottomTitle}
+                </Text>
+              )}
+            </View>
           </View>
-        </View>
-      ) : (
-        <LinearGradient
-          colors={[colors.themeBgColor, colors.bottomTabLightGray]}
-          locations={[0, 1]} // Smooth transition from dark to light
-          start={{x: 0.5, y: 0}} // Start at the top-center
-          end={{x: 0.5, y: 1}} // End at the bottom-center
-          style={{
-            width: '100%',
-            borderBottomLeftRadius: 30,
-            borderBottomRightRadius: 30,
-            paddingTop: 10,
-          }}>
-          <StatusBar
-            backgroundColor={'transparent'}
-            translucent
-            barStyle="light-content"
-          />
-          <View
+        ) : (
+          <LinearGradient
+            colors={[colors.themeBgColor, colors.bottomTabLightGray]}
+            locations={[0, 1]} // Smooth transition from dark to light
+            start={{ x: 0.5, y: 0 }} // Start at the top-center
+            end={{ x: 0.5, y: 1 }} // End at the bottom-center
             style={{
               width: '100%',
               borderBottomLeftRadius: 30,
               borderBottomRightRadius: 30,
             }}>
+            <StatusBar
+              backgroundColor={'transparent'}
+              translucent
+              barStyle="light-content" />
             <View
-              style={[
-                style.containerHeaderFlex,
-                {marginBottom: isHeaderBottomText ? 5 : 20},
-              ]}>
-              {showBackBtnContainer && (
-                <View style={style.boxesA}>
-                  {showBackBtn && (
-                    <TouchableOpacity
-                      onPress={goBack}
-                      style={{
-                        width: 44,
-                        height: 44,
-                        borderRadius: 8,
-                        borderWidth: 1,
-                        borderColor: colors.inputBorderColor,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                      }}>
-                      <Image
-                        source={leftImg}
-                        style={{
-                          height: 24,
-                          width: 24,
-                          resizeMode: 'contain',
-                          //   alignSelf:'flex-start',
-                          tintColor: (colors.white, leftImgTint),
-                        }}
-                      />
-                    </TouchableOpacity>
-                  )}
-                </View>
-              )}
-              <View style={style.boxesB}>
-                <View style={style.headerbox}>
-                  <Text style={style.header}>{headerText}</Text>
-                </View>
-              </View>
+              style={{
+                width: '100%',
+                borderBottomLeftRadius: 30,
+                borderBottomRightRadius: 30,
+              }}>
               <View
-                style={{
-                  justifyContent: 'space-between',
-                  flexDirection: 'row',
-                  width: 90,
-                }}>
-                {isSecondEndImg && (
-                  <View style={style.boxesC}>
-                    <TouchableOpacity
-                      style={style.headerc}
-                      onPress={rightSecondImgOnPress}>
-                      <Image
-                        source={secondRightIcon}
+                style={[
+                  style.containerHeaderFlex,
+                  { marginBottom: isHeaderBottomText ? 5 : 20 },
+                ]}>
+                {showBackBtnContainer && (
+                  <View style={style.boxesA}>
+                    {showBackBtn && (
+                      <TouchableOpacity
+                        onPress={goBack}
                         style={{
-                          height: 16,
-                          width: 16,
-                          resizeMode: 'contain',
-                          tintColor: colors.white,
-                        }}
-                      />
-                    </TouchableOpacity>
+                          width: 44,
+                          height: 44,
+                          borderRadius: 8,
+                          borderWidth: 1,
+                          borderColor: colors.inputBorderColor,
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                        }}>
+                        <Image
+                          source={leftImg}
+                          style={{
+                            height: 24,
+                            width: 24,
+                            resizeMode: 'contain',
+                            //   alignSelf:'flex-start',
+                            tintColor: (colors.white, leftImgTint),
+                          }} />
+                      </TouchableOpacity>
+                    )}
                   </View>
                 )}
-                {isEndRightImg && (
-                  <View style={style.boxesC}>
-                    <TouchableOpacity
-                      style={
-                        !isFilterShow
+                <View style={style.boxesB}>
+                  <View style={style.headerbox}>
+                    <Text style={style.header}>{headerText}</Text>
+                  </View>
+                </View>
+                <View
+                  style={{
+                    justifyContent: 'space-between',
+                    flexDirection: 'row',
+                    width: 90,
+                  }}>
+                  {isSecondEndImg && (
+                    <View style={style.boxesC}>
+                      <TouchableOpacity
+                        style={style.headerc}
+                        onPress={rightSecondImgOnPress}>
+                        <Image
+                          source={secondRightIcon}
+                          style={{
+                            height: 16,
+                            width: 16,
+                            resizeMode: 'contain',
+                            tintColor: colors.white,
+                          }} />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                  {isEndRightImg && (
+                    <View style={style.boxesC}>
+                      <TouchableOpacity
+                        style={!isFilterShow
                           ? style.headerc
                           : {
-                              width: 44,
-                              height: 44,
-                              borderRadius: 8,
-                              borderWidth: 1,
-                              borderColor: colors.inputBorderColor,
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                            }
-                      }
-                      onPress={rightImgOnPress}>
-                      <Image
-                        source={rightIcon}
-                        style={{
-                          height: 28,
-                          width: 28,
-                          resizeMode: 'contain',
-                          tintColor: colors.white,
-                        }}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                )}
+                            width: 44,
+                            height: 44,
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            borderColor: colors.inputBorderColor,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                          }}
+                        onPress={rightImgOnPress}>
+                        <Image
+                          source={rightIcon}
+                          style={{
+                            height: isFilterShow ? 28 : 16,
+                            width: isFilterShow ? 28 : 16,
+                            resizeMode: 'contain',
+                            tintColor: colors.white,
+                          }} />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
               </View>
+              {isHeaderBottomText && (
+                <Text
+                  style={[
+                    style.caseTitle,
+                    {
+                      marginBottom: Platform.OS === 'android' ? 10 : 20,
+                    },
+                  ]}>
+                  {headerBottomTitle}
+                </Text>
+              )}
             </View>
-            {isHeaderBottomText && (
-              <Text
-                style={[
-                  style.caseTitle,
-                  {
-                    marginBottom: Platform.OS === 'android' ? 10 : 20,
-                  },
-                ]}>
-                {headerBottomTitle}
-              </Text>
-            )}
-          </View>
-        </LinearGradient>
-      )}
-    </>
-  );
-};
+          </LinearGradient>
+        )}
+      </>
+    );
+  };
 
 const style = StyleSheet.create({
   containerHeaderFlex: {
     flexDirection: 'row',
     marginBottom: 5,
     paddingHorizontal: 15,
-    marginTop: Platform.OS === 'android' ? 30 : 30,
+    marginTop: Platform.OS === 'android' ? 40 : 50,
     paddingTop: Platform.OS === 'android' ? 10 : 10,
   },
   boxesA: {

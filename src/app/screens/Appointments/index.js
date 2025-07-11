@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -23,19 +23,41 @@ import {
   dropdownOptions,
 } from '../../config/StaticDataList';
 
-// const clientsData = [
-//   {name: 'Himanshu', ClientImage: AppImages.userAnimyPlaceholder},
-//   {name: 'Ankit', ClientImage: AppImages.userAnimyPlaceholder},
-//   {name: 'Aditiya', ClientImage: AppImages.userAnimyPlaceholder},
-//   {name: 'Ashish', ClientImage: AppImages.userAnimyPlaceholder},
-//   {name: 'Himanshu', ClientImage: AppImages.userAnimyPlaceholder},
-//   {name: 'Ankit', ClientImage: AppImages.userAnimyPlaceholder},
-//   {name: 'Aditiya', ClientImage: AppImages.userAnimyPlaceholder},
-//   {name: 'Ashish', ClientImage: AppImages.userAnimyPlaceholder},
-// ];
 
 const AppointmentsScreen = ({navigation}) => {
   const filterBottomSheetRef = useRef(null);
+
+  const [selectedItem, setSelectedItem] = useState(1);
+
+  const handleTabChange = useCallback(
+    tab => {
+      setSelectedItem(tab);
+
+      // if (!selectedClient) return;
+
+      // // Fetch data based on selected tab
+      // switch (tab) {
+      //   case 1: // Snapshot
+      //     if (!clientDetails.snapshot) {
+      //       fetchClientDetails(selectedClient.id, 'snapshot');
+      //     }
+      //     break;
+      //   case 2: // Cases
+      //     if (!clientDetails.cases) {
+      //       fetchClientDetails(selectedClient.user, 'cases');
+      //     }
+      //     break;
+      //   case 3: // Hearings
+      //     if (!clientDetails.hearings) {
+      //       fetchClientDetails(selectedClient.id, 'hearings');
+      //     }
+      //     break;
+      //   default:
+      //     break;
+      // }
+    },
+    [selectedItem],
+  );
 
   //  Function to open filter
   const openFilter = () => {
@@ -172,7 +194,35 @@ const AppointmentsScreen = ({navigation}) => {
               rightIcon={AppImages.filter}
               rightImgOnPress={openFilter}
             />
-
+            <View style={styles.mainContainer}>
+              <View style={styles.tabSelector}>
+                <TouchableOpacity
+                  onPress={() => handleTabChange(1)}
+                  style={[
+                    styles.tabButton,
+                    selectedItem === 1 && styles.tabButtonActive,
+                  ]}>
+                  <Text style={styles.tabButtonText}>Open</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleTabChange(2)}
+                  style={[
+                    styles.tabButton,
+                    styles.tabButtonMiddle,
+                    selectedItem === 2 && styles.tabButtonActive,
+                  ]}>
+                  <Text style={styles.tabButtonText}>Upcoming</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleTabChange(3)}
+                  style={[
+                    styles.tabButton,
+                    selectedItem === 3 && styles.tabButtonActive,
+                  ]}>
+                  <Text style={styles.tabButtonText}>Past</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
             <FlatList
               keyExtractor={(item, index) => index.toString()}
               contentContainerStyle={styles.appointmentList}
@@ -210,6 +260,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.themeBgColor,
   },
+  mainContainer: {
+    paddingHorizontal: 15,
+  },
   appointmentContainer: {
     width: '100%',
     borderRadius: 12,
@@ -221,9 +274,46 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 15,
   },
+
   appointmentList: {
     marginVertical: 30,
     paddingHorizontal: 15,
+  },
+
+  tabSelector: {
+    width: '100%',
+    height: 40,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 30,
+    borderWidth: 0.5,
+    borderColor: colors.textGrayTwo,
+    flexDirection: 'row',
+  },
+  tabButton: {
+    width: '33.33%',
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tabButtonMiddle: {
+    borderColor: colors.textGrayTwo,
+  },
+  tabButtonActive: {
+    backgroundColor: colors.textGrayThree,
+    borderRadius: 25,
+    borderColor: colors.textGrayTwo,
+    borderWidth: 1,
+    shadowColor: colors.white,
+    shadowOffset: {width: 1, height: 1},
+    shadowOpacity: 0.5,
+    shadowRadius: 3,
+  },
+  tabButtonText: {
+    fontSize: responsiveSize(14),
+    fontWeight: '400',
+    color: colors.white,
   },
 });
 

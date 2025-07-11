@@ -1,15 +1,13 @@
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Ionicons from '@react-native-vector-icons/ionicons';
-import HomeScreen from '../screens/Home';
-import ProfileScreen from '../screens/Profile';
 import {colors} from '../config/theme';
 import {StyleSheet, View, Platform} from 'react-native';
 import Cases from '../screens/Cases';
 import LinearGradient from 'react-native-linear-gradient';
 import DrawerNavigator from './DrawerNavigator';
 import {responsiveSize} from '../utils/responsiveFontSize';
-import HearingsScreen from '../screens/Hearings';
+import HearingsScreen from '../screens/Hearings/view/HearingsScreen';
 
 const Tab = createBottomTabNavigator();
 

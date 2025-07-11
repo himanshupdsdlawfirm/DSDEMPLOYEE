@@ -7,6 +7,7 @@ import {
   Image,
   TouchableOpacity,
   FlatList,
+  TextInput,
 } from 'react-native';
 import Loader from '../../../components/common/Loader';
 import {AppImages} from '../../config/Images';
@@ -80,8 +81,23 @@ const dummyClientsData = [
 const CasesScreen = ({navigation, route}) => {
   const {backScreen = undefined} = route?.params || {};
 
+  const [searchText, setSearchText] = useState('');
+  const [scrollOffset, setScrollOffset] = useState(0);
+
   // Create a ref for the bottom sheet
   const filterBottomSheetRef = useRef(null);
+  const scrollRef = useRef(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      filterBottomSheetRef.current.dismiss();
+      scrollRef.current.scrollToOffset({
+        offset: scrollOffset,
+        animated: true,
+      });
+      return () => {};
+    }, []),
+  );
 
   const formattedDate = useCallback(item => {
     if (item) {
@@ -214,8 +230,21 @@ const CasesScreen = ({navigation, route}) => {
             rightImgOnPress={openFilter}
             isHeaderBottomText={false}
           />
+          <View style={styles.searchContainer}>
+            <View style={styles.searchButton}>
+              <Image source={AppImages.searchIcon} style={styles.searchIcon} />
+              <TextInput
+                onChangeText={setSearchText}
+                value={searchText}
+                placeholder="Search"
+                placeholderTextColor={colors.gray}
+                style={styles.searchInput}
+              />
+            </View>
+          </View>
           <BottomSheetModalProvider>
             <FlatList
+              ref={scrollRef}
               keyExtractor={(item, index) => index.toString()}
               contentContainerStyle={[
                 styles.clientsList,
@@ -223,15 +252,19 @@ const CasesScreen = ({navigation, route}) => {
               ]}
               showsHorizontalScrollIndicator={false}
               data={dummyClientsData}
+              onScroll={event => {
+                setScrollOffset(event.nativeEvent.contentOffset.y);
+              }}
+              scrollEventThrottle={16}
               renderItem={renderCases}
             />
             {/* Filter Component */}
             <FilterBottomSheet
               dropdownOptions={dropdownOptions}
-              pickerOnePlaceholder={{label: 'Select case worker', value: null}}
-              pickerTwoPlaceholder={{label: 'Select attorney', value: null}}
+              pickerOnePlaceholder={{label: 'Select case type', value: null}}
+              pickerTwoPlaceholder={{label: 'Select case worker', value: null}}
               pickerThreePlaceholder={{
-                label: 'Select hearing type',
+                label: 'Select status',
                 value: null,
               }}
               pickerFourPlaceholder={{
@@ -244,9 +277,9 @@ const CasesScreen = ({navigation, route}) => {
               isDropdownOneVisible={true}
               isDropdownTwoVisible={true}
               isDropdownThreeVisible={true}
-              isDropdownFourVisible={true}
+              isDropdownFourVisible={false}
               isTextInputOneVisible={false}
-              isTextInputTwoVisible={true}
+              isTextInputTwoVisible={false}
               bottomBtnStyle={{
                 marginBottom: backScreen === 'Drawer' ? 10 : 90,
               }}
@@ -273,6 +306,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     width: '100%',
     paddingHorizontal: 15,
+    marginTop: 20,
   },
   searchButton: {
     width: '100%',
@@ -299,9 +333,16 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     color: colors.gray,
   },
+  searchInput: {
+    flex: 1,
+    paddingHorizontal: 10,
+    fontSize: responsiveSize(12),
+    fontWeight: '400',
+    color: colors.white,
+  },
   clientsList: {
     paddingBottom: 20,
-    paddingTop: 20,
+    paddingTop: 10,
   },
   caseCardContainer: {
     shadowColor: colors.themeBgColor,
@@ -310,13 +351,14 @@ const styles = StyleSheet.create({
     shadowRadius: 3.5,
     borderRadius: 12,
     marginVertical: 10,
-    width: '90%',
+    paddingHorizontal: 15,
     alignSelf: 'center',
     elevation: 10,
   },
   caseGradient: {
     justifyContent: 'space-around',
     borderRadius: 12,
+    width: '100%',
     // height: 200,
   },
   AppointmentNotifitionBox: {
@@ -363,14 +405,16 @@ const styles = StyleSheet.create({
   },
   Appointmentwith: {
     flexDirection: 'row',
-    backgroundColor: colors.themeLightBg,
+    // backgroundColor: colors.themeLightBg,
+    backgroundColor: colors.textViewBg,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
   },
   paidContainer: {
     flexDirection: 'row',
-    backgroundColor: colors.themeLightBg,
+    // backgroundColor: colors.themeLightBg,
+    backgroundColor: colors.textViewBg,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,

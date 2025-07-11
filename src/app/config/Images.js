@@ -44,4 +44,6 @@ export const AppImages = {
   call: require('../../assets/call.png'),
   rightArrow: require('../../assets/arrow.png'),
   downArrow: require('../../assets/downArrow.png'),
+  star: require('../../assets/star.png'),
+  noDataFound: require('../../assets/noData.png'),
 };

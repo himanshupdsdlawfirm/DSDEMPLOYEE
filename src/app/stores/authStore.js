@@ -1,63 +1,69 @@
-import { makeAutoObservable } from 'mobx';
-import AuthService from '../services/authServices';
+import {makeAutoObservable} from 'mobx';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 class AuthStore {
-  user = null;
-  otp = ['', '', '', '', '', ''];
-  countdown = 30;
-  error = null;
+  token = null;
+  userId = null;
+  is_superuser = false;
+  userDeatil = {};
   isLoading = false;
-  networkError = false;
+  error = null;
 
   constructor() {
     makeAutoObservable(this);
+    this.loadToken();
   }
 
-  setError = (error) => {
-    this.error = error.message;
-    this.networkError = error.isNetworkError || false;
-    
-    if (error.isUnauthorized) {
-      // Handle logout or token refresh
-    }
-  };
+  async loadToken() {
+    this.token = await AsyncStorage.getItem('userToken');
+    this.userId = await AsyncStorage.getItem('userId');
+    this.is_superuser = JSON.parse(await AsyncStorage.getItem('isSuperUser'));
+    this.userDeatil = JSON.parse(await AsyncStorage.getItem('userDetail'));
+    console.log('user tok::', this.token);
+  }
 
-  verifyOtp = async (email) => {
-    this.isLoading = true;
-    this.error = null;
-    this.networkError = false;
-    
-    try {
-      const otpCode = this.otp.join('');
-      const response = await AuthService.verifyOtp(email, otpCode);
-      this.user = response.user;
-      return response;
-    } catch (error) {
-      this.setError(error);
-      throw error;
-    } finally {
-      this.isLoading = false;
-    }
-  };
+  setToken(token) {
+    this.token = token;
 
-  resendOtp = async (email) => {
-    this.isLoading = true;
+    AsyncStorage.setItem('userToken', token);
+  }
+
+  clearToken() {
+    this.token = null;
+    this.userId = null;
+    this.is_superuser = false;
+    AsyncStorage.removeItem('userToken');
+    AsyncStorage.removeItem('userId');
+    AsyncStorage.removeItem('isSuperUser');
+  }
+
+  setUserId(userId) {
+    this.userId = userId;
+
+    AsyncStorage.setItem('userId', userId);
+  }
+
+  setIsSuperUser(isSuperUser) {
+    this.is_superuser = isSuperUser;
+    AsyncStorage.setItem('isSuperUser', JSON.stringify(isSuperUser));
+  }
+
+  setUserDeatil(item) {
+    this.userDeatil = item;
+    AsyncStorage.setItem('userDetail', JSON.stringify(item));
+  }
+
+  setLoading(loading) {
+    this.isLoading = loading;
+  }
+
+  setError(error) {
+    this.error = error;
+  }
+
+  clearError() {
     this.error = null;
-    this.networkError = false;
-    
-    try {
-      const response = await AuthService.resendOtp(email);
-      this.startCountdown();
-      return response;
-    } catch (error) {
-      this.setError(error);
-      throw error;
-    } finally {
-      this.isLoading = false;
-    }
-  };
-  
-  // ... other store methods
+  }
 }
 
 export default AuthStore;

@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -17,16 +17,14 @@ import Loader from '../../../components/common/Loader';
 import {AppImages} from '../../config/Images';
 import {LinearGradientHeader} from '../../../components/common/LinerGradientHeader';
 import {colors} from '../../config/theme';
-import {
-  CommonActions,
-  StackActions,
-  useFocusEffect,
-} from '@react-navigation/native';
+import {useFocusEffect} from '@react-navigation/native';
 import {TextInput} from 'react-native-gesture-handler';
 import {moderateScale} from '../../utils/fontsize';
 import LinearGradient from 'react-native-linear-gradient';
 import {responsiveSize} from '../../utils/responsiveFontSize';
 import {GradientBorderHalfCircle} from '../../../components/common/LinearBorderColor';
+import rootStore from '../../stores/rootStore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const clientsData = [
   {name: 'Himanshu', ClientImage: AppImages.userAnimyPlaceholder},
@@ -40,13 +38,27 @@ const clientsData = [
 ];
 
 const HomeScreen = ({navigation}) => {
+  const scrollRef = useRef(null);
+
+  const token = rootStore.authStore.token;
+  
+
   useFocusEffect(
     useCallback(() => {
-      return () => {
       navigation.closeDrawer();
-      }
-    }, [])
+      getValue()
+      scrollRef.current.scrollTo({y: 0, animated: true});
+      return () => {};
+    }, []),
   );
+
+   const getValue = async() => {
+
+    const getSuperUser = await AsyncStorage.getItem('isSuperUser');
+    console.log('getSuperUser::', getSuperUser);
+    
+    
+  }
 
   const renderAppointments = ({item, index}) => {
     console.log('asasas::', index);
@@ -449,6 +461,7 @@ const HomeScreen = ({navigation}) => {
             </TouchableOpacity>
           </View>
           <ScrollView
+            ref={scrollRef}
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}>
@@ -486,7 +499,9 @@ const HomeScreen = ({navigation}) => {
             <View style={styles.sectionContainer}>
               <Text style={styles.sectionTitle}>Hearings</Text>
               <TouchableOpacity
-                onPress={() => navigation.navigate('HearingList')}>
+                onPress={() =>
+                  navigation.navigate('HearingList', {backScreen: 'Drawer'})
+                }>
                 <Text style={styles.sectionViewAll}>View All</Text>
               </TouchableOpacity>
             </View>

@@ -1,19 +1,18 @@
 import React from 'react';
-import {createStackNavigator} from '@react-navigation/stack';
-import {useAuth} from '../context';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import AuthStack from './AuthStack';
 import BottomTabNavigator from './BottomTabNavigator';
+import rootStore from '../stores/rootStore';
 
-const RootStack = createStackNavigator();
+const RootStack = createNativeStackNavigator();
 
 const MainNavigator = () => {
-  const {user} = useAuth();
-
-  console.log('user state::', user);
+  const token = rootStore.authStore.token;
 
   return (
-    <RootStack.Navigator screenOptions={{headerShown: false}}>
-      <RootStack.Screen name="Auth" component={AuthStack} />
+    <RootStack.Navigator
+      screenOptions={{headerShown: false}}>
+      <RootStack.Screen name="AuthStack" component={AuthStack} />
     </RootStack.Navigator>
   );
 };

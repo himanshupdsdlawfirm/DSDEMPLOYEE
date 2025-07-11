@@ -1,7 +1,7 @@
 import {makeAutoObservable} from 'mobx';
-import AuthService from '../services/authServices';
+import { ApiService } from '../services/apiService';
 
-class AuthStore {
+class UscisStore {
   cases = [];
 
   constructor() {
@@ -18,10 +18,6 @@ class AuthStore {
     });
   }
 
-  
-
-
-
   static async getAccessToken() {
     try {
       const params = new URLSearchParams();
@@ -30,7 +26,7 @@ class AuthStore {
       params.append('client_secret', 'GzCUm3jpfd0Z7j3s');
 
       // Make sure to use the raw URLSearchParams string without JSON.stringify
-      const response = await ApiService.post(
+      const response = await ApiService .post(
         '/oauth/accesstoken',
         params.toString(), // This should NOT be wrapped in quotes
         {

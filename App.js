@@ -5,11 +5,13 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {AuthProvider} from './src/app/context';
 import MainNavigator from './src/app/navigation';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
-import { Provider } from 'mobx-react';
+import {Provider} from 'mobx-react';
 import rootStore from './src/app/stores/rootStore';
 
-
 const App = () => {
+  const token = rootStore.authStore.token;
+  console.log('token is::', token);
+
   return (
     <Provider rootStore={rootStore}>
       <GestureHandlerRootView style={{flex: 1}}>

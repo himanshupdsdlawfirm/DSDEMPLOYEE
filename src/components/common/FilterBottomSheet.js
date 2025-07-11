@@ -1,4 +1,4 @@
-import React, {forwardRef, useState, useMemo} from 'react';
+import React, {forwardRef, useState, useMemo, useCallback} from 'react';
 import {
   View,
   Text,
@@ -32,7 +32,9 @@ const FilterBottomSheet = forwardRef(({onApply, ...props}, ref) => {
     pickerTwoPlaceholder,
     pickerThreePlaceholder,
     pickerFourPlaceholder,
-    bottomBtnStyle
+    bottomBtnStyle,
+    isFromAppointments,
+    selectedAppointmentTab, // 'today', 'future', 'past'
   } = props;
 
   // State for filters
@@ -44,8 +46,8 @@ const FilterBottomSheet = forwardRef(({onApply, ...props}, ref) => {
     judge: null,
     hearingType: null,
     hearing: null,
-    startDate: new Date(),
-    endDate: new Date(),
+    startDate: null,
+    endDate: null,
   });
 
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
@@ -59,29 +61,13 @@ const FilterBottomSheet = forwardRef(({onApply, ...props}, ref) => {
     setFilters(prev => ({...prev, [key]: value}));
   };
 
-  // Handle apply filters
-  const handleApply = () => {
-    const {startDate, endDate} = filters;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    if (!startDate || !endDate) {
-      Alert.alert('Validation Error', 'Please select both start and end dates');
-      return;
-    }
-
-    if (startDate > endDate) {
-      Alert.alert('Validation Error', 'End date cannot be before start date');
-      return;
-    }
-
-    if (startDate > today || endDate > today) {
-      Alert.alert('Validation Error', 'Dates cannot be in the future');
-      return;
-    }
-
-    onApply(filters);
-    ref.current?.dismiss();
+  // Helper function to check if two dates are the same day
+  const isSameDay = (date1, date2) => {
+    return (
+      date1.getFullYear() === date2.getFullYear() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getDate() === date2.getDate()
+    );
   };
 
   // Reset all filters
@@ -94,8 +80,8 @@ const FilterBottomSheet = forwardRef(({onApply, ...props}, ref) => {
       judge: null,
       hearingType: null,
       hearing: null,
-      startDate: new Date(),
-      endDate: new Date(),
+      startDate: null,
+      endDate: null,
     });
   };
 
@@ -104,20 +90,96 @@ const FilterBottomSheet = forwardRef(({onApply, ...props}, ref) => {
     <Ionicons name="chevron-down" size={16} color={colors.gray} />
   );
 
+  const getMaxDate = () => {
+    if (!isFromAppointments) return null;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (selectedAppointmentTab === 'past') {
+      return today; // Only past dates allowed (before today)
+    }
+    if (selectedAppointmentTab === 'today') {
+      return today; // Only today allowed
+    }
+    return null; // No restriction for future
+  };
+
+  const getMinDate = () => {
+    if (!isFromAppointments) return null;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (selectedAppointmentTab === 'future') {
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      return tomorrow;
+    }
+    if (selectedAppointmentTab === 'today') {
+      return today;
+    }
+    return null; // No restriction for past
+  };
+
+  // Update the handleApply function to ensure proper date handling
+  const handleApply = useCallback(() => {
+    const {startDate, endDate} = filters;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // For today tab, ensure dates are today
+    if (isFromAppointments && selectedAppointmentTab === 'today') {
+      const newFilters = {
+        ...filters,
+        startDate: today,
+        endDate: today,
+      };
+      setFilters(newFilters);
+      onApply(newFilters);
+      ref.current?.dismiss();
+      return;
+    }
+
+    // For past tab, ensure dates are in past
+    if (isFromAppointments && selectedAppointmentTab === 'past') {
+      if (startDate && startDate >= today) {
+        Alert.alert('Invalid Date', 'Please select a date in the past');
+        return;
+      }
+      if (endDate && endDate >= today) {
+        Alert.alert('Invalid Date', 'Please select a date in the past');
+        return;
+      }
+    }
+
+    // For future tab, ensure dates are in future
+    if (isFromAppointments && selectedAppointmentTab === 'future') {
+      if (startDate && startDate < today) {
+        Alert.alert('Invalid Date', 'Please select a date in the future');
+        return;
+      }
+      if (endDate && endDate <= today) {
+        Alert.alert('Invalid Date', 'Please select a date in the future');
+        return;
+      }
+    }
+
+    onApply(filters);
+    ref.current?.dismiss();
+  }, [filters, isFromAppointments, selectedAppointmentTab, onApply, ref]);
+  
+
   return (
     <BottomSheetModal
       ref={ref}
       index={0}
-      // snapPoints={'80%'}
       backgroundStyle={styles.background}
       handleIndicatorStyle={styles.handle}>
       <BottomSheetScrollView contentContainerStyle={styles.contentContainer}>
-        {/* Text Input One */}
         <LinearGradient
           colors={[colors.bottomTabSignOut, colors.themeBgColor]}
-          style={{
-            flex: 1,
-          }}>
+          style={{flex: 1}}>
           <View style={{padding: 20}}>
             {isTextInputOneVisible && (
               <TextInput
@@ -180,9 +242,11 @@ const FilterBottomSheet = forwardRef(({onApply, ...props}, ref) => {
             {isDropdownThreeVisible && (
               <View style={styles.dropdownWrapper}>
                 <RNPickerSelect
-                  onValueChange={value =>
-                    handleFilterChange('hearingType', value)
-                  }
+                  onValueChange={value => {
+                    console.log('hearing value::', value);
+
+                    handleFilterChange('hearingType', value);
+                  }}
                   items={dropdownOptions.categoryFour}
                   value={filters.hearingType}
                   placeholder={pickerThreePlaceholder}
@@ -210,7 +274,6 @@ const FilterBottomSheet = forwardRef(({onApply, ...props}, ref) => {
               </View>
             )}
 
-            {/* Date Picker */}
             {isDatePickerVisible && (
               <View>
                 <Text style={styles.dateRangeLabel}>Select date range</Text>
@@ -219,7 +282,9 @@ const FilterBottomSheet = forwardRef(({onApply, ...props}, ref) => {
                     style={styles.dateButton}
                     onPress={() => setShowStartDatePicker(true)}>
                     <Text style={styles.dateText}>
-                      {filters.startDate.toLocaleDateString()}
+                      {filters.startDate
+                        ? filters.startDate.toLocaleDateString()
+                        : 'Select start date'}
                     </Text>
                   </TouchableOpacity>
 
@@ -227,7 +292,9 @@ const FilterBottomSheet = forwardRef(({onApply, ...props}, ref) => {
                     style={styles.dateButton}
                     onPress={() => setShowEndDatePicker(true)}>
                     <Text style={styles.dateText}>
-                      {filters.endDate.toLocaleDateString()}
+                      {filters.endDate
+                        ? filters.endDate.toLocaleDateString()
+                        : 'Select end date'}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -240,7 +307,8 @@ const FilterBottomSheet = forwardRef(({onApply, ...props}, ref) => {
               open={showStartDatePicker}
               date={filters.startDate || new Date()}
               mode="date"
-              maximumDate={new Date()}
+              minimumDate={getMinDate()}
+              maximumDate={getMaxDate()}
               onConfirm={selectedDate => {
                 setShowStartDatePicker(false);
                 const date = new Date(selectedDate);
@@ -258,11 +326,10 @@ const FilterBottomSheet = forwardRef(({onApply, ...props}, ref) => {
             <DatePicker
               modal
               open={showEndDatePicker}
-              date={filters.endDate || filters.startDate || new Date()}
+              date={filters.endDate || new Date()}
               mode="date"
-              minimumDate={filters.startDate}
-              maximumDate={new Date()}
-              disabled={!filters.startDate}
+              minimumDate={filters.startDate || getMinDate()}
+              maximumDate={getMaxDate()}
               onConfirm={selectedDate => {
                 setShowEndDatePicker(false);
                 const date = new Date(selectedDate);
@@ -298,12 +365,11 @@ const FilterBottomSheet = forwardRef(({onApply, ...props}, ref) => {
     </BottomSheetModal>
   );
 });
-
 // Styles
 const styles = StyleSheet.create({
   background: {
     backgroundColor: colors.bottomTabSignOut,
-    borderRadius: 20
+    borderRadius: 20,
   },
   handle: {
     backgroundColor: '#ccc',

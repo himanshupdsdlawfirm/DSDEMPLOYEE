@@ -43,6 +43,7 @@ const AddCaseScreen = ({navigation}) => {
           isSecondEndImg={false}
           isEndRightImg={false}
           isHeaderBottomText={false}
+          isFilterShow={false}
           headerBottomTitle={`Refreshed: ${new Date().toLocaleString()}`}
         />
 

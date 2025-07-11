@@ -54,7 +54,7 @@ export const LoginForm = ({viewModel}) => {
         onBlur={() => viewModel.setIsPassFocus(false)}
         isEnterValue={viewModel.isPassFocus}
         passHideShowOnPress={viewModel.togglePasswordVisibility}
-        isPassSecure={!viewModel.isPassShow}
+        isPassSecure={viewModel.isPassShow}
         inputTextStyle={styles.passwordInputText}
       />
 
@@ -63,6 +63,7 @@ export const LoginForm = ({viewModel}) => {
         btnOnPress={viewModel.handleLogin}
         isBtnEnable={isFormValid}
         isEnable={isFormValid}
+        isLoadingTrue={viewModel.isLoading}
         btnViewStyle={styles.loginButton}
       />
     </View>

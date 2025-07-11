@@ -1,0 +1,207 @@
+// features/hearings/view/Styles.js
+import {StyleSheet, Platform} from 'react-native';
+import {colors} from '../../../config/theme';
+import {responsiveSize} from '../../../utils/responsiveFontSize';
+
+export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.themeBgColor,
+  },
+  searchMainContainer: {
+    paddingHorizontal: 15,
+    marginTop: 30,
+  },
+  searchContainer: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    backgroundColor: colors.bottomTabLightGray,
+    borderWidth: 1,
+    borderColor: colors.inputBorderColor,
+    borderRadius: 8,
+    height: 42,
+  },
+  searchInput: {
+    flex: 1,
+    paddingHorizontal: 10,
+    fontSize: 14,
+    fontWeight: '400',
+    color: colors.white,
+  },
+  searchIcon: {
+    height: 24,
+    width: 24,
+  },
+  hearingsList: {
+    paddingTop: 30,
+    paddingHorizontal: 15,
+  },
+  hearingsColumnWrapper: {
+    justifyContent: 'space-between',
+    marginBottom: 3,
+  },
+  hearingLinearCard: {
+    width: '48%',
+    marginBottom: 15,
+    borderRadius: 10,
+    elevation: 5,
+    shadowOffset: {width: 0, height: 0},
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    shadowColor: colors.borderColor,
+  },
+  hearingItem: {
+    width: '100%',
+    padding: 10,
+  },
+  hearingDateContainer: {
+    width: '100%',
+    borderRadius: 8,
+    paddingHorizontal: Platform.OS === 'android' ? 1 : 0,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  hearingDateInner: {
+    backgroundColor: colors.themeBgColor,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    width: Platform.OS === 'android' ? '100%' : '99%',
+    padding: 5,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    marginVertical: 1,
+  },
+  calendarIcon: {
+    height: 15,
+    width: 15,
+  },
+  hearingDateTime: {
+    fontSize: responsiveSize(14, 'font'),
+    fontWeight: '400',
+    flex: 1,
+    marginLeft: 10,
+    color: colors.white,
+  },
+  hearingName: {
+    fontSize: responsiveSize(20, 'font'),
+    fontWeight: '400',
+    marginTop: 10,
+    marginHorizontal: 10,
+    color: colors.themeTextColor,
+  },
+  hearingAlienNumber: {
+    fontSize: responsiveSize(18, 'font'),
+    fontWeight: '400',
+    marginHorizontal: 10,
+    color: colors.textGray,
+  },
+  hearingLocationContainer: {
+    flexDirection: 'row',
+    marginHorizontal: 10,
+    alignItems: 'center',
+    marginTop: 15,
+  },
+  locationIcon: {
+    height: 16,
+    width: 16,
+    tintColor: colors.sheildIconColor,
+  },
+  hearingLocation: {
+    fontSize: responsiveSize(19, 'font'),
+    fontWeight: '400',
+    marginHorizontal: 10,
+    color: colors.textGray,
+  },
+  hearingOfficerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+  },
+  officerIcon: {
+    height: 16,
+    width: 16,
+    tintColor: colors.sheildIconColor,
+  },
+  hearingOfficer: {
+    fontSize: responsiveSize(19, 'font'),
+    fontWeight: '400',
+    marginHorizontal: 10,
+    color: colors.textGray,
+  },
+  hearingTypeContainer: {
+    width: '100%',
+    borderRadius: 12,
+    marginTop: 10,
+    paddingHorizontal: Platform.OS === 'android' ? 1 : 0,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  hearingTypeInner: {
+    width: Platform.OS === 'android' ? '100%' : '99%',
+    borderRadius: 11,
+    backgroundColor: colors.themeBgColor,
+    alignSelf: 'center',
+    padding: 10,
+    marginVertical: 1,
+  },
+  hearingOfficerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  userIcon: {
+    height: 22,
+    width: 22,
+  },
+  hearingOfficerName: {
+    fontSize: responsiveSize(20, 'font'),
+    fontWeight: '600',
+    marginHorizontal: 10,
+    color: colors.white,
+  },
+  hearingTypeRow: {
+    marginTop: 5,
+    overflow: 'hidden',
+  },
+  ihIcon: {
+    height: 18,
+    width: 18,
+  },
+  hearingTypeText: {
+    fontSize: responsiveSize(19, 'font'),
+    fontWeight: '400',
+    marginTop:5,
+    color: colors.textGray,
+  },
+  hearingTypeBullet: {
+    fontSize: responsiveSize(22, 'font'),
+    fontWeight: '600',
+    color: colors.white,
+  },
+  loadingIndicator: {
+    paddingBottom: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noDataContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  noDataText: {
+    color: colors.gray,
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 20,
+    lineHeight: 24,
+  },
+});

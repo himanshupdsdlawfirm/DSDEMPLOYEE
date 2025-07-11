@@ -8,23 +8,26 @@ import AddCaseScreen from '../screens/USCISTracker/AddCase';
 import CaseListScreen from '../screens/USCISTracker/CaseList';
 import CaseDetailsScreen from '../screens/USCISTracker/CaseDetails';
 import BottomTabNavigator from './BottomTabNavigator';
-import DrawerNavigator from './DrawerNavigator';
-import HomeScreen from '../screens/Home';
 import SearchScreen from '../screens/Search';
-import HearingsScreen from '../screens/Hearings';
-import AppointmentsScreen from '../screens/Appointments';
-import ClientsScreen from '../screens/Clients';
 import CasesScreen from '../screens/Cases';
+import rootStore from '../stores/rootStore';
+import ClientsScreen from '../screens/Clients/view/ClientScreen';
+import HearingsScreen from '../screens/Hearings/view/HearingsScreen';
+import AppointmentsScreen from '../screens/Appointments/view/AppointmentsScreen';
 
 const Stack = createNativeStackNavigator();
 
 const AuthStack = () => {
+  const token = rootStore.authStore.token;
+
   return (
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
         animation: 'fade',
-      }}>
+      }}
+       initialRouteName={token ? 'MainTabs' : 'Login'}
+      >
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="Otp" component={OtpScreen} />

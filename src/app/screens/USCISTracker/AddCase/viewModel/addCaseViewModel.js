@@ -3,6 +3,7 @@ import { AddCaseService } from '../../../../services/apiCalling/uscis/addCase';
 import { AddCaseModel } from '../model/addCaseModel';
 
 export class AddCaseViewModel {
+  
   constructor() {
     this.model = new AddCaseModel();
     this.error = '';

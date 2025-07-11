@@ -13,7 +13,7 @@ export const colors = {
   inputBgColor: '#101F2C',
   redError: '#E06158',
   transparent: 'transparent',
-  blue:'#0569FF',
+  blue: '#0569FF',
   themeLightBg: '#14578D',
   searchInputBgColor: '#0A1F2F',
   imageBorderColor: '#076A6B',
@@ -28,6 +28,17 @@ export const colors = {
   clientListBg: '#081B2C',
   textViewBg: '#F2F2F21F',
   underline: 'rgba(255, 255, 255, 0.05)',
+  textGrayThree: 'rgba(255, 255, 255, 0.3)',
+  skeletonBg: '#2A3A4A',
+  skeletonDarkBg: '#1E2B38',
+  adjourned_txt: '#374151',
+  reschdule: '#aa6207',
+  cancelled_txt: '#b91c1c',
+  reschduleBg: '#fefce8',
+  on_scheduled: '#15803d',
+  on_scheduled_bg: '#f0fdf4',
+  adjourned_bg: '#eff6ff',
+  cancelled_bg: '#fef2f2',
 };
 
 export const fonts = {
