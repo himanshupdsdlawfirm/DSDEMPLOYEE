@@ -1,26 +1,27 @@
-// features/home/view/HomeScreen.js
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   StyleSheet,
   ImageBackground,
   FlatList,
-  ScrollView,
   TouchableOpacity,
   Image,
   Text,
-  Dimensions,
+  RefreshControl,
 } from 'react-native';
-import {AppImages} from '../../../config/Images';
-import {colors} from '../../../config/theme';
-import {LinearGradientHeader} from '../../../../components/common/LinerGradientHeader';
-import {useHomeViewModel} from '../viewModel/useHomeViewModel';
+import { AppImages } from '../../../config/Images';
+import { colors } from '../../../config/theme';
+import { LinearGradientHeader } from '../../../../components/common/LinerGradientHeader';
+import { useHomeViewModel } from '../viewModel/useHomeViewModel';
 import ClientItem from '../components/CientItem';
 import AppointmentItem from '../components/AppointmentItem';
 import HearingItem from '../components/HearingItem';
 import HomeSkeleton from './HomeSkeleton';
 
-const {width} = Dimensions.get('screen');
+// Memoize the list items to prevent unnecessary re-renders
+const MemoizedClientItem = React.memo(ClientItem);
+const MemoizedAppointmentItem = React.memo(AppointmentItem);
+const MemoizedHearingItem = React.memo(HearingItem);
 
 const HomeScreen = () => {
   const {
@@ -35,11 +36,54 @@ const HomeScreen = () => {
     handleOpenDrawer,
     formattedDate,
     isLoading,
+    fetchClientList,
+    fetchAppointmentList,
+    fetchHearingList,
   } = useHomeViewModel();
 
-  if (isLoading) {
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      // Execute all refresh operations in parallel
+      await Promise.all([
+        fetchClientList(),
+        fetchAppointmentList(),
+        fetchHearingList(),
+      ]);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [fetchClientList, fetchAppointmentList, fetchHearingList]);
+
+  if (isLoading && !refreshing) {
     return <HomeSkeleton />;
   }
+
+  const renderClientItem = ({ item, index }) => (
+    <MemoizedClientItem
+      item={item}
+      index={index}
+      isLast={index === clientsData.length - 1}
+    />
+  );
+
+  const renderAppointmentItem = ({ item, index }) => (
+    <MemoizedAppointmentItem
+      item={item}
+      index={index}
+      isLast={index === appointmentsData.length - 1}
+      formattedDate={formattedDate}
+    />
+  );
+
+  const renderHearingItem = ({ item }) => (
+    <MemoizedHearingItem formattedDate={formattedDate} item={item} />
+  );
+
+  const keyExtractor = (item, index) => index.toString();
+
   return (
     <View style={styles.container}>
       <ImageBackground source={AppImages.loginTheme} style={styles.container}>
@@ -67,83 +111,98 @@ const HomeScreen = () => {
           </TouchableOpacity>
         </View>
 
-        <ScrollView
+        <FlatList
           ref={scrollRef}
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}>
-          {/* Clients Section */}
-          {clientsData.length > 0 && (
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Clients</Text>
-              <TouchableOpacity onPress={handleViewAllClients}>
-                <Text style={styles.sectionViewAll}>View All</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-          <FlatList
-            horizontal
-            data={clientsData}
-            renderItem={({item, index}) => (
-              <ClientItem
-                item={item}
-                index={index}
-                isLast={index === clientsData.length - 1}
-              />
-            )}
-            keyExtractor={(item, index) => index.toString()}
-            contentContainerStyle={styles.clientsList}
-            showsHorizontalScrollIndicator={false}
-          />
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.themeTextColor}
+              colors={[colors.themeTextColor]}
+            />
+          }
+          ListHeaderComponent={
+            <>
+              {/* Clients Section */}
+              {clientsData.length > 0 && (
+                <View style={styles.sectionContainer}>
+                  <Text style={styles.sectionTitle}>Clients</Text>
+                  <TouchableOpacity onPress={handleViewAllClients}>
+                    <Text style={styles.sectionViewAll}>View All</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+              {clientsData.length > 0 && (
+                <FlatList
+                  horizontal
+                  data={clientsData}
+                  renderItem={renderClientItem}
+                  keyExtractor={keyExtractor}
+                  contentContainerStyle={styles.clientsList}
+                  showsHorizontalScrollIndicator={false}
+                  initialNumToRender={5}
+                  maxToRenderPerBatch={5}
+                  windowSize={5}
+                />
+              )}
 
-          {/* Appointments Section */}
-          {appointmentsData.length > 0 && (
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Appointments</Text>
-              <TouchableOpacity onPress={handleViewAllAppointments}>
-                <Text style={styles.sectionViewAll}>View All</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-          <FlatList
-            horizontal
-            data={appointmentsData.slice(0, 20)}
-            renderItem={({item, index}) => (
-              <AppointmentItem
-                item={item}
-                index={index}
-                isLast={index === appointmentsData.length - 1}
-                formattedDate={formattedDate}
-              />
-            )}
-            keyExtractor={(item, index) => index.toString()}
-            contentContainerStyle={styles.appointmentList}
-            showsHorizontalScrollIndicator={false}
-          />
-
-          {/* Hearings Section */}
-          {hearingsData?.length > 0 && (
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Hearings</Text>
-              <TouchableOpacity onPress={handleViewAllHearings}>
-                <Text style={styles.sectionViewAll}>View All</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-          <FlatList
-            numColumns={2}
-            data={hearingsData.slice(0, 8)}
-            renderItem={({item}) => (
-              <HearingItem formattedDate={formattedDate} item={item} />
-            )}
-            keyExtractor={(item, index) => index.toString()}
-            // initialNumToRender={6}
-            contentContainerStyle={styles.hearingsList}
-            columnWrapperStyle={styles.hearingsColumnWrapper}
-            showsVerticalScrollIndicator={false}
-            scrollEnabled={false}
-          />
-        </ScrollView>
+              {/* Appointments Section */}
+              {appointmentsData.length > 0 && (
+                <View style={styles.sectionContainer}>
+                  <Text style={styles.sectionTitle}>Appointments</Text>
+                  <TouchableOpacity onPress={handleViewAllAppointments}>
+                    <Text style={styles.sectionViewAll}>View All</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+              {appointmentsData.length > 0 && (
+                <FlatList
+                  horizontal
+                  data={appointmentsData.slice(0, 20)}
+                  renderItem={renderAppointmentItem}
+                  keyExtractor={keyExtractor}
+                  contentContainerStyle={styles.appointmentList}
+                  showsHorizontalScrollIndicator={false}
+                  initialNumToRender={3}
+                  maxToRenderPerBatch={3}
+                  windowSize={3}
+                />
+              )}
+              
+            </>
+          }
+          ListFooterComponent={
+            <>
+              {/* Hearings Section */}
+              {hearingsData?.length > 0 && (
+                <View style={styles.sectionContainer}>
+                  <Text style={styles.sectionTitle}>Hearings</Text>
+                  <TouchableOpacity onPress={handleViewAllHearings}>
+                    <Text style={styles.sectionViewAll}>View All</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+              {hearingsData?.length > 0 && (
+                <FlatList
+                  numColumns={2}
+                  data={hearingsData.slice(0, 8)}
+                  renderItem={renderHearingItem}
+                  keyExtractor={keyExtractor}
+                  style = {styles.hearingsList}
+                  columnWrapperStyle={styles.hearingsColumnWrapper}
+                  showsVerticalScrollIndicator={false}
+                  scrollEnabled={false}
+                  initialNumToRender={4}
+                  maxToRenderPerBatch={4}
+                  windowSize={4}
+                />
+              )}
+            </>
+          }
+        />
       </ImageBackground>
     </View>
   );

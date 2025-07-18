@@ -331,7 +331,6 @@ const SearchScreen = ({navigation}) => {
           isSecondEndImg={false}
           isEndRightImg={false}
           isHeaderBottomText={false}
-          headerBottomTitle={`Refreshed: ${new Date().toLocaleString()}`}
         />
         <BottomSheetModalProvider>
           <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>

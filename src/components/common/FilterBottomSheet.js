@@ -237,6 +237,11 @@ const FilterBottomSheet = forwardRef(({onApply, ...props}, ref) => {
                   useNativeAndroidPickerStyle={false}
                   Icon={PickerIcon}
                   fixAndroidTouchableBug
+                  touchableWrapperProps={{
+                    // THIS MAKES ENTIRE AREA CLICKABLE
+                    hitSlop: {top: 20, bottom: 20, left: 0, right: 0},
+                    activeOpacity: 0.8,
+                  }}
                 />
               </View>
             )}
@@ -427,9 +432,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: colors.inputBgColor,
     marginBottom: 15,
-    justifyContent: 'center',
     height: 50,
-    paddingHorizontal: 5,
+    justifyContent: 'center',
+    overflow:'hidden'
   },
   dateRangeLabel: {
     fontSize: responsiveSize(14),
@@ -480,13 +485,16 @@ const styles = StyleSheet.create({
 });
 
 const pickerSelectStyles = StyleSheet.create({
+  inputIOSContainer:{width:'100%',height:40},
+  // viewContainer:{width:200,height:40, backgroundColor:'red'},
   inputIOS: {
     fontSize: responsiveSize(16),
     paddingVertical: 12,
     paddingHorizontal: 10,
     color: colors.white,
-    zIndex: 9999,
     paddingRight: 30,
+    height: '100%',
+    width: '100%',
   },
   inputAndroid: {
     fontSize: responsiveSize(14),
@@ -498,6 +506,10 @@ const pickerSelectStyles = StyleSheet.create({
     width: '100%',
     includeFontPadding: false,
     textAlignVertical: 'center',
+  },
+  touchableWrapper: {
+    flex: 1,
+    justifyContent: 'center',
   },
   placeholder: {
     color: colors.gray,

@@ -1,15 +1,24 @@
-import {useState, useEffect, useMemo, useCallback} from 'react';
+import {useState, useEffect, useMemo, useCallback, useRef} from 'react';
 import {ClientModel} from '../clientsModel/clientsModel';
 import {getClientListFilterData} from '../../../config/StaticDataList';
 import rootStore from '../../../stores/rootStore';
+import {useNavigation} from '@react-navigation/native';
 
-export const useClientsViewModel = () => {
+export const useClientsViewModel = route => {
+  const {initialType} = route || null;
+
+  const navigation = useNavigation();
+
+  const searchBottomSheetRef = useRef(null);
+
   const [searchText, setSearchText] = useState('');
   const [clientsData, setClientsData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+
+  const [selectedType, setSelectedType] = useState('Clients');
 
   // Client details state
   const [clientDetails, setClientDetails] = useState({
@@ -34,6 +43,28 @@ export const useClientsViewModel = () => {
     startDate: null,
     endDate: null,
   });
+
+  const openSearchBottomSheet = () => {
+    searchBottomSheetRef.current?.present();
+  };
+
+  const handleSearchTypeSelect = name => {
+    console.log('param type::', initialType);
+
+    setSelectedType(name);
+    if (name === 'Appointments') {
+      navigation.replace('AppointmentList', {
+        type: initialType,
+      });
+    } else if (name === 'Cases') {
+      navigation.replace('CasesScreenList', {
+        type: initialType,
+      });
+    } else if (name === 'Clients') {
+      navigation.replace('ClientList', {type: initialType});
+    }
+    searchBottomSheetRef.current?.dismiss();
+  };
 
   // Format date helper
   const formattedDate = useCallback(dateString => {
@@ -232,6 +263,9 @@ export const useClientsViewModel = () => {
     loading,
     refreshing,
     clientDetails,
+    filters,
+    searchBottomSheetRef,
+    selectedType,
     setClientDetails,
     formattedDate,
     handleSearch,
@@ -239,6 +273,7 @@ export const useClientsViewModel = () => {
     handleLoadMore,
     handleApplyFilters,
     fetchClientDetails,
-    filters,
+    handleSearchTypeSelect,
+    openSearchBottomSheet,
   };
 };

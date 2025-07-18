@@ -73,7 +73,7 @@ const HearingItem = memo(({item, formattedDate}) => (
             {item?.client_name}
           </Text>
         ) : null}
-        {item?.item?.alien_number ? (
+        {item?.alien_number ? (
           <Text numberOfLines={1} style={styles.hearingAlienNumber}>
             {item?.alien_number}
           </Text>

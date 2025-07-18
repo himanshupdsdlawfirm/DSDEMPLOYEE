@@ -25,17 +25,15 @@ import ClientSnapshot from '../components/ClientSnapshot';
 import ClientCases from '../components/ClientCases';
 import ClientHearings from '../components/ClientHearings';
 
-const ClientsScreen = ({navigation}) => {
+const ClientsScreen = ({navigation, route}) => {
+  const {type} = route?.params || {};
+
   // Existing declarations
   const filterBottomSheetRef = useRef(null);
   const bottomSheetRef = useRef(null);
   const [selectedItem, setSelectedItem] = useState(1);
   const [selectedClient, setSelectedClient] = useState(null);
   const scaleValue = new Animated.Value(0.5);
-  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
-
-  // Add this new state for tracking tabs per client
-  const [clientTabs, setClientTabs] = useState({}); // Tracks selected tab for each client
 
   const {
     searchText,
@@ -44,6 +42,8 @@ const ClientsScreen = ({navigation}) => {
     loading,
     refreshing,
     clientDetails,
+    searchBottomSheetRef,
+    selectedType,
     formattedDate,
     handleSearch,
     handleRefresh,
@@ -51,7 +51,9 @@ const ClientsScreen = ({navigation}) => {
     handleApplyFilters,
     fetchClientDetails,
     setClientDetails,
-  } = useClientsViewModel();
+    handleSearchTypeSelect,
+    openSearchBottomSheet,
+  } = useClientsViewModel({initialType: type});
 
   // Animation for no data found
   useEffect(() => {
@@ -96,8 +98,7 @@ const ClientsScreen = ({navigation}) => {
         case 3: // Hearings
           // Make sure we're using the correct ID property
           console.log('selectedClient.user::', selectedClient.user);
-          
-          
+
           fetchClientDetails(selectedClient.user, 'hearings').catch(error =>
             console.error('Hearings fetch error:', error),
           );
@@ -217,6 +218,32 @@ const ClientsScreen = ({navigation}) => {
     }
   }, [selectedItem, clientDetails, formattedDate]);
 
+  const SearchTypeSelector = () => (
+    <View style={styles.selectorContainer}>
+      {['Appointments', 'Cases', 'Clients'].map(type => (
+        <TouchableOpacity
+          style={styles.searchTypeSelectorBtn}
+          key={type}
+          onPress={() => handleSearchTypeSelect(type)}
+          activeOpacity={0.8}>
+          <View
+            style={[
+              styles.pillButton,
+              selectedType === type && styles.selectedPill,
+            ]}>
+            <Text
+              style={[
+                styles.pillText,
+                selectedType === type && styles.selectedPillText,
+              ]}>
+              {type}
+            </Text>
+          </View>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <ImageBackground source={AppImages.loginTheme} style={styles.container}>
@@ -226,7 +253,7 @@ const ClientsScreen = ({navigation}) => {
           showBackBtn={true}
           leftImg={AppImages.backArrow}
           leftImgTint={colors.white}
-          headerText="Clients"
+          headerText={type ? 'Search' : 'Clients'}
           isSecondEndImg={true}
           isFilterShow={filteredClients.length > 0}
           isEndRightImg={filteredClients.length > 0}
@@ -238,23 +265,35 @@ const ClientsScreen = ({navigation}) => {
         <BottomSheetModalProvider>
           {filteredClients.length > 0 && (
             <>
-              <View style={styles.searchMainContainer}>
+              {type && (
                 <View style={styles.searchContainer}>
-                  <Image
-                    source={AppImages.searchIcon}
-                    style={styles.searchIcon}
-                  />
-                  <TextInput
-                    onChangeText={handleSearch}
-                    value={searchText}
-                    placeholder="Search by name, alien #, or phone"
-                    placeholderTextColor={colors.gray}
-                    onBlur={() => Keyboard.dismiss()}
-                    style={styles.searchInput}
-                    returnKeyType="search"
-                  />
+                  <View style={styles.searchInputContainer}>
+                    <Image
+                      source={AppImages.searchIcon}
+                      style={styles.searchIcon}
+                    />
+                    <TextInput
+                      onChangeText={handleSearch}
+                      value={searchText}
+                      placeholder="Search"
+                      placeholderTextColor={colors.gray}
+                      style={styles.searchInput}
+                    />
+                  </View>
+                  <TouchableOpacity
+                    style={styles.searchTypeButtonContainer}
+                    onPress={openSearchBottomSheet}>
+                    <Text style={styles.searchTypeButtonText}>
+                      {selectedType}
+                    </Text>
+                    <Image
+                      source={AppImages.downArrow}
+                      tintColor={colors.white}
+                      style={styles.dropdownIcon}
+                    />
+                  </TouchableOpacity>
                 </View>
-              </View>
+              )}
 
               <View style={styles.sectionContainer}>
                 <Text style={styles.sectionTitle}>Clients</Text>
@@ -341,29 +380,29 @@ const ClientsScreen = ({navigation}) => {
                       style={styles.clientImageSmall}
                     />
                     <View>
-                    <Text numberOfLines={1} style={styles.clientNameSmall}>
-                      {selectedClient?.client_name}
-                    </Text>
-                    <View style={styles.clientInfoRight}>
-                      <View style={styles.infoBox}>
-                        <Image
-                          source={AppImages.alienNumber}
-                          style={styles.infoIcon}
-                        />
-                        <Text numberOfLines={1} style={styles.infoText}>
-                          {selectedClient?.alien_number}
-                        </Text>
+                      <Text numberOfLines={1} style={styles.clientNameSmall}>
+                        {selectedClient?.client_name}
+                      </Text>
+                      <View style={styles.clientInfoRight}>
+                        <View style={styles.infoBox}>
+                          <Image
+                            source={AppImages.alienNumber}
+                            style={styles.infoIcon}
+                          />
+                          <Text numberOfLines={1} style={styles.infoText}>
+                            {selectedClient?.alien_number}
+                          </Text>
+                        </View>
+                        <View style={styles.infoBox}>
+                          <Image
+                            source={AppImages.call}
+                            style={styles.infoIcon}
+                          />
+                          <Text numberOfLines={1} style={styles.infoText}>
+                            {selectedClient?.mobile}
+                          </Text>
+                        </View>
                       </View>
-                      <View style={styles.infoBox}>
-                        <Image
-                          source={AppImages.call}
-                          style={styles.infoIcon}
-                        />
-                        <Text numberOfLines={1} style={styles.infoText}>
-                          {selectedClient?.mobile}
-                        </Text>
-                      </View>
-                    </View>
                     </View>
                   </View>
 
@@ -399,6 +438,13 @@ const ClientsScreen = ({navigation}) => {
                 </>
               )}
             </View>
+          </CustomBottomSheet>
+          <CustomBottomSheet
+            ref={searchBottomSheetRef}
+            snapPoints={['30%']}
+            backgroundStyle={styles.bottomSheetBackground}
+            handleIndicatorStyle={styles.bottomSheetHandle}>
+            <SearchTypeSelector />
           </CustomBottomSheet>
         </BottomSheetModalProvider>
       </ImageBackground>

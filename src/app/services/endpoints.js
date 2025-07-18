@@ -15,6 +15,5 @@ export const end_points = {
     attorney_list: '/list_attorneys/',
     employee_appointments_list: '/employee_appointments_list/',
     latest_cases: '/latest_cases/'
-    
   },
 };

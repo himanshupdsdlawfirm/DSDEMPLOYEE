@@ -86,8 +86,8 @@ const HearingItem = ({item, formattedDate}) => {
               {item?.client_name}
             </Text>
           ) : null}
-          {item?.item?.alien_number ? (
-            <Text style={styles.clientId}>{item?.item?.alien_number}</Text>
+          {item?.alien_number ? (
+            <Text style={styles.clientId}>{item?.alien_number}</Text>
           ) : null}
           {item?.court_name ? (
             <View style={styles.locationContainer}>

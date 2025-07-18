@@ -1,7 +1,9 @@
 // features/hearings/view/Styles.js
-import {StyleSheet, Platform} from 'react-native';
+import {StyleSheet, Platform, Dimensions} from 'react-native';
 import {colors} from '../../../config/theme';
 import {responsiveSize} from '../../../utils/responsiveFontSize';
+
+const {height} = Dimensions.get('screen');
 
 export const styles = StyleSheet.create({
   container: {
@@ -43,7 +45,7 @@ export const styles = StyleSheet.create({
     marginBottom: 3,
   },
   hearingContainer: {
-    width:'48%',
+    width: '48%',
     elevation: 5,
     shadowOffset: {width: 0, height: 0},
     shadowOpacity: 0.4,
@@ -150,6 +152,10 @@ export const styles = StyleSheet.create({
   },
   hearingTypeInner: {
     width: Platform.OS === 'android' ? '100%' : '99%',
+    height:
+      Platform.OS === 'android'
+        ? responsiveSize(90, 'height')
+        : responsiveSize(80, 'height'),
     borderRadius: 11,
     backgroundColor: colors.themeBgColor,
     alignSelf: 'center',

@@ -1,16 +1,24 @@
 // features/appointments/viewModel/appointmentsViewModel.js
-import {useState, useEffect, useMemo, useCallback} from 'react';
+import {useState, useEffect, useMemo, useCallback, useRef} from 'react';
 import {getAppointmentFilterData} from '../../../config/StaticDataList';
 import {AppointmentModel} from '../model/appointmentModel';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useNavigation} from '@react-navigation/native';
 
-export const useAppointmentsViewModel = () => {
+export const useAppointmentsViewModel = route => {
+  const {initialType, previousSearchTab} = route || null;
+
+  const navigation = useNavigation();
+
+  const bottomSheetRef = useRef(null);
+
   const [searchText, setSearchText] = useState('');
   const [appointmentsData, setAppointmentsData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [selectedType, setSelectedType] = useState('Appointments');
 
   // Tab state
   const [selectedTab, setSelectedTab] = useState(() => 'today');
@@ -26,7 +34,25 @@ export const useAppointmentsViewModel = () => {
     datesBefore: null,
   });
 
+  const handleSearchTypeSelect = name => {
+    console.log('param type::', initialType);
 
+    setSelectedType(name);
+    if (name === 'Appointments') {
+      navigation.replace('AppointmentList', {
+        type: initialType,
+      });
+    } else if (name === 'Cases') {
+      navigation.replace('CasesScreenList', {
+        type: initialType,
+      });
+    } else if (name === 'Clients') {
+      navigation.replace('ClientList', {
+        type: initialType,
+      });
+    }
+    bottomSheetRef.current?.dismiss();
+  };
 
   const formattedDate = useCallback(dateString => {
     if (!dateString) return '--/--/--';
@@ -76,10 +102,10 @@ export const useAppointmentsViewModel = () => {
   // Fetch appointments data
   const fetchAppointments = useCallback(
     async (pageNum = 1, isRefreshing = false) => {
-        const token = await AsyncStorage.getItem('userToken');
+      const token = await AsyncStorage.getItem('userToken');
 
-        console.log('tokentoken:::', token);
-        
+      console.log('tokentoken:::', token);
+
       try {
         setLoading(true);
 
@@ -157,7 +183,7 @@ export const useAppointmentsViewModel = () => {
     setSelectedTab(tab);
     setAppointmentsData([]);
     setPage(1);
-    
+
     setFilters({
       search: '',
       client: null,
@@ -242,6 +268,10 @@ export const useAppointmentsViewModel = () => {
     [filters, selectedTab],
   );
 
+  const openBottomSheet = () => {
+    bottomSheetRef.current?.present();
+  };
+
   // Memoized filtered appointments
   const filteredAppointments = useMemo(() => {
     if (!searchText) return appointmentsData;
@@ -262,6 +292,9 @@ export const useAppointmentsViewModel = () => {
     loading,
     refreshing,
     selectedTab,
+    bottomSheetRef,
+    filters,
+    selectedType,
     formattedDate,
     formattedTime,
     handleSearch,
@@ -269,6 +302,7 @@ export const useAppointmentsViewModel = () => {
     handleLoadMore,
     handleApplyFilters,
     handleTabChange,
-    filters,
+    openBottomSheet,
+    handleSearchTypeSelect,
   };
 };

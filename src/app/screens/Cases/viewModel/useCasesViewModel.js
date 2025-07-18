@@ -1,13 +1,23 @@
-import {useState, useEffect, useCallback, useMemo} from 'react';
+import {useState, useEffect, useCallback, useMemo, useRef} from 'react';
 import {CasesModel} from '../model/CasesModel';
+import {useNavigation} from '@react-navigation/native';
+import { dropdownApoointmentOptions, getAppointmentFilterData, getHearingFilterData } from '../../../config/StaticDataList';
 
-export const useCasesViewModel = () => {
+export const useCasesViewModel = route => {
+  const {initialType} = route || {};
+  const navigation = useNavigation();
+
+  const bottomSheetRef = useRef(null);
+
+  const filterData = dropdownApoointmentOptions();
+
   const [searchText, setSearchText] = useState('');
   const [casesData, setCasesData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [selectedType, setSelectedType] = useState('Cases');
   const [filters, setFilters] = useState({
     search: '',
     caseType: null,
@@ -16,6 +26,22 @@ export const useCasesViewModel = () => {
     startDate: null,
     endDate: null,
   });
+
+  const openBottomSheet = () => {
+    bottomSheetRef.current?.present();
+  };
+
+  const handleSearchTypeSelect = name => {
+    setSelectedType(name);
+    if (name === 'Appointments') {
+      navigation.replace('AppointmentList', {type: initialType});
+    } else if (name === 'Cases') {
+      navigation.replace('CasesScreenList', {type: initialType});
+    } else if (name === 'Clients') {
+      navigation.replace('ClientList', {type: initialType});
+    }
+    bottomSheetRef.current?.dismiss();
+  };
 
   // Format date helper
   const formattedDate = useCallback(dateString => {
@@ -147,10 +173,15 @@ export const useCasesViewModel = () => {
     filteredCases,
     loading,
     refreshing,
+    bottomSheetRef,
+    selectedType,
+    filterData,
     formattedDate,
     handleSearch,
     handleRefresh,
     handleLoadMore,
     handleApplyFilters,
+    openBottomSheet,
+    handleSearchTypeSelect,
   };
 };

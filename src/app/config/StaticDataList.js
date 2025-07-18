@@ -8,19 +8,19 @@ export const dropdownApoointmentOptions = () => ({
     {label: 'Existing', value: 'case_worker_three'},
   ],
   categoryTwo: [
-    {label: 'Debit Card', value: null},
+    {label: 'Debit Card', value: 'Debit Card'},
     {label: 'Credit Card', value: 'attorney_one'},
     {label: 'Cash', value: 'attorney_two'},
     {label: 'Check', value: 'attorney_three'},
   ],
   categoryThree: [
-    {label: 'Judge', value: null},
+    {label: 'Judge', value: 'Judge'},
     {label: 'Aakash', value: 'name_one'},
     {label: 'Mahesh singh', value: 'name_two'},
     {label: 'Amit suyal', value: 'name_three'},
   ],
   categoryFour: [
-    {label: 'Type', value: null},
+    {label: 'Type', value: 'Type'},
     {label: 'IH', value: 'IH'},
     {label: 'MH', value: 'MH'},
     {label: 'FC', value: 'FC'},

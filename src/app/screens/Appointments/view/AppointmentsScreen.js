@@ -8,6 +8,8 @@ import {
   RefreshControl,
   ActivityIndicator,
   TouchableOpacity,
+  Image,
+  TextInput,
 } from 'react-native';
 import {AppImages} from '../../../config/Images';
 import {LinearGradientHeader} from '../../../../components/common/LinerGradientHeader';
@@ -19,8 +21,11 @@ import AppointmentItem from '../components/AppointmentItem';
 import {useAppointmentsViewModel} from '../viewModel/useAppointmentsViewModel';
 import {styles} from './Styles';
 import ToastNotification from '../../../../components/common/CustomToast';
+import CustomBottomSheet from '../../../../components/common/CustomBottomSheet';
 
-const AppointmentsScreen = ({navigation}) => {
+const AppointmentsScreen = ({navigation, route}) => {
+  const {type} = route.params || {};
+
   const filterBottomSheetRef = useRef(null);
 
   const {
@@ -30,6 +35,8 @@ const AppointmentsScreen = ({navigation}) => {
     loading,
     refreshing,
     selectedTab,
+    bottomSheetRef,
+    selectedType,
     formattedDate,
     formattedTime,
     handleSearch,
@@ -37,7 +44,9 @@ const AppointmentsScreen = ({navigation}) => {
     handleLoadMore,
     handleApplyFilters,
     handleTabChange,
-  } = useAppointmentsViewModel();
+    openBottomSheet,
+    handleSearchTypeSelect,
+  } = useAppointmentsViewModel({initialType: type});
 
   const [toastConfig, setToastConfig] = useState({
     visible: false,
@@ -50,7 +59,7 @@ const AppointmentsScreen = ({navigation}) => {
 
   const showToast = useCallback(config => {
     console.log('config data::', config);
-    
+
     setToastConfig({
       ...config,
       visible: true,
@@ -90,6 +99,32 @@ const AppointmentsScreen = ({navigation}) => {
     [],
   );
 
+  const SearchTypeSelector = () => (
+    <View style={styles.selectorContainer}>
+      {['Appointments', 'Cases', 'Clients'].map(type => (
+        <TouchableOpacity
+          style={styles.searchTypeSelectorBtn}
+          key={type}
+          onPress={() => handleSearchTypeSelect(type)}
+          activeOpacity={0.8}>
+          <View
+            style={[
+              styles.pillButton,
+              selectedType === type && styles.selectedPill,
+            ]}>
+            <Text
+              style={[
+                styles.pillText,
+                selectedType === type && styles.selectedPillText,
+              ]}>
+              {type}
+            </Text>
+          </View>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <ImageBackground source={AppImages.loginTheme} style={styles.container}>
@@ -100,7 +135,7 @@ const AppointmentsScreen = ({navigation}) => {
             showBackBtn={true}
             leftImg={AppImages.backArrow}
             leftImgTint={colors.white}
-            headerText="Appointments"
+            headerText={type ? 'Search' : 'Appointments'}
             isSecondEndImg={true}
             isEndRightImg={true}
             isHeaderBottomText={false}
@@ -108,7 +143,33 @@ const AppointmentsScreen = ({navigation}) => {
             rightIcon={AppImages.filter}
             rightImgOnPress={openFilter}
           />
-
+          {type && (
+            <View style={styles.searchContainer}>
+              <View style={styles.searchInputContainer}>
+                <Image
+                  source={AppImages.searchIcon}
+                  style={styles.searchIcon}
+                />
+                <TextInput
+                  onChangeText={handleSearch}
+                  value={searchText}
+                  placeholder="Search"
+                  placeholderTextColor={colors.gray}
+                  style={styles.searchInput}
+                />
+              </View>
+              <TouchableOpacity
+                style={styles.searchTypeButtonContainer}
+                onPress={openBottomSheet}>
+                <Text style={styles.searchTypeButtonText}>{selectedType}</Text>
+                <Image
+                  source={AppImages.downArrow}
+                  tintColor={colors.white}
+                  style={styles.dropdownIcon}
+                />
+              </TouchableOpacity>
+            </View>
+          )}
           <View style={styles.mainContainer}>
             <View style={styles.tabSelector}>
               <TouchableOpacity
@@ -190,8 +251,17 @@ const AppointmentsScreen = ({navigation}) => {
             secondInputPlaceholder="Transaction Id"
             isFromAppointments={true}
             selectedAppointmentTab={selectedTab}
-            showToast = {showToast}
+            showToast={showToast}
           />
+
+          <CustomBottomSheet
+            ref={bottomSheetRef}
+            snapPoints={['30%']}
+            backgroundStyle={styles.bottomSheetBackground}
+            handleIndicatorStyle={styles.bottomSheetHandle}>
+            <SearchTypeSelector />
+          </CustomBottomSheet>
+
           <ToastNotification
             visible={toastConfig.visible}
             title={toastConfig.title}

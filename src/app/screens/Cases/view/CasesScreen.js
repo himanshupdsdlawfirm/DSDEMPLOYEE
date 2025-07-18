@@ -17,11 +17,11 @@ import FilterBottomSheet from '../../../../components/common/FilterBottomSheet';
 import {colors} from '../../../config/theme';
 import LinearGradient from 'react-native-linear-gradient';
 import {dropdownApoointmentOptions} from '../../../config/StaticDataList';
-import { useCasesViewModel } from '../viewModel/useCasesViewModel';
-import { styles } from './Styles';
+import {useCasesViewModel} from '../viewModel/useCasesViewModel';
+import {styles} from './Styles';
+import CustomBottomSheet from '../../../../components/common/CustomBottomSheet';
 
 const CaseItem = React.memo(({item, formattedDate}) => {
-    
   return (
     <View style={styles.caseCardContainer}>
       <LinearGradient
@@ -103,20 +103,29 @@ const CaseItem = React.memo(({item, formattedDate}) => {
 });
 
 const CasesScreen = ({navigation, route}) => {
+  const {type} = route?.params || {};
+
   const {backScreen = undefined} = route?.params || {};
   const filterBottomSheetRef = useRef(null);
-  
+
+  console.log('route::', route.params);
+
   const {
     searchText,
     filteredCases,
     loading,
     refreshing,
+    bottomSheetRef,
+    selectedType,
+    filterData,
     formattedDate,
     handleSearch,
     handleRefresh,
     handleLoadMore,
     handleApplyFilters,
-  } = useCasesViewModel();
+    openBottomSheet,
+    handleSearchTypeSelect,
+  } = useCasesViewModel({initialType: type});
 
   // Function to open filter
   const openFilter = useCallback(() => {
@@ -125,7 +134,33 @@ const CasesScreen = ({navigation, route}) => {
 
   const renderItem = useCallback(
     ({item}) => <CaseItem item={item} formattedDate={formattedDate} />,
-    [formattedDate]
+    [formattedDate],
+  );
+
+  const SearchTypeSelector = () => (
+    <View style={styles.selectorContainer}>
+      {['Appointments', 'Cases', 'Clients'].map(type => (
+        <TouchableOpacity
+          style={styles.searchTypeSelectorBtn}
+          key={type}
+          onPress={() => handleSearchTypeSelect(type)}
+          activeOpacity={0.8}>
+          <View
+            style={[
+              styles.pillButton,
+              selectedType === type && styles.selectedPill,
+            ]}>
+            <Text
+              style={[
+                styles.pillText,
+                selectedType === type && styles.selectedPillText,
+              ]}>
+              {type}
+            </Text>
+          </View>
+        </TouchableOpacity>
+      ))}
+    </View>
   );
 
   return (
@@ -134,10 +169,10 @@ const CasesScreen = ({navigation, route}) => {
         <LinearGradientHeader
           goBack={() => navigation.goBack()}
           showBackBtnContainer={true}
-          showBackBtn={backScreen === 'Drawer'}
+          showBackBtn={backScreen === 'Drawer' || type}
           leftImg={AppImages.backArrow}
           leftImgTint={colors.white}
-          headerText="Cases"
+          headerText={type ? 'Search' : 'Cases'}
           isSecondEndImg={true}
           isFilterShow={true}
           isEndRightImg={true}
@@ -146,20 +181,30 @@ const CasesScreen = ({navigation, route}) => {
           isHeaderBottomText={false}
         />
 
-        <View style={styles.searchContainer}>
-          <View style={styles.searchButton}>
-            <Image source={AppImages.searchIcon} style={styles.searchIcon} />
-            <TextInput
-              onChangeText={handleSearch}
-              value={searchText}
-              placeholder="Search"
-              placeholderTextColor={colors.gray}
-              style={styles.searchInput}
-            />
+        {type && (
+          <View style={styles.searchContainer}>
+            <View style={styles.searchInputContainer}>
+              <Image source={AppImages.searchIcon} style={styles.searchIcon} />
+              <TextInput
+                onChangeText={handleSearch}
+                value={searchText}
+                placeholder="Search"
+                placeholderTextColor={colors.gray}
+                style={styles.searchInput}
+              />
+            </View>
+            <TouchableOpacity
+              style={styles.searchTypeButtonContainer}
+              onPress={openBottomSheet}>
+              <Text style={styles.searchTypeButtonText}>{selectedType}</Text>
+              <Image
+                source={AppImages.downArrow}
+                tintColor={colors.white}
+                style={styles.dropdownIcon}
+              />
+            </TouchableOpacity>
           </View>
-        </View>
-        {console.log('filteredCases::', filteredCases)
-        }
+        )}
 
         <BottomSheetModalProvider>
           {loading && !refreshing && filteredCases.length === 0 ? (
@@ -173,7 +218,7 @@ const CasesScreen = ({navigation, route}) => {
               keyExtractor={(item, index) => index.toString()}
               contentContainerStyle={[
                 styles.clientsList,
-                {paddingBottom: backScreen === 'Drawer' ? 30 : 120},
+                {paddingBottom: backScreen === 'Drawer' || type ? 30 : 120},
               ]}
               showsVerticalScrollIndicator={false}
               refreshControl={
@@ -203,7 +248,7 @@ const CasesScreen = ({navigation, route}) => {
           )}
 
           <FilterBottomSheet
-            dropdownOptions={dropdownApoointmentOptions}
+            dropdownOptions={filterData}
             pickerOnePlaceholder={{label: 'Select case type', value: null}}
             pickerTwoPlaceholder={{label: 'Select case worker', value: null}}
             pickerThreePlaceholder={{label: 'Select status', value: null}}
@@ -221,10 +266,18 @@ const CasesScreen = ({navigation, route}) => {
             isTextInputOneVisible={false}
             isTextInputTwoVisible={false}
             bottomBtnStyle={{
-              marginBottom: backScreen === 'Drawer' ? 10 : 90,
+              marginBottom: backScreen === 'Drawer' || type ? 10 : 90,
             }}
             secondInputPlaceholder="Enter judge name"
           />
+
+          <CustomBottomSheet
+            ref={bottomSheetRef}
+            snapPoints={['30%']}
+            backgroundStyle={styles.bottomSheetBackground}
+            handleIndicatorStyle={styles.bottomSheetHandle}>
+            <SearchTypeSelector />
+          </CustomBottomSheet>
         </BottomSheetModalProvider>
       </ImageBackground>
     </View>

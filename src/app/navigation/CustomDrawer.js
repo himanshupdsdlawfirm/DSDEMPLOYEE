@@ -98,17 +98,17 @@ const DRAWER_ITEMS = [
 
 const CustomDrawer = React.memo(props => {
   const userDetail = rootStore.authStore.userDeatil;
-  const userImage = userDetail?.profile_image;
-  const fullUrl = userImage?.name?.trim() || null || undefined;
+  const userImage = userDetail?.profile_image ? userDetail?.profile_image: null;
+  const fullUrl = userImage?.name ? userImage.name.trim() : null;
 
   // Memoize user details
   const memoizedUserDetail = useMemo(
-    () => ({
-      name: userDetail?.name.trim() || '' || null || undefined,
-      email: userDetail?.email.trim() || '' || null || undefined,
-    }),
-    [userDetail?.name, userDetail?.email],
-  );
+  () => ({
+    name: userDetail?.name ? userDetail.name.trim() : '',
+    email: userDetail?.email ? userDetail.email.trim() : '',
+  }),
+  [userDetail?.name, userDetail?.email],
+);
 
   const handleNavigation = useCallback(
     name => {
@@ -233,7 +233,7 @@ const CustomDrawer = React.memo(props => {
             {userImage ? (
               <Image style={styles.userProfilePic} source={{uri: fullUrl}} />
             ) : (
-              <Ionicons name="person" size={40} color="#00FFEC" />
+              <Ionicons name="person" size={40} color={colors.lightGray} />
             )}
           </View>
           <Text numberOfLines={1} style={styles.profileName}>
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#00FFEC',
+    borderColor: colors.lightGray,
     marginBottom: 10,
   },
   userProfilePic: {

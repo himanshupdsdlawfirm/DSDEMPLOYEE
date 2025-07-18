@@ -116,7 +116,8 @@ export const useHomeViewModel = () => {
     fetchAppointmentList();
   }, []);
 
-  const handleSearchPress = () => navigation.navigate('Search');
+  const handleSearchPress = () =>
+    navigation.navigate('AppointmentList', {type: 'HomeSearch'});
   const handleViewAllClients = () => navigation.navigate('ClientList');
   const handleViewAllAppointments = () =>
     navigation.navigate('AppointmentList');
@@ -136,5 +137,8 @@ export const useHomeViewModel = () => {
     handleOpenDrawer,
     formattedDate,
     isLoading: rootStore.homeStore.isLoading,
+    fetchClientList,
+    fetchAppointmentList,
+    fetchHearingList,
   };
 };
