@@ -10,6 +10,7 @@ import {
   RefreshControl,
   ActivityIndicator,
   Animated,
+  TouchableOpacity,
 } from 'react-native';
 import {AppImages} from '../../../config/Images';
 import {LinearGradientHeader} from '../../../../components/common/LinerGradientHeader';
@@ -60,139 +61,144 @@ const HearingsScreen = ({navigation, route}) => {
 
   const renderHearingItem = useCallback(
     ({item}) => (
-      <LinearGradient
-        colors={[colors.hearingCardLinearOne, colors.hearingCardLinearTwo]}
-        style={styles.hearingLinearCard}>
-        {console.log('hearing item:', item)}
-        <View style={styles.hearingItem}>
-          <LinearGradient
-            style={styles.hearingDateContainer}
-            colors={['#384651', '#051422']}
-            locations={[0, 1]}
-            start={{x: 1, y: 0}}
-            end={{x: 0.5, y: 0}}>
-            <View style={styles.hearingDateInner}>
-              <Image
-                source={AppImages.calendarClock}
-                style={styles.calendarIcon}
-              />
-              <Text numberOfLines={1} style={styles.hearingDateTime}>
-                {`${formattedDate(item?.date)}  ${item?.time}`}
-              </Text>
-            </View>
-          </LinearGradient>
-
-          <View
-            style={{
-              paddingVertical: 5,
-              marginTop: 10,
-              maxWidth: '60%',
-              alignItems: 'center',
-              justifyContent: 'center',
-              minWidth: '30%',
-              paddingHorizontal: 10,
-              backgroundColor:
-                item?.hearing_status === 'Cancelled'
-                  ? colors?.cancelled_bg
-                  : item?.hearing_status === 'Adjourned'
-                  ? colors.adjourned_bg
-                  : item?.hearing_status === 'Rescheduled'
-                  ? colors.reschduleBg
-                  : colors.on_scheduled_bg,
-              borderRadius: 8,
-              overflow: 'hidden',
-            }}>
-            <Text
-              style={{
-                fontSize: responsiveSize(16, 'font'),
-                fontWeight: '500',
-                color:
-                  item?.hearing_status === 'Cancelled'
-                    ? colors?.redError
-                    : item?.hearing_status === 'Adjourned'
-                    ? colors.adjourned_txt
-                    : item?.hearing_status === 'Rescheduled'
-                    ? colors.reschdule
-                    : colors.on_scheduled,
-              }}>
-              {item?.hearing_status}
-            </Text>
-          </View>
-
-          {item?.client_name && (
-            <Text numberOfLines={1} style={styles.hearingName}>
-              {item?.client_name}
-            </Text>
-          )}
-
-          {item?.alien_number && (
-            <Text numberOfLines={1} style={styles.hearingAlienNumber}>
-              {item.alien_number}
-            </Text>
-          )}
-
-          {item?.court_name && (
-            <View style={styles.hearingLocationContainer}>
-              <Image
-                source={AppImages.locationCheck}
-                style={styles.locationIcon}
-              />
-              <Text numberOfLines={1} style={styles.hearingLocation}>
-                {item.court_name}
-              </Text>
-            </View>
-          )}
-
-          {item?.judge_name && (
-            <View style={styles.hearingOfficerContainer}>
-              <Image style={styles.officerIcon} source={AppImages.userShield} />
-              <Text numberOfLines={1} style={styles.hearingOfficer}>
-                {item.judge_name}
-              </Text>
-            </View>
-          )}
-
-          <LinearGradient
-            style={styles.hearingTypeContainer}
-            colors={['#384651', '#051422']}
-            locations={[0, 1]}
-            start={{x: 1, y: 0}}
-            end={{x: 0.5, y: 0}}>
-            <View style={styles.hearingTypeInner}>
-              {item?.paralegal_name && (
-                <View style={styles.hearingOfficerRow}>
-                  <Image
-                    style={styles.userIcon}
-                    source={AppImages.userAnimyPlaceholder}
-                  />
-                  <Text numberOfLines={1} style={styles.hearingOfficerName}>
-                    {item.paralegal_name}
-                  </Text>
-                </View>
-              )}
-
-              {item?.hearing_medium_attorney && (
-                <Text numberOfLines={1} style={styles.hearingTypeText}>
-                  {item.hearing_medium_attorney}
+      <View style={styles.hearingContainer}>
+        <LinearGradient
+          colors={[colors.hearingCardLinearOne, colors.hearingCardLinearTwo]}
+          style={styles.hearingLinearCard}>
+          {console.log('hearing item:', item)}
+          <TouchableOpacity style={styles.hearingItem}>
+            <LinearGradient
+              style={styles.hearingDateContainer}
+              colors={['#384651', '#051422']}
+              locations={[0, 1]}
+              start={{x: 1, y: 0}}
+              end={{x: 0.5, y: 0}}>
+              <View style={styles.hearingDateInner}>
+                <Image
+                  source={AppImages.calendarClock}
+                  style={styles.calendarIcon}
+                />
+                <Text numberOfLines={1} style={styles.hearingDateTime}>
+                  {`${formattedDate(item?.date)}  ${item?.time}`}
                 </Text>
-              )}
-              {item?.hearingType && (
-                <View style={styles.hearingTypeRow}>
-                  <Text
-                    numberOfLines={1}
-                    style={{
-                      fontSize: responsiveSize(20, 'font'),
-                      color: colors.themeActiveTint,
-                      marginTop: !item.hearing_medium_attorney && 3
-                    }}>
-                    {item?.hearingType}
-                  </Text>
-                </View>
-              )}
+              </View>
+            </LinearGradient>
+
+            <View
+              style={{
+                paddingVertical: 5,
+                marginTop: 10,
+                maxWidth: '60%',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minWidth: '30%',
+                paddingHorizontal: 10,
+                backgroundColor:
+                  item?.hearing_status === 'Cancelled'
+                    ? colors?.cancelled_bg
+                    : item?.hearing_status === 'Adjourned'
+                    ? colors.adjourned_bg
+                    : item?.hearing_status === 'Rescheduled'
+                    ? colors.reschduleBg
+                    : colors.on_scheduled_bg,
+                borderRadius: 8,
+                overflow: 'hidden',
+              }}>
+              <Text
+                style={{
+                  fontSize: responsiveSize(16, 'font'),
+                  fontWeight: '500',
+                  color:
+                    item?.hearing_status === 'Cancelled'
+                      ? colors?.redError
+                      : item?.hearing_status === 'Adjourned'
+                      ? colors.adjourned_txt
+                      : item?.hearing_status === 'Rescheduled'
+                      ? colors.reschdule
+                      : colors.on_scheduled,
+                }}>
+                {item?.hearing_status}
+              </Text>
             </View>
-          </LinearGradient>
-        </View>
-      </LinearGradient>
+
+            {item?.client_name && (
+              <Text numberOfLines={1} style={styles.hearingName}>
+                {item?.client_name}
+              </Text>
+            )}
+
+            {item?.alien_number && (
+              <Text numberOfLines={1} style={styles.hearingAlienNumber}>
+                {item.alien_number}
+              </Text>
+            )}
+
+            {item?.court_name && (
+              <View style={styles.hearingLocationContainer}>
+                <Image
+                  source={AppImages.locationCheck}
+                  style={styles.locationIcon}
+                />
+                <Text numberOfLines={1} style={styles.hearingLocation}>
+                  {item.court_name}
+                </Text>
+              </View>
+            )}
+
+            {item?.judge_name && (
+              <View style={styles.hearingOfficerContainer}>
+                <Image
+                  style={styles.officerIcon}
+                  source={AppImages.userShield}
+                />
+                <Text numberOfLines={1} style={styles.hearingOfficer}>
+                  {item.judge_name}
+                </Text>
+              </View>
+            )}
+
+            <LinearGradient
+              style={styles.hearingTypeContainer}
+              colors={['#384651', '#051422']}
+              locations={[0, 1]}
+              start={{x: 1, y: 0}}
+              end={{x: 0.5, y: 0}}>
+              <View style={styles.hearingTypeInner}>
+                {item?.paralegal_name && (
+                  <View style={styles.hearingOfficerRow}>
+                    <Image
+                      style={styles.userIcon}
+                      source={AppImages.userAnimyPlaceholder}
+                    />
+                    <Text numberOfLines={1} style={styles.hearingOfficerName}>
+                      {item.paralegal_name}
+                    </Text>
+                  </View>
+                )}
+
+                {item?.hearing_medium_attorney && (
+                  <Text numberOfLines={1} style={styles.hearingTypeText}>
+                    {item.hearing_medium_attorney}
+                  </Text>
+                )}
+                {item?.hearingType && (
+                  <View style={styles.hearingTypeRow}>
+                    <Text
+                      numberOfLines={1}
+                      style={{
+                        fontSize: responsiveSize(20, 'font'),
+                        color: colors.themeActiveTint,
+                        marginTop: !item.hearing_medium_attorney && 3,
+                      }}>
+                      {item?.hearingType}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </LinearGradient>
+          </TouchableOpacity>
+        </LinearGradient>
+      </View>
     ),
     [formattedDate],
   );

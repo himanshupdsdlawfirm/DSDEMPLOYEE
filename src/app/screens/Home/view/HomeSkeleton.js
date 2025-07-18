@@ -1,14 +1,15 @@
 // features/home/components/HomeSkeleton.js
 import React from 'react';
-import { View, StyleSheet, ImageBackground } from 'react-native';
-import { AppImages } from '../../../config/Images';
-import { colors } from '../../../config/theme';
+import {View, StyleSheet, ImageBackground, StatusBar, Platform} from 'react-native';
+import {AppImages} from '../../../config/Images';
+import {colors} from '../../../config/theme';
 import Shimmer from '../../../../components/common/Shimmer';
 
 const HomeSkeleton = () => {
   return (
     <View style={styles.container}>
       <ImageBackground source={AppImages.loginTheme} style={styles.container}>
+        
         {/* Header */}
         <View style={styles.headerContainer}>
           <Shimmer width={40} height={40} style={styles.headerLeft} />
@@ -48,7 +49,12 @@ const HomeSkeleton = () => {
           </View>
           <View style={styles.horizontalList}>
             {[...Array(3)].map((_, i) => (
-              <Shimmer key={`appointment-${i}`} width={240} height={150} style={styles.appointmentItem} />
+              <Shimmer
+                key={`appointment-${i}`}
+                width={240}
+                height={150}
+                style={styles.appointmentItem}
+              />
             ))}
           </View>
 
@@ -59,7 +65,12 @@ const HomeSkeleton = () => {
           </View>
           <View style={styles.gridContainer}>
             {[...Array(4)].map((_, i) => (
-              <Shimmer key={`hearing-${i}`} width="48%" height={200} style={styles.hearingItem} />
+              <Shimmer
+                key={`hearing-${i}`}
+                width="48%"
+                height={200}
+                style={styles.hearingItem}
+              />
             ))}
           </View>
         </View>
@@ -77,6 +88,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: Platform.OS === 'android' ? 20 : 50,
     paddingHorizontal: 15,
     paddingVertical: 10,
     height: 60,

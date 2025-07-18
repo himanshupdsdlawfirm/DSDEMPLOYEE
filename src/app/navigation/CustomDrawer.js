@@ -99,13 +99,13 @@ const DRAWER_ITEMS = [
 const CustomDrawer = React.memo(props => {
   const userDetail = rootStore.authStore.userDeatil;
   const userImage = userDetail?.profile_image;
-  const fullUrl = userImage?.name?.trim() || null;
+  const fullUrl = userImage?.name?.trim() || null || undefined;
 
   // Memoize user details
   const memoizedUserDetail = useMemo(
     () => ({
-      name: userDetail?.name.trim() || '',
-      email: userDetail?.email.trim() || '',
+      name: userDetail?.name.trim() || '' || null || undefined,
+      email: userDetail?.email.trim() || '' || null || undefined,
     }),
     [userDetail?.name, userDetail?.email],
   );

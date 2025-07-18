@@ -26,11 +26,16 @@ import ClientCases from '../components/ClientCases';
 import ClientHearings from '../components/ClientHearings';
 
 const ClientsScreen = ({navigation}) => {
+  // Existing declarations
   const filterBottomSheetRef = useRef(null);
   const bottomSheetRef = useRef(null);
   const [selectedItem, setSelectedItem] = useState(1);
   const [selectedClient, setSelectedClient] = useState(null);
   const scaleValue = new Animated.Value(0.5);
+  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+
+  // Add this new state for tracking tabs per client
+  const [clientTabs, setClientTabs] = useState({}); // Tracks selected tab for each client
 
   const {
     searchText,
@@ -45,6 +50,7 @@ const ClientsScreen = ({navigation}) => {
     handleLoadMore,
     handleApplyFilters,
     fetchClientDetails,
+    setClientDetails,
   } = useClientsViewModel();
 
   // Animation for no data found
@@ -63,13 +69,44 @@ const ClientsScreen = ({navigation}) => {
   const openBottomSheet = useCallback(
     client => {
       setSelectedClient(client);
+      setSelectedItem(1); // Always default to Snapshot for new client
       bottomSheetRef.current?.present();
       filterBottomSheetRef.current?.dismiss();
 
-      // Fetch snapshot data by default when opening
+      // Always fetch fresh snapshot data when opening
       fetchClientDetails(client?.id, 'snapshot');
     },
     [fetchClientDetails],
+  );
+
+  const handleTabChange = useCallback(
+    tab => {
+      if (!selectedClient) return;
+
+      setSelectedItem(tab);
+
+      // Force fresh data fetch with correct IDs
+      switch (tab) {
+        case 1: // Snapshot
+          fetchClientDetails(selectedClient.id, 'snapshot');
+          break;
+        case 2: // Cases
+          fetchClientDetails(selectedClient.user, 'cases');
+          break;
+        case 3: // Hearings
+          // Make sure we're using the correct ID property
+          console.log('selectedClient.user::', selectedClient.user);
+          
+          
+          fetchClientDetails(selectedClient.user, 'hearings').catch(error =>
+            console.error('Hearings fetch error:', error),
+          );
+          break;
+        default:
+          break;
+      }
+    },
+    [selectedClient, fetchClientDetails],
   );
 
   const openFilter = useCallback(() => {
@@ -77,35 +114,6 @@ const ClientsScreen = ({navigation}) => {
     filterBottomSheetRef.current?.present();
     bottomSheetRef.current?.dismiss();
   }, [filteredClients.length]);
-
-  const handleTabChange = useCallback(
-    tab => {
-      setSelectedItem(tab);
-      if (!selectedClient) return;
-
-      // Fetch data based on selected tab
-      switch (tab) {
-        case 1: // Snapshot
-          if (!clientDetails.snapshot) {
-            fetchClientDetails(selectedClient.id, 'snapshot');
-          }
-          break;
-        case 2: // Cases
-          if (!clientDetails.cases) {
-            fetchClientDetails(selectedClient.user, 'cases');
-          }
-          break;
-        case 3: // Hearings
-          if (!clientDetails.hearings) {
-            fetchClientDetails(selectedClient.id, 'hearings');
-          }
-          break;
-        default:
-          break;
-      }
-    },
-    [selectedClient, clientDetails, fetchClientDetails],
-  );
 
   const renderClientItem = useCallback(
     ({item, index}) => (
@@ -291,7 +299,7 @@ const ClientsScreen = ({navigation}) => {
 
           <FilterBottomSheet
             dropdownOptions={filterData}
-            isFutureDateSelectionValid = {true}
+            isFutureDateSelectionValid={true}
             pickerOnePlaceholder={{label: 'Select case type', value: null}}
             pickerTwoPlaceholder={{label: 'Select status', value: null}}
             pickerThreePlaceholder={{label: 'Select assignee', value: null}}
@@ -308,7 +316,22 @@ const ClientsScreen = ({navigation}) => {
             bottomBtnStyle={{marginBottom: 10}}
           />
 
-          <CustomBottomSheet ref={bottomSheetRef}>
+          <CustomBottomSheet
+            ref={bottomSheetRef}
+            onDismiss={() => {
+              // Clear all client details when sheet is closed
+              setClientDetails({
+                snapshot: null,
+                cases: null,
+                hearings: null,
+                loading: {
+                  snapshot: false,
+                  cases: false,
+                  hearings: false,
+                },
+                error: null,
+              });
+            }}>
             <View style={styles.bottomSheetContainer}>
               {selectedClient && (
                 <>
@@ -317,6 +340,7 @@ const ClientsScreen = ({navigation}) => {
                       source={AppImages.userAnimyPlaceholder}
                       style={styles.clientImageSmall}
                     />
+                    <View>
                     <Text numberOfLines={1} style={styles.clientNameSmall}>
                       {selectedClient?.client_name}
                     </Text>
@@ -339,6 +363,7 @@ const ClientsScreen = ({navigation}) => {
                           {selectedClient?.mobile}
                         </Text>
                       </View>
+                    </View>
                     </View>
                   </View>
 

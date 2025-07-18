@@ -16,11 +16,29 @@ export const useHomeViewModel = () => {
   // Format date helper
   const formattedDate = useCallback(dateString => {
     if (!dateString) return '--/--/--';
+
     try {
-      const date = new Date(dateString);
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const year = String(date.getFullYear()).slice(-2);
+      // Option 1: If your date string is ISO format (e.g., "2023-12-31T00:00:00Z")
+      let date = new Date(dateString);
+
+      // Option 2: If your date string is just "YYYY-MM-DD" without time
+      if (isNaN(date.getTime())) {
+        date = new Date(dateString + 'T00:00:00Z');
+      }
+
+      // If still invalid, try manual parsing
+      if (isNaN(date.getTime())) {
+        const parts = dateString.split(/[-T]/);
+        if (parts.length >= 3) {
+          date = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+        }
+      }
+
+      if (isNaN(date.getTime())) return '--/--/--';
+
+      const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(date.getUTCDate()).padStart(2, '0');
+      const year = String(date.getUTCFullYear()).slice(-2);
       return `${month}/${day}/${year}`;
     } catch {
       return '--/--/--';

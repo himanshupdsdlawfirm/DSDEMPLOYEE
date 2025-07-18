@@ -38,11 +38,29 @@ export const useClientsViewModel = () => {
   // Format date helper
   const formattedDate = useCallback(dateString => {
     if (!dateString) return '--/--/--';
+
     try {
-      const date = new Date(dateString);
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const year = String(date.getFullYear()).slice(-2);
+      // Option 1: If your date string is ISO format (e.g., "2023-12-31T00:00:00Z")
+      let date = new Date(dateString);
+
+      // Option 2: If your date string is just "YYYY-MM-DD" without time
+      if (isNaN(date.getTime())) {
+        date = new Date(dateString + 'T00:00:00Z');
+      }
+
+      // If still invalid, try manual parsing
+      if (isNaN(date.getTime())) {
+        const parts = dateString.split(/[-T]/);
+        if (parts.length >= 3) {
+          date = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+        }
+      }
+
+      if (isNaN(date.getTime())) return '--/--/--';
+
+      const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(date.getUTCDate()).padStart(2, '0');
+      const year = String(date.getUTCFullYear()).slice(-2);
       return `${month}/${day}/${year}`;
     } catch {
       return '--/--/--';
@@ -104,46 +122,45 @@ export const useClientsViewModel = () => {
 
   // Fetch client details (snapshot, cases, hearings)
   const fetchClientDetails = useCallback(async (clientId, tab) => {
-    console.log('client id::', clientId);
+    console.log(`Fetching ${tab} for client:`, clientId);
 
     try {
       setClientDetails(prev => ({
         ...prev,
         loading: {...prev.loading, [tab]: true},
         error: null,
+        [tab]: null, // Clear previous data
       }));
 
       let response;
       switch (tab) {
         case 'snapshot':
           response = await ClientModel.getSnapshot(clientId);
-          setClientDetails(prev => ({
-            ...prev,
-            snapshot: response.data,
-          }));
           break;
         case 'cases':
           response = await ClientModel.getCases(clientId);
-          setClientDetails(prev => ({
-            ...prev,
-            cases: response.data,
-          }));
           break;
         case 'hearings':
-          response = await ClientModel.getHearings(clientId);
-          setClientDetails(prev => ({
-            ...prev,
-            hearings: response.data,
-          }));
+          // Ensure we're passing the correct ID type
+          response = await ClientModel.getHearings(clientId.toString());
           break;
         default:
           break;
       }
+
+      setClientDetails(prev => ({
+        ...prev,
+        [tab]: response.data || [],
+        error: response.error || null,
+      }));
+
+      return response;
     } catch (error) {
       setClientDetails(prev => ({
         ...prev,
-        error: error.message || 'Failed to fetch client details',
+        error: error.message || `Failed to fetch ${tab} data`,
       }));
+      throw error;
     } finally {
       setClientDetails(prev => ({
         ...prev,
@@ -151,7 +168,6 @@ export const useClientsViewModel = () => {
       }));
     }
   }, []);
-
 
   // Initial load
   useEffect(() => {
@@ -216,6 +232,7 @@ export const useClientsViewModel = () => {
     loading,
     refreshing,
     clientDetails,
+    setClientDetails,
     formattedDate,
     handleSearch,
     handleRefresh,

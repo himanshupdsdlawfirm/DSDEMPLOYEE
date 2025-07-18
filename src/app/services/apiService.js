@@ -8,7 +8,7 @@ const apiClient = axios.create({
   baseURL: base_url.prod_url,
   timeout: 10000,
   headers: {
-    'Content-Type': 'application/x-www-form-urlencoded',
+    'Content-Type': 'application/json',
     Accept: 'application/json',
   },
 });
@@ -38,7 +38,7 @@ apiClient.interceptors.response.use(
       rootStore.authStore.setError(errorMessage);
 
       if (error.response.status === 401) {
-        rootStore.authStore.clearToken();
+        // rootStore.authStore.clearToken();
       }
     }
     return Promise.reject(error);

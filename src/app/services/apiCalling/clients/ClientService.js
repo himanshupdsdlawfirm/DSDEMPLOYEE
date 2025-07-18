@@ -55,7 +55,10 @@ export class ClientService {
 
   static async getUserSnapshot(id) {
     try {
-      const url = `${end_points.user.snapshot}${id}`;
+      const url = `${end_points.user.snapshot}${id}/`;
+
+      console.log('URL user snapshot::', url);
+
       const response = await ApiService.get(url);
 
       console.log('service user snapshot::', response);
@@ -68,10 +71,11 @@ export class ClientService {
 
   static async getCaseList(id) {
     try {
-      const url = `${end_points.user.cases}${id}`;
+      const url = `${end_points.user.cases}${id}/`;
       const response = await ApiService.get(url);
 
       console.log('service case list::', response);
+      console.log('service case list url::', url);
 
       return response;
     } catch (error) {
@@ -82,8 +86,10 @@ export class ClientService {
 
   static async getHearinglist(id) {
     try {
-      const url = `${end_points.user.hearingsById}${id}`;
+      const url = `${end_points.user.hearingListByUUID}${id}/`;
       const response = await ApiService.get(url);
+
+      console.log('service hearing url::', url);
 
       console.log('service hearing list::', response);
 

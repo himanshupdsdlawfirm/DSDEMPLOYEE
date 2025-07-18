@@ -4,7 +4,6 @@ import { AppointmentService } from "../../../services/apiCalling/appointments/Ap
 
 export class AppointmentModel {
   static async getAppointmentList(params) {
-    console.log('params:::', params);
     
     try {
       const response = await AppointmentService.getAppointmentList(params);

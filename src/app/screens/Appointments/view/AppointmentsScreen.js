@@ -1,5 +1,5 @@
 // features/appointments/view/AppointmentsScreen.js
-import React, {useCallback, useMemo, useRef} from 'react';
+import React, {useCallback, useMemo, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -18,6 +18,7 @@ import {NoDataFound} from '../../../../components/common/NoDataFound';
 import AppointmentItem from '../components/AppointmentItem';
 import {useAppointmentsViewModel} from '../viewModel/useAppointmentsViewModel';
 import {styles} from './Styles';
+import ToastNotification from '../../../../components/common/CustomToast';
 
 const AppointmentsScreen = ({navigation}) => {
   const filterBottomSheetRef = useRef(null);
@@ -37,6 +38,29 @@ const AppointmentsScreen = ({navigation}) => {
     handleApplyFilters,
     handleTabChange,
   } = useAppointmentsViewModel();
+
+  const [toastConfig, setToastConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    colorDark: '',
+    colorLight: '',
+    icon: null,
+  });
+
+  const showToast = useCallback(config => {
+    console.log('config data::', config);
+    
+    setToastConfig({
+      ...config,
+      visible: true,
+    });
+
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+      setToastConfig(prev => ({...prev, visible: false}));
+    }, 3000);
+  }, []);
 
   const openFilter = useCallback(() => {
     if (filteredAppointments.length === 0) return;
@@ -166,6 +190,15 @@ const AppointmentsScreen = ({navigation}) => {
             secondInputPlaceholder="Transaction Id"
             isFromAppointments={true}
             selectedAppointmentTab={selectedTab}
+            showToast = {showToast}
+          />
+          <ToastNotification
+            visible={toastConfig.visible}
+            title={toastConfig.title}
+            message={toastConfig.message}
+            colorDark={toastConfig.colorDark}
+            colorLight={toastConfig.colorLight}
+            icon={toastConfig.icon}
           />
         </BottomSheetModalProvider>
       </ImageBackground>

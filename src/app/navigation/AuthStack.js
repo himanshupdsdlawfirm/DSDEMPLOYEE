@@ -9,11 +9,11 @@ import CaseListScreen from '../screens/USCISTracker/CaseList';
 import CaseDetailsScreen from '../screens/USCISTracker/CaseDetails';
 import BottomTabNavigator from './BottomTabNavigator';
 import SearchScreen from '../screens/Search';
-import CasesScreen from '../screens/Cases';
 import rootStore from '../stores/rootStore';
 import ClientsScreen from '../screens/Clients/view/ClientScreen';
 import HearingsScreen from '../screens/Hearings/view/HearingsScreen';
 import AppointmentsScreen from '../screens/Appointments/view/AppointmentsScreen';
+import CasesScreen from '../screens/Cases/view/CasesScreen';
 
 const Stack = createNativeStackNavigator();
 

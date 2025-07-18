@@ -19,7 +19,7 @@ import {responsiveSize} from '../../utils/responsiveFontSize';
 import {useFocusEffect} from '@react-navigation/native';
 import FilterBottomSheet from '../../../components/common/FilterBottomSheet';
 import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
-import {dropdownOptions} from '../../config/StaticDataList';
+import {dropdownApoointmentOptions} from '../../config/StaticDataList';
 
 const dummyClientsData = [
   {
@@ -99,15 +99,36 @@ const CasesScreen = ({navigation, route}) => {
     }, []),
   );
 
-  const formattedDate = useCallback(item => {
-    if (item) {
-      const dateObj = new Date(item + 'T00:00:00');
-      const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-      const day = String(dateObj.getDate()).padStart(2, '0');
-      const year = String(dateObj.getFullYear()).slice(-2);
-      return `${month}-${day}-${year}`;
+  // Format date helper
+  const formattedDate = useCallback(dateString => {
+    if (!dateString) return '--/--/--';
+
+    try {
+      // Option 1: If your date string is ISO format (e.g., "2023-12-31T00:00:00Z")
+      let date = new Date(dateString);
+
+      // Option 2: If your date string is just "YYYY-MM-DD" without time
+      if (isNaN(date.getTime())) {
+        date = new Date(dateString + 'T00:00:00Z');
+      }
+
+      // If still invalid, try manual parsing
+      if (isNaN(date.getTime())) {
+        const parts = dateString.split(/[-T]/);
+        if (parts.length >= 3) {
+          date = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+        }
+      }
+
+      if (isNaN(date.getTime())) return '--/--/--';
+
+      const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(date.getUTCDate()).padStart(2, '0');
+      const year = String(date.getUTCFullYear()).slice(-2);
+      return `${month}/${day}/${year}`;
+    } catch {
+      return '--/--/--';
     }
-    return '-- -- --';
   }, []);
 
   //  Function to open filter
@@ -260,7 +281,7 @@ const CasesScreen = ({navigation, route}) => {
             />
             {/* Filter Component */}
             <FilterBottomSheet
-              dropdownOptions={dropdownOptions}
+              dropdownOptions={dropdownApoointmentOptions}
               pickerOnePlaceholder={{label: 'Select case type', value: null}}
               pickerTwoPlaceholder={{label: 'Select case worker', value: null}}
               pickerThreePlaceholder={{

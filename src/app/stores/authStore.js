@@ -24,7 +24,6 @@ class AuthStore {
 
   setToken(token) {
     this.token = token;
-
     AsyncStorage.setItem('userToken', token);
   }
 

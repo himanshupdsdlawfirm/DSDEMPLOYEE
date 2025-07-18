@@ -36,8 +36,8 @@ const ClientCases = memo(({casesData, loading, formattedDate}) => {
         <View style={styles.AppointmentNotifitionBox}>
           <View style={styles.caseHeader}>
             <Text style={styles.Appointment}>
-              {item?.case_type_name?.length > 18
-                ? `${item?.case_type_name.slice(0, 18)}...`
+              {item?.case_type_name?.length > 25
+                ? `${item?.case_type_name.slice(0, 24)}...`
                 : item?.case_type_name}
             </Text>
             <View

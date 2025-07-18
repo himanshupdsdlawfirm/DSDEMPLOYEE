@@ -42,15 +42,18 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 3,
   },
-  hearingLinearCard: {
-    width: '48%',
-    marginBottom: 15,
-    borderRadius: 10,
+  hearingContainer: {
+    width:'48%',
     elevation: 5,
     shadowOffset: {width: 0, height: 0},
     shadowOpacity: 0.4,
     shadowRadius: 10,
     shadowColor: colors.borderColor,
+  },
+  hearingLinearCard: {
+    width: '100%',
+    marginBottom: 15,
+    borderRadius: 10,
   },
   hearingItem: {
     width: '100%',
@@ -92,6 +95,7 @@ export const styles = StyleSheet.create({
     marginTop: 10,
     marginHorizontal: 10,
     color: colors.themeTextColor,
+    letterSpacing: 0.5,
   },
   hearingAlienNumber: {
     fontSize: responsiveSize(18, 'font'),
@@ -115,6 +119,7 @@ export const styles = StyleSheet.create({
     fontWeight: '400',
     marginHorizontal: 10,
     color: colors.textGray,
+    letterSpacing: 0.5,
   },
   hearingOfficerContainer: {
     flexDirection: 'row',
@@ -132,6 +137,7 @@ export const styles = StyleSheet.create({
     fontWeight: '400',
     marginHorizontal: 10,
     color: colors.textGray,
+    letterSpacing: 0.5,
   },
   hearingTypeContainer: {
     width: '100%',
@@ -163,6 +169,7 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     marginHorizontal: 10,
     color: colors.white,
+    letterSpacing: 0.5,
   },
   hearingTypeRow: {
     marginTop: 5,
@@ -175,13 +182,14 @@ export const styles = StyleSheet.create({
   hearingTypeText: {
     fontSize: responsiveSize(19, 'font'),
     fontWeight: '400',
-    marginTop:5,
+    marginTop: 5,
     color: colors.textGray,
   },
   hearingTypeBullet: {
     fontSize: responsiveSize(22, 'font'),
     fontWeight: '600',
     color: colors.white,
+    letterSpacing: 0.5,
   },
   loadingIndicator: {
     paddingBottom: 20,

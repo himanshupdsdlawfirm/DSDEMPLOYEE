@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
 } from 'react-native';
 import {BottomSheetModal, BottomSheetScrollView} from '@gorhom/bottom-sheet';
 import RNPickerSelect from 'react-native-picker-select';
@@ -34,7 +33,8 @@ const FilterBottomSheet = forwardRef(({onApply, ...props}, ref) => {
     pickerFourPlaceholder,
     bottomBtnStyle,
     isFromAppointments,
-    selectedAppointmentTab, // 'today', 'future', 'past'
+    selectedAppointmentTab,
+    showToast,
   } = props;
 
   // State for filters
@@ -96,11 +96,13 @@ const FilterBottomSheet = forwardRef(({onApply, ...props}, ref) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    if (selectedAppointmentTab === 'past') {
-      return today; // Only past dates allowed (before today)
-    }
     if (selectedAppointmentTab === 'today') {
       return today; // Only today allowed
+    }
+    if (selectedAppointmentTab === 'past') {
+      const past = new Date(today);
+      past.setDate(past.getDate() - 1);
+      return past;
     }
     return null; // No restriction for future
   };
@@ -119,12 +121,24 @@ const FilterBottomSheet = forwardRef(({onApply, ...props}, ref) => {
     if (selectedAppointmentTab === 'today') {
       return today;
     }
+
     return null; // No restriction for past
   };
 
   // Update the handleApply function to ensure proper date handling
   const handleApply = useCallback(() => {
     const {startDate, endDate} = filters;
+
+    console.log('Start date is::', startDate);
+    console.log('End date is::', endDate);
+
+    if (!startDate && endDate) {
+      return showToast({
+        title: 'Invalid Date',
+        message: 'Please select a start date first',
+      });
+    }
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -144,11 +158,17 @@ const FilterBottomSheet = forwardRef(({onApply, ...props}, ref) => {
     // For past tab, ensure dates are in past
     if (isFromAppointments && selectedAppointmentTab === 'past') {
       if (startDate && startDate >= today) {
-        Alert.alert('Invalid Date', 'Please select a date in the past');
+        showToast({
+          title: 'Invalid Date',
+          message: 'Please select a date in the past',
+        });
         return;
       }
       if (endDate && endDate >= today) {
-        Alert.alert('Invalid Date', 'Please select a date in the past');
+        showToast({
+          title: 'Invalid Date',
+          message: 'Please select a date in the past',
+        });
         return;
       }
     }
@@ -156,19 +176,31 @@ const FilterBottomSheet = forwardRef(({onApply, ...props}, ref) => {
     // For future tab, ensure dates are in future
     if (isFromAppointments && selectedAppointmentTab === 'future') {
       if (startDate && startDate < today) {
-        Alert.alert('Invalid Date', 'Please select a date in the future');
+        showToast({
+          title: 'Invalid Date',
+          message: 'Please select a date in the future',
+        });
         return;
       }
       if (endDate && endDate <= today) {
-        Alert.alert('Invalid Date', 'Please select a date in the future');
+        showToast({
+          title: 'Invalid Date',
+          message: 'Please select a date in the future',
+        });
         return;
       }
     }
 
     onApply(filters);
     ref.current?.dismiss();
-  }, [filters, isFromAppointments, selectedAppointmentTab, onApply, ref]);
-  
+  }, [
+    filters,
+    isFromAppointments,
+    selectedAppointmentTab,
+    onApply,
+    ref,
+    showToast,
+  ]);
 
   return (
     <BottomSheetModal

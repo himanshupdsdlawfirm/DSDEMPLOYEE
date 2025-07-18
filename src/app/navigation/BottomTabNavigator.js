@@ -3,11 +3,11 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import {colors} from '../config/theme';
 import {StyleSheet, View, Platform} from 'react-native';
-import Cases from '../screens/Cases';
 import LinearGradient from 'react-native-linear-gradient';
 import DrawerNavigator from './DrawerNavigator';
 import {responsiveSize} from '../utils/responsiveFontSize';
 import HearingsScreen from '../screens/Hearings/view/HearingsScreen';
+import CasesScreen from '../screens/Cases/view/CasesScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -60,7 +60,7 @@ const BottomTabNavigator = () => {
       {/* <Tab.Screen name="Home" component={HomeScreen} /> */}
 
       <Tab.Screen name="Home" component={DrawerNavigator} />
-      <Tab.Screen name="Cases" component={Cases} />
+      <Tab.Screen name="Cases" component={CasesScreen} />
       <Tab.Screen name="Hearing" component={HearingsScreen} />
       {/* <Tab.Screen name="Settings" component={SettingsScreen} /> */}
     </Tab.Navigator>

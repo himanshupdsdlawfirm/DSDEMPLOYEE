@@ -138,25 +138,27 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   clientImageSmall: {
-    height: 30,
-    width: 30,
+    height: 60,
+    width: 60,
+    alignSelf: 'flex-start',
   },
   clientNameSmall: {
     fontSize: responsiveSize(14),
     fontWeight: '400',
+    maxWidth: '80%',
     color: colors.white,
-    maxWidth: 110,
-    marginLeft: 8,
+    maxWidth: '100%',
+    marginLeft: 12,
   },
   clientInfoRight: {
-    flex: 1,
+    marginTop: 5,
+    marginLeft: 12,
     flexDirection: 'row',
-    justifyContent: 'flex-end',
     gap: 10,
   },
   infoBox: {
-    flexDirection:'row',
-    alignItems:'center',
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 8,
@@ -166,7 +168,7 @@ export const styles = StyleSheet.create({
     fontSize: responsiveSize(12),
     fontWeight: '400',
     maxWidth: 100,
-    marginLeft:5,
+    marginLeft: 5,
     color: colors.white,
   },
   tabSelector: {
@@ -273,7 +275,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 8,
     paddingVertical: 4,
-    marginBottom:4
+    marginBottom: 4,
   },
   statusIcon: {
     height: 20,
@@ -341,18 +343,21 @@ export const styles = StyleSheet.create({
     marginBottom: 3,
   },
   hearingLinearCard: {
-    width: '48%',
+    width: '100%',
     marginBottom: 15,
     borderRadius: 10,
+  },
+  hearingItem: {
+    width: '100%',
+    padding: 10,
+  },
+  hearingContainer: {
+    width: '48%',
     elevation: 5,
     shadowOffset: {width: 0, height: 0},
     shadowOpacity: 0.4,
     shadowRadius: 10,
     shadowColor: colors.borderColor,
-  },
-  hearingItem: {
-    width: '100%',
-    padding: 10,
   },
   hearingDateContainer: {
     width: '100%',
@@ -442,6 +447,10 @@ export const styles = StyleSheet.create({
   },
   hearingTypeInner: {
     width: Platform.OS === 'android' ? '100%' : '99%',
+    height:
+      Platform.OS === 'android'
+        ? responsiveSize(90, 'height')
+        : responsiveSize(80, 'height'),
     borderRadius: 11,
     backgroundColor: colors.themeBgColor,
     alignSelf: 'center',
@@ -451,6 +460,8 @@ export const styles = StyleSheet.create({
   hearingOfficerRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1, // Add this to take available width
+    maxWidth: '100%', // Ensure it doesn't overflow
   },
   userIcon: {
     height: 22,
@@ -459,13 +470,14 @@ export const styles = StyleSheet.create({
   hearingOfficerName: {
     fontSize: responsiveSize(20, 'font'),
     fontWeight: '600',
-    marginHorizontal: 10,
+    marginLeft: 10,
     color: colors.white,
+    flex: 1,
+    flexShrink: 1,
   },
   hearingTypeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 5,
     overflow: 'hidden',
   },
   ihIcon: {
@@ -475,7 +487,7 @@ export const styles = StyleSheet.create({
   hearingTypeText: {
     fontSize: responsiveSize(19, 'font'),
     fontWeight: '400',
-    marginLeft: 5,
+    marginTop: 5,
     color: colors.textGray,
   },
   hearingTypeBullet: {
