@@ -1,5 +1,5 @@
 // features/home/viewModel/HomeViewModel.js
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {useCallback, useEffect, useRef, useState} from 'react';
 import rootStore from '../../../stores/rootStore';
 import {HomeModel} from '../model/homeModel';
@@ -12,6 +12,23 @@ export const useHomeViewModel = () => {
   const [clientsData, setClientsData] = useState([]);
   const [hearingsData, setHearingsData] = useState([]);
   const [appointmentsData, setAppointmentsData] = useState([]);
+
+  useEffect(() => {
+    fetchCaseWorkerList();
+    fetchCaseType();
+    fetchAttornyList();
+    fetchClientList();
+    fetchHearingList();
+    fetchAppointmentList();
+  }, []);
+
+   useFocusEffect(
+      useCallback(() => {
+        navigation.closeDrawer();
+        scrollRef.current?.scrollToOffset({ offset: 0, animated: true });
+        return () => {};
+      }, []),
+    );
 
   // Format date helper
   const formattedDate = useCallback(dateString => {
@@ -65,9 +82,30 @@ export const useHomeViewModel = () => {
       const data = await HomeModel.getAppointmentList(1, 'today');
       console.log('askajskasasa::::', data);
 
-      setAppointmentsData(data?.data);
+      const res = data?.data || [];
 
-      rootStore.homeStore.setClientList(data?.data);
+      // Sort appointments by date and time (most recent first)
+      const sortedData = res.sort((a, b) => {
+        // Convert time from "02:10 PM" to "14:10" format for proper parsing
+        const convertTimeTo24Hour = timeStr => {
+          const [time, modifier] = timeStr.split(' ');
+          let [hours, minutes] = time.split(':');
+          if (hours === '12') hours = '00';
+          if (modifier === 'PM') hours = parseInt(hours, 10) + 12;
+          return `${hours}:${minutes}`;
+        };
+
+        // Create comparable date-time strings
+        const dateTimeA = `${a.date}T${convertTimeTo24Hour(a.start_time)}`;
+        const dateTimeB = `${b.date}T${convertTimeTo24Hour(b.start_time)}`;
+
+        // Convert to timestamps for comparison
+        return new Date(dateTimeB) - new Date(dateTimeA);
+      });
+
+      setAppointmentsData(sortedData);
+
+      rootStore.homeStore.setClientList(res);
     } catch (error) {
       rootStore.homeStore.setError(error.message);
     }
@@ -98,6 +136,15 @@ export const useHomeViewModel = () => {
     }
   };
 
+  const fetchCaseType = async () => {
+    try {
+      const data = await ClientModel.getCaseType();
+      rootStore.clientStore.setCaseType(data?.data);
+    } catch (error) {
+      rootStore.homeStore.setError(error.message);
+    }
+  };
+
   const fetchAttornyList = async () => {
     try {
       const data = await ClientModel.getEmployeeAttorney();
@@ -108,13 +155,6 @@ export const useHomeViewModel = () => {
     }
   };
 
-  useEffect(() => {
-    fetchCaseWorkerList();
-    fetchAttornyList();
-    fetchClientList();
-    fetchHearingList();
-    fetchAppointmentList();
-  }, []);
 
   const handleSearchPress = () =>
     navigation.navigate('AppointmentList', {type: 'HomeSearch'});
@@ -127,7 +167,7 @@ export const useHomeViewModel = () => {
 
   return {
     clientsData,
-    appointmentsData,
+    appointmentsData, 
     hearingsData,
     scrollRef,
     handleSearchPress,

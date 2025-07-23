@@ -1,14 +1,14 @@
 import React, {memo} from 'react';
-import {View, Text} from 'react-native';
+import {View, Text, Image} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {colors} from '../../../config/theme';
 import {ActivityIndicator} from 'react-native';
-import { styles } from '../view/Styles';
+import {styles} from '../view/Styles';
+import {AppImages} from '../../../config/Images';
 
 const ClientCases = memo(({casesData, loading, formattedDate}) => {
-
   console.log('casesData::', casesData);
-  
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -26,7 +26,7 @@ const ClientCases = memo(({casesData, loading, formattedDate}) => {
   }
 
   return casesData.map(item => (
-    <View key={item?.id} style={styles.caseCardContainer}>
+    <View style={styles.caseCardContainer}>
       <LinearGradient
         colors={[colors.bottomTabLightGray, colors.textGray]}
         locations={[0, 1]}
@@ -36,8 +36,8 @@ const ClientCases = memo(({casesData, loading, formattedDate}) => {
         <View style={styles.AppointmentNotifitionBox}>
           <View style={styles.caseHeader}>
             <Text style={styles.Appointment}>
-              {item?.case_type_name?.length > 25
-                ? `${item?.case_type_name.slice(0, 24)}...`
+              {item?.case_type_name?.length > 30
+                ? `${item?.case_type_name.slice(0, 29)}...`
                 : item?.case_type_name}
             </Text>
             <View
@@ -55,24 +55,63 @@ const ClientCases = memo(({casesData, loading, formattedDate}) => {
               <Text style={styles.AppointmentTime}>{item?.status}</Text>
             </View>
           </View>
+          <View style={styles.clientDetailContainer}>
+            <View style={styles.clientContactRow}>
+              {item?.client_name && (
+                <>
+                  <Image
+                    style={styles.clientUserIcon}
+                    source={AppImages.userAnimyPlaceholder}
+                    resizeMode="contain"
+                  />
+                  <Text numberOfLines={1} style={styles.employeeClientName}>
+                    {item?.client_name}
+                  </Text>
+                </>
+              )}
+              {item?.client_mobile_no && (
+                <>
+                  <Image style={styles.mobileIcon} source={AppImages.call} />
+                  <Text numberOfLines={1} style={styles.mobileNumber}>
+                    {item?.client_mobile_no}
+                  </Text>
+                </>
+              )}
+              {item?.client_alien_no && (
+                <>
+                  <Image
+                    style={styles.alienNumberIcon}
+                    source={AppImages.alienNumber}
+                  />
+                  <Text numberOfLines={1} style={styles.alienNumber}>
+                    {item?.client_alien_no}
+                  </Text>
+                </>
+              )}
+            </View>
+          </View>
           <View style={styles.AppointmentTabs}>
-            <View style={styles.Appointmentwith}>
-              <Text style={styles.amountLabel}>
-                {'Contract \n'}
-                <Text style={styles.amountValue}>
-                  {`$${item?.contract_amount || 0}`}
+            {item?.contract_amount && (
+              <View style={styles.Appointmentwith}>
+                <Text style={styles.amountLabel}>
+                  {'Contract \n'}
+                  <Text style={styles.amountValue}>
+                    {`$${item?.contract_amount || 0}`}
+                  </Text>
                 </Text>
-              </Text>
-            </View>
-            <View style={styles.paidContainer}>
-              <Text style={styles.amountLabel}>
-                {'Paid \n'}
-                <Text style={styles.amountValue}>
-                  {`$${item?.total_paid || 0}`}
+              </View>
+            )}
+            {item?.total_paid && (
+              <View style={styles.paidContainer}>
+                <Text style={styles.amountLabel}>
+                  {'Paid \n'}
+                  <Text style={styles.amountValue}>
+                    {`$${item?.total_paid || 0}`}
+                  </Text>
                 </Text>
-              </Text>
-            </View>
-            {item?.remaining_amount ? (
+              </View>
+            )}
+            {item?.remaining_amount && (
               <View style={styles.Appointmenttype}>
                 <Text style={styles.amountLabel}>
                   {'Due \n'}
@@ -81,17 +120,27 @@ const ClientCases = memo(({casesData, loading, formattedDate}) => {
                   </Text>
                 </Text>
               </View>
-            ) : null}
-            <View style={styles.Appointmentwith}>
-              <Text style={styles.amountLabel}>
-                {'Filing Date \n'}
-                <Text style={styles.amountValue}>
-                  {item?.filing_date
-                    ? formattedDate(item.filing_date)
-                    : '--/--/--'}
+            )}
+            {item?.retention_date && (
+              <View style={styles.Appointmentwith}>
+                <Text style={styles.amountLabel}>
+                  {'Retained \n'}
+                  <Text style={styles.amountValue}>
+                    {formattedDate(item?.retention_date)}
+                  </Text>
                 </Text>
-              </Text>
-            </View>
+              </View>
+            )}
+            {item?.filing_date && (
+              <View style={styles.Appointmentwith}>
+                <Text style={styles.amountLabel}>
+                  {'Filing \n'}
+                  <Text style={styles.amountValue}>
+                    {formattedDate(item?.filing_date)}
+                  </Text>
+                </Text>
+              </View>
+            )}
           </View>
         </View>
       </LinearGradient>

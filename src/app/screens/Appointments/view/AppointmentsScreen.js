@@ -1,5 +1,5 @@
 // features/appointments/view/AppointmentsScreen.js
-import React, {useCallback, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   Image,
   TextInput,
+  Animated,
 } from 'react-native';
 import {AppImages} from '../../../config/Images';
 import {LinearGradientHeader} from '../../../../components/common/LinerGradientHeader';
@@ -26,17 +27,18 @@ import CustomBottomSheet from '../../../../components/common/CustomBottomSheet';
 const AppointmentsScreen = ({navigation, route}) => {
   const {type} = route.params || {};
 
-  const filterBottomSheetRef = useRef(null);
-
   const {
     searchText,
-    filteredAppointments,
+    appointmentsData,
     filterData,
     loading,
     refreshing,
     selectedTab,
     bottomSheetRef,
     selectedType,
+    filterActive,
+    filterBottomSheetRef,
+    isResetFilterData,
     formattedDate,
     formattedTime,
     handleSearch,
@@ -46,7 +48,11 @@ const AppointmentsScreen = ({navigation, route}) => {
     handleTabChange,
     openBottomSheet,
     handleSearchTypeSelect,
+    setFilterActive,
+    openFilter,
   } = useAppointmentsViewModel({initialType: type});
+
+  const scaleValue = new Animated.Value(0.5);
 
   const [toastConfig, setToastConfig] = useState({
     visible: false,
@@ -56,6 +62,19 @@ const AppointmentsScreen = ({navigation, route}) => {
     colorLight: '',
     icon: null,
   });
+
+  // Animation for no data found
+  useEffect(() => {
+    if (appointmentsData.length === 0 && !loading) {
+      Animated.spring(scaleValue, {
+        toValue: 1,
+        friction: 3,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      scaleValue.setValue(0.5);
+    }
+  }, [appointmentsData, loading]);
 
   const showToast = useCallback(config => {
     console.log('config data::', config);
@@ -71,11 +90,6 @@ const AppointmentsScreen = ({navigation, route}) => {
     }, 3000);
   }, []);
 
-  const openFilter = useCallback(() => {
-    if (filteredAppointments.length === 0) return;
-    filterBottomSheetRef.current?.present();
-  }, [filteredAppointments.length]);
-
   const renderAppointmentItem = useCallback(
     ({item}) => (
       <AppointmentItem
@@ -90,13 +104,15 @@ const AppointmentsScreen = ({navigation, route}) => {
   const renderNoDataFound = useMemo(
     () => (
       <View style={styles.noDataContainer}>
-        <NoDataFound
-          noDataFoundText={'No appointments found'}
-          noDataSubText={'Try adjusting your search or filters'}
-        />
+        <Animated.View style={{transform: [{scale: scaleValue}]}}>
+          <NoDataFound
+            noDataFoundText={'No appointments found'}
+            noDataSubText={'Try adjusting your search or filters'}
+          />
+        </Animated.View>
       </View>
     ),
-    [],
+    [scaleValue],
   );
 
   const SearchTypeSelector = () => (
@@ -130,16 +146,18 @@ const AppointmentsScreen = ({navigation, route}) => {
       <ImageBackground source={AppImages.loginTheme} style={styles.container}>
         <BottomSheetModalProvider>
           <LinearGradientHeader
-            goBack={() => navigation.goBack()}
+            goBack={() => {
+              navigation.goBack(), setFilterActive(false);
+            }}
             showBackBtnContainer={true}
             showBackBtn={true}
             leftImg={AppImages.backArrow}
             leftImgTint={colors.white}
             headerText={type ? 'Search' : 'Appointments'}
             isSecondEndImg={true}
-            isEndRightImg={true}
             isHeaderBottomText={false}
-            isFilterShow={true}
+            isFilterShow={appointmentsData.length > 0 || filterActive}
+            isEndRightImg={appointmentsData.length > 0 || filterActive}
             rightIcon={AppImages.filter}
             rightImgOnPress={openFilter}
           />
@@ -199,13 +217,13 @@ const AppointmentsScreen = ({navigation, route}) => {
             </View>
           </View>
 
-          {loading && !refreshing && filteredAppointments.length === 0 ? (
+          {loading && !refreshing && appointmentsData.length === 0 ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color={colors.white} />
             </View>
-          ) : filteredAppointments.length > 0 ? (
+          ) : appointmentsData.length > 0 ? (
             <FlatList
-              data={filteredAppointments}
+              data={appointmentsData}
               renderItem={renderAppointmentItem}
               keyExtractor={(item, index) => index.toString()}
               contentContainerStyle={styles.appointmentList}
@@ -238,20 +256,21 @@ const AppointmentsScreen = ({navigation, route}) => {
             ref={filterBottomSheetRef}
             dropdownOptions={filterData}
             onApply={handleApplyFilters}
-            pickerOnePlaceholder={{label: 'Select client', value: null}}
+            pickerOnePlaceholder={{label: 'Retained', value: null}}
             pickerTwoPlaceholder={{label: 'Select payment mode', value: null}}
-            isDatePickerVisible={true}
+            isDatePickerVisible={false}
             isDropdownOneVisible={true}
             isDropdownTwoVisible={true}
             isDropdownThreeVisible={false}
             isDropdownFourVisible={false}
-            isTextInputOneVisible={true}
+            isTextInputOneVisible={false}
             isTextInputTwoVisible={true}
             firstInputPlaceholder="Search Appointments..."
             secondInputPlaceholder="Transaction Id"
             isFromAppointments={true}
             selectedAppointmentTab={selectedTab}
             showToast={showToast}
+            isResetFilterData={isResetFilterData}
           />
 
           <CustomBottomSheet

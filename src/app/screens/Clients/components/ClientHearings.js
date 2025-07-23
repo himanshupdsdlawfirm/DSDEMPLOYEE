@@ -12,7 +12,7 @@ const HearingItem = memo(({item, formattedDate}) => (
     <LinearGradient
       colors={[colors.hearingCardLinearOne, colors.hearingCardLinearTwo]}
       style={styles.hearingLinearCard}>
-      <TouchableOpacity style={styles.hearingItem}>
+      <TouchableOpacity activeOpacity={1} style={styles.hearingItem}>
         <LinearGradient
           style={styles.hearingDateContainer}
           colors={['#384651', '#051422']}
@@ -115,7 +115,7 @@ const HearingItem = memo(({item, formattedDate}) => (
                 </Text>
               </View>
             ) : null}
-         
+
             {item?.hearing_medium_attorney && (
               <Text numberOfLines={1} style={styles.hearingTypeText}>
                 {/* <Text style={styles.hearingTypeBullet}>{'•  '}</Text> */}

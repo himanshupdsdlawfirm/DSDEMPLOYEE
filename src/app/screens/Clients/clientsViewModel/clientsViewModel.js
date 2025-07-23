@@ -10,6 +10,7 @@ export const useClientsViewModel = route => {
   const navigation = useNavigation();
 
   const searchBottomSheetRef = useRef(null);
+  const toastTimeoutRef = useRef(null);
 
   const [searchText, setSearchText] = useState('');
   const [clientsData, setClientsData] = useState([]);
@@ -17,8 +18,10 @@ export const useClientsViewModel = route => {
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-
+  const [filterActive, setFilterActive] = useState(false);
+  const [searchMode, setSearchMode] = useState('local'); // 'local' or 'api'
   const [selectedType, setSelectedType] = useState('Clients');
+  const [debouncedSearchText, setDebouncedSearchText] = useState('');
 
   // Client details state
   const [clientDetails, setClientDetails] = useState({
@@ -37,12 +40,60 @@ export const useClientsViewModel = route => {
 
   const [filters, setFilters] = useState({
     search: '',
-    caseWorker: null,
-    attorney: null,
-    assigne: null,
+    case_activity: null,
+    status: null,
+    assignee: null,
     startDate: null,
     endDate: null,
   });
+
+  const [toastConfig, setToastConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    colorDark: '',
+    colorLight: '',
+    icon: null,
+  });
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      // Only update filters if search text has changed
+      setFilters(prev => ({...prev, search: searchText}));
+    }, 300); // 300ms delay
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchText]);
+
+  const showToast = useCallback(config => {
+    console.log('config data::', config);
+
+    // Clear any existing timeout
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+
+    setToastConfig({
+      ...config,
+      visible: true,
+    });
+
+    // Auto-hide after 3 seconds
+    toastTimeoutRef.current = setTimeout(() => {
+      setToastConfig(prev => ({...prev, visible: false}));
+    }, 3000);
+  }, []);
+
+  // Cleanup effect for the timeout
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const openSearchBottomSheet = () => {
     searchBottomSheetRef.current?.present();
@@ -104,6 +155,11 @@ export const useClientsViewModel = route => {
       try {
         setLoading(true);
 
+        // Reset data when starting a new fetch with filters
+        if (pageNum === 1 && (filterActive || filters.search)) {
+          setClientsData([]);
+        }
+
         const formatDate = date => {
           if (!date) return null;
           const d = new Date(date);
@@ -113,9 +169,9 @@ export const useClientsViewModel = route => {
         const params = {
           page: pageNum,
           search: filters.search || '',
-          has_case: filters.attorney,
-          assigned_employee: filters.assigne,
-          is_closed_client: filters.caseWorker,
+          has_case: filters.case_activity,
+          assigned_employee: filters.assignee,
+          is_closed_client: filters.status,
           retention_date_after: formatDate(filters.startDate),
           retention_date_before: formatDate(filters.endDate),
         };
@@ -133,22 +189,26 @@ export const useClientsViewModel = route => {
 
         const response = await ClientModel.getClientList(params);
 
-        if (isRefreshing) {
-          setClientsData(response.data);
+        if (isRefreshing || pageNum === 1) {
+          setClientsData(response.data || []);
         } else {
-          setClientsData(prev => [...prev, ...response.data]);
+          setClientsData(prev => [...prev, ...(response.data || [])]);
         }
 
         setTotalCount(response.count);
         setPage(pageNum);
       } catch (error) {
         console.error('Error fetching clients:', error);
+        // Reset data on error if it's the first page
+        if (page === 1) {
+          setClientsData([]);
+        }
       } finally {
         setLoading(false);
         setRefreshing(false);
       }
     },
-    [filters],
+    [filters, filterActive],
   );
 
   // Fetch client details (snapshot, cases, hearings)
@@ -214,7 +274,6 @@ export const useClientsViewModel = route => {
   // Handle search
   const handleSearch = useCallback(text => {
     setSearchText(text);
-    setFilters(prev => ({...prev, search: text}));
   }, []);
 
   // Handle load more
@@ -229,13 +288,14 @@ export const useClientsViewModel = route => {
     newFilters => {
       const mappedFilters = {
         search: filters.search,
-        caseWorker: newFilters.caseWorker,
-        attorney: newFilters.attorney,
-        assigne: newFilters.hearingType,
+        case_activity: newFilters.caseWorker,
+        status: newFilters.attorney,
+        assignee: newFilters.hearingType,
         startDate: newFilters.startDate,
         endDate: newFilters.endDate,
       };
 
+      setFilterActive(true);
       setFilters(mappedFilters);
       setClientsData([]);
       setPage(1);
@@ -243,29 +303,18 @@ export const useClientsViewModel = route => {
     [filters.search],
   );
 
-  // Memoized filtered clients
-  const filteredClients = useMemo(() => {
-    if (!searchText) return clientsData;
-
-    const lowerCaseSearch = searchText.toLowerCase();
-    return clientsData.filter(
-      client =>
-        client.client_name?.toLowerCase().includes(lowerCaseSearch) ||
-        client.alien_number?.toLowerCase().includes(lowerCaseSearch) ||
-        client.mobile?.toLowerCase().includes(lowerCaseSearch),
-    );
-  }, [searchText, clientsData]);
-
   return {
     searchText,
     filterData,
-    filteredClients,
+    clientsData,
     loading,
     refreshing,
     clientDetails,
     filters,
     searchBottomSheetRef,
     selectedType,
+    filterActive,
+    toastConfig,
     setClientDetails,
     formattedDate,
     handleSearch,
@@ -275,5 +324,7 @@ export const useClientsViewModel = route => {
     fetchClientDetails,
     handleSearchTypeSelect,
     openSearchBottomSheet,
+    setFilterActive,
+    showToast,
   };
 };

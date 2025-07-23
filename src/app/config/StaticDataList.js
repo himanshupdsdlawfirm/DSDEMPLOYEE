@@ -1,40 +1,40 @@
 // Import your MobX store
 import rootStore from '../stores/rootStore';
 
-export const dropdownApoointmentOptions = () => ({
-  categoryOne: [
-    {label: 'Client', value: 'case_worker_one'},
-    {label: 'New', value: 'case_worker_two'},
-    {label: 'Existing', value: 'case_worker_three'},
-  ],
-  categoryTwo: [
-    {label: 'Debit Card', value: 'Debit Card'},
-    {label: 'Credit Card', value: 'attorney_one'},
-    {label: 'Cash', value: 'attorney_two'},
-    {label: 'Check', value: 'attorney_three'},
-  ],
-  categoryThree: [
-    {label: 'Judge', value: 'Judge'},
-    {label: 'Aakash', value: 'name_one'},
-    {label: 'Mahesh singh', value: 'name_two'},
-    {label: 'Amit suyal', value: 'name_three'},
-  ],
-  categoryFour: [
-    {label: 'Type', value: 'Type'},
-    {label: 'IH', value: 'IH'},
-    {label: 'MH', value: 'MH'},
-    {label: 'FC', value: 'FC'},
-    {label: 'Criminal', value: 'Criminal'},
-    {label: 'Divorce', value: 'Divorce'},
-  ],
-  categoryFive: [
-    {label: 'All', value: 'All'},
-    {label: 'Adjourned', value: 'Adjourned'},
-    {label: 'Rescheduled', value: 'Rescheduled'},
-    {label: 'Cancelled', value: 'Cancelled'},
-    {label: 'On Schedule', value: 'On_Schedule'},
-  ],
-});
+export const dropdownApoointmentOptions = () => {
+  const caseWorkerList = rootStore.clientStore.caseWorker.map(client => ({
+    label: `${client.first_name} ${client.last_name}`, // Combine first and last name
+    value: `${client.first_name} ${client.last_name}`, // Use id as the value
+  }));
+
+  const getCaseTypeFromStore = rootStore.clientStore.caseType.map(client => ({
+    label: `${client.case_type}`, // Combine first and last name
+    value: `${client?.id}`, // Use id as the value
+  }));
+
+  return {
+    categoryOne: getCaseTypeFromStore,
+    categoryTwo: caseWorkerList,
+    categoryThree: [
+      {label: 'Judge', value: 'Judge'},
+      {label: 'Aakash', value: 'name_one'},
+      {label: 'Mahesh singh', value: 'name_two'},
+      {label: 'Amit suyal', value: 'name_three'},
+    ],
+    categoryFour: [
+      {label: 'Open', value: 'Open'},
+      {label: 'Close', value: 'Close'},
+      {label: 'Inactive', value: 'Inactive'},
+    ],
+    categoryFive: [
+      {label: 'All', value: 'All'},
+      {label: 'Adjourned', value: 'Adjourned'},
+      {label: 'Rescheduled', value: 'Rescheduled'},
+      {label: 'Cancelled', value: 'Cancelled'},
+      {label: 'On Schedule', value: 'On_Schedule'},
+    ],
+  };
+};
 
 // config/StaticDataList.js
 export const getHearingFilterData = () => {
@@ -47,9 +47,6 @@ export const getHearingFilterData = () => {
     label: `${client?.first_name} ${client?.last_name}`, // Combine first and last name
     value: `${client?.id}`, // Use id as the value
   }));
-
-  console.log('caseWorkerList::', caseWorkerList);
-  console.log('attorneyList::', attorneyList);
 
   return {
     categoryOne: caseWorkerList,
@@ -92,8 +89,8 @@ export const getClientListFilterData = () => {
       {label: 'Not Created', value: false},
     ],
     categoryTwo: [
-      {label: 'Active', value: true},
-      {label: 'Inactive', value: false},
+      {label: 'Active', value: false},
+      {label: 'Inactive', value: true},
     ],
     categoryThree: [
       {label: 'All', value: 'all'},
@@ -115,15 +112,22 @@ export const getClientListFilterData = () => {
 export const getAppointmentFilterData = () => {
   return {
     categoryOne: [
-      {label: 'Client', value: 'case_worker_one'},
-      {label: 'New', value: 'case_worker_two'},
-      {label: 'Existing', value: 'case_worker_three'},
+      {label: 'Yes', value: false},
+      {label: 'No', value: true},
     ],
     categoryTwo: [
-      {label: 'Debit Card', value: null},
-      {label: 'Credit Card', value: 'attorney_one'},
-      {label: 'Cash', value: 'attorney_two'},
-      {label: 'Check', value: 'attorney_three'},
+      {label: 'Debit Card', value: 'Debit Card'},
+      {label: 'Credit Card', value: 'Credit Card'},
+      {label: 'Check', value: 'Check'},
+      {label: 'Money Order', value: 'Money Order'},
+      {label: 'Wire Transfer', value: 'Wire Transfer'},
+      {label: 'Zelle', value: 'Zelle'},
+      {label: 'Bank Deposit', value: 'Bank Deposit'},
+      {label: 'Personal-No Cost', value: 'Personal-No Cost'},
+      {label: 'Zero Fee', value: 'Zero Fee'},
+      {label: 'Cash', value: 'Cash'},
+      {label: 'Grace Period', value: 'Grace Period'},
+      {label: 'Online', value: 'Online'},
     ],
     categoryThree: [
       {label: 'Judge', value: null},

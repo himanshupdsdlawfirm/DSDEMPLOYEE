@@ -24,6 +24,7 @@ import {NoDataFound} from '../../../../components/common/NoDataFound';
 import ClientSnapshot from '../components/ClientSnapshot';
 import ClientCases from '../components/ClientCases';
 import ClientHearings from '../components/ClientHearings';
+import ToastNotification from '../../../../components/common/CustomToast';
 
 const ClientsScreen = ({navigation, route}) => {
   const {type} = route?.params || {};
@@ -37,13 +38,16 @@ const ClientsScreen = ({navigation, route}) => {
 
   const {
     searchText,
-    filteredClients,
+    clientsData,
     filterData,
     loading,
     refreshing,
     clientDetails,
     searchBottomSheetRef,
     selectedType,
+    filterActive,
+    toastConfig,
+    showToast,
     formattedDate,
     handleSearch,
     handleRefresh,
@@ -53,11 +57,14 @@ const ClientsScreen = ({navigation, route}) => {
     setClientDetails,
     handleSearchTypeSelect,
     openSearchBottomSheet,
+    setFilterActive,
   } = useClientsViewModel({initialType: type});
+
+  console.log('filterActivefilterActive::', filterActive);
 
   // Animation for no data found
   useEffect(() => {
-    if (filteredClients.length === 0 && !loading) {
+    if (clientsData.length === 0 && !loading) {
       Animated.spring(scaleValue, {
         toValue: 1,
         friction: 3,
@@ -66,7 +73,7 @@ const ClientsScreen = ({navigation, route}) => {
     } else {
       scaleValue.setValue(0.5);
     }
-  }, [filteredClients, loading]);
+  }, [clientsData, loading]);
 
   const openBottomSheet = useCallback(
     client => {
@@ -110,11 +117,12 @@ const ClientsScreen = ({navigation, route}) => {
     [selectedClient, fetchClientDetails],
   );
 
+  console.log('filteredClientsfilteredClients:::', clientsData);
+
   const openFilter = useCallback(() => {
-    if (filteredClients.length === 0) return;
     filterBottomSheetRef.current?.present();
     bottomSheetRef.current?.dismiss();
-  }, [filteredClients.length]);
+  }, [clientsData.length]);
 
   const renderClientItem = useCallback(
     ({item, index}) => (
@@ -123,9 +131,10 @@ const ClientsScreen = ({navigation, route}) => {
         style={[
           styles.clientItem,
           {
-            borderBottomWidth: index === filteredClients.length - 1 ? 0 : 1,
+            borderBottomWidth: index === clientsData.length - 1 ? 0 : 1,
           },
         ]}>
+        {console.log('client item is::', item)}
         <View style={styles.clientItemSubContainer}>
           <View>
             <View style={styles.clientImageContainer}>
@@ -154,9 +163,10 @@ const ClientsScreen = ({navigation, route}) => {
                   <Text numberOfLines={1} style={styles.clientId}>
                     {item.alien_number}
                   </Text>
+
+                  <View style={styles.separator} />
                 </>
               ) : null}
-              <View style={styles.separator} />
               {item.mobile ? (
                 <>
                   <Image source={AppImages.call} style={styles.infoIcon} />
@@ -171,7 +181,7 @@ const ClientsScreen = ({navigation, route}) => {
         <Image source={AppImages.rightArrow} style={styles.rightArrowIcon} />
       </TouchableOpacity>
     ),
-    [filteredClients.length, openBottomSheet],
+    [clientsData.length, openBottomSheet],
   );
 
   const renderNoDataFound = useMemo(
@@ -248,66 +258,62 @@ const ClientsScreen = ({navigation, route}) => {
     <View style={styles.container}>
       <ImageBackground source={AppImages.loginTheme} style={styles.container}>
         <LinearGradientHeader
-          goBack={() => navigation.goBack()}
+          goBack={() => {
+            navigation.goBack(), setFilterActive(false);
+          }}
           showBackBtnContainer={true}
           showBackBtn={true}
           leftImg={AppImages.backArrow}
           leftImgTint={colors.white}
           headerText={type ? 'Search' : 'Clients'}
           isSecondEndImg={true}
-          isFilterShow={filteredClients.length > 0}
-          isEndRightImg={filteredClients.length > 0}
+          isFilterShow={clientsData.length > 0 || filterActive}
+          isEndRightImg={clientsData.length > 0 || filterActive}
           rightIcon={AppImages.filter}
           rightImgOnPress={openFilter}
           isHeaderBottomText={false}
         />
 
         <BottomSheetModalProvider>
-          {filteredClients.length > 0 && (
-            <>
-              {type && (
-                <View style={styles.searchContainer}>
-                  <View style={styles.searchInputContainer}>
-                    <Image
-                      source={AppImages.searchIcon}
-                      style={styles.searchIcon}
-                    />
-                    <TextInput
-                      onChangeText={handleSearch}
-                      value={searchText}
-                      placeholder="Search"
-                      placeholderTextColor={colors.gray}
-                      style={styles.searchInput}
-                    />
-                  </View>
-                  <TouchableOpacity
-                    style={styles.searchTypeButtonContainer}
-                    onPress={openSearchBottomSheet}>
-                    <Text style={styles.searchTypeButtonText}>
-                      {selectedType}
-                    </Text>
-                    <Image
-                      source={AppImages.downArrow}
-                      tintColor={colors.white}
-                      style={styles.dropdownIcon}
-                    />
-                  </TouchableOpacity>
-                </View>
-              )}
-
-              <View style={styles.sectionContainer}>
-                <Text style={styles.sectionTitle}>Clients</Text>
+          {type && (
+            <View style={styles.searchContainer}>
+              <View style={styles.searchInputContainer}>
+                <Image
+                  source={AppImages.searchIcon}
+                  style={styles.searchIcon}
+                />
+                <TextInput
+                  onChangeText={handleSearch}
+                  value={searchText}
+                  placeholder="Search"
+                  placeholderTextColor={colors.gray}
+                  style={styles.searchInput}
+                />
               </View>
-            </>
+              <TouchableOpacity
+                style={styles.searchTypeButtonContainer}
+                onPress={openSearchBottomSheet}>
+                <Text style={styles.searchTypeButtonText}>{selectedType}</Text>
+                <Image
+                  source={AppImages.downArrow}
+                  tintColor={colors.white}
+                  style={styles.dropdownIcon}
+                />
+              </TouchableOpacity>
+            </View>
           )}
 
-          {loading && !refreshing && filteredClients.length === 0 ? (
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Clients</Text>
+          </View>
+
+          {loading && !refreshing && clientsData.length === 0 ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color={colors.white} />
             </View>
-          ) : filteredClients.length > 0 ? (
+          ) : clientsData.length > 0 ? (
             <FlatList
-              data={filteredClients}
+              data={clientsData}
               renderItem={renderClientItem}
               keyExtractor={(item, index) => index.toString()}
               showsVerticalScrollIndicator={false}
@@ -339,7 +345,7 @@ const ClientsScreen = ({navigation, route}) => {
           <FilterBottomSheet
             dropdownOptions={filterData}
             isFutureDateSelectionValid={true}
-            pickerOnePlaceholder={{label: 'Select case type', value: null}}
+            pickerOnePlaceholder={{label: 'Select case activity', value: null}}
             pickerTwoPlaceholder={{label: 'Select status', value: null}}
             pickerThreePlaceholder={{label: 'Select assignee', value: null}}
             ref={filterBottomSheetRef}
@@ -353,6 +359,16 @@ const ClientsScreen = ({navigation, route}) => {
             isTextInputTwoVisible={false}
             secondInputPlaceholder="Enter judge name"
             bottomBtnStyle={{marginBottom: 10}}
+            showToast={showToast}
+          />
+
+          <ToastNotification
+            visible={toastConfig.visible}
+            title={toastConfig.title}
+            message={toastConfig.message}
+            colorDark={toastConfig.colorDark}
+            colorLight={toastConfig.colorLight}
+            icon={toastConfig.icon}
           />
 
           <CustomBottomSheet

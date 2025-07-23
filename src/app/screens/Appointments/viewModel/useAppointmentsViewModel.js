@@ -11,6 +11,7 @@ export const useAppointmentsViewModel = route => {
   const navigation = useNavigation();
 
   const bottomSheetRef = useRef(null);
+  const filterBottomSheetRef = useRef(null);
 
   const [searchText, setSearchText] = useState('');
   const [appointmentsData, setAppointmentsData] = useState([]);
@@ -19,6 +20,9 @@ export const useAppointmentsViewModel = route => {
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [selectedType, setSelectedType] = useState('Appointments');
+  const [filterActive, setFilterActive] = useState(false);
+  const [isResetFilterData, setResetFilterData] = useState(0);
+  const [debouncedSearchText, setDebouncedSearchText] = useState('');
 
   // Tab state
   const [selectedTab, setSelectedTab] = useState(() => 'today');
@@ -27,12 +31,21 @@ export const useAppointmentsViewModel = route => {
 
   const [filters, setFilters] = useState({
     search: '',
-    client: null,
-    paymentMode: null,
-    transactionId: '',
-    datesAfter: null,
-    datesBefore: null,
+    visitor: null,
+    payment_mode: null,
+    transaction_id: '',
   });
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      // Only update filters if search text has changed
+      setFilters(prev => ({...prev, search: searchText}));
+    }, 300); // 300ms delay
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchText]);
 
   const handleSearchTypeSelect = name => {
     console.log('param type::', initialType);
@@ -102,48 +115,22 @@ export const useAppointmentsViewModel = route => {
   // Fetch appointments data
   const fetchAppointments = useCallback(
     async (pageNum = 1, isRefreshing = false) => {
-      const token = await AsyncStorage.getItem('userToken');
-
-      console.log('tokentoken:::', token);
-
       try {
         setLoading(true);
 
-        const formatDate = date => {
-          if (!date) return null;
-          const d = new Date(date);
-          return d.toISOString().split('T')[0];
-        };
-
-        // Tab-specific date handling
-        let datesAfter = filters.datesAfter;
-        let datesBefore = filters.datesBefore;
-        const today = new Date();
-        const todayFormatted = formatDate(today);
-
-        // Clear any existing date filters when changing tabs
-        if (selectedTab === 'today') {
-          datesAfter = todayFormatted;
-          datesBefore = todayFormatted;
-        } else if (selectedTab === 'past') {
-          datesBefore = filters.datesBefore;
-          datesAfter = filters.datesAfter; // Clear any future dates
-        } else if (selectedTab === 'future') {
-          datesAfter = filters.datesAfter;
-          datesBefore = filters.datesBefore; // Clear any past dates
+        // Clear data if it's the first page
+        if (pageNum === 1) {
+          setAppointmentsData([]);
         }
 
         const params = {
           page: pageNum,
           date: selectedTab, // Send the current tab as API parameter
           search: filters.search || '',
-          client: filters.client,
-          payment_mode: filters.paymentMode,
-          transaction_id: filters.transactionId,
-          dates_after: datesAfter,
-          dates_before: datesBefore,
+          visitor: filters.visitor,
+          payment_mode: filters.payment_mode,
+          transaction_id: filters.transaction_id,
         };
-        console.log('paramsparams::', params);
 
         // Clean params
         Object.keys(params).forEach(key => {
@@ -157,47 +144,79 @@ export const useAppointmentsViewModel = route => {
         });
 
         const response = await AppointmentModel.getAppointmentList(params);
-
         const res = response?.data || [];
-        const reverseData = selectedTab === 'future' ? res.reverse() : res;
+
+        // Sort appointments by date and time (most recent first)
+        const sortedData = res.sort((a, b) => {
+          // Convert time from "02:10 PM" to "14:10" format for proper parsing
+          const convertTimeTo24Hour = timeStr => {
+            const [time, modifier] = timeStr.split(' ');
+            let [hours, minutes] = time.split(':');
+            if (hours === '12') hours = '00';
+            if (modifier === 'PM') hours = parseInt(hours, 10) + 12;
+            return `${hours}:${minutes}`;
+          };
+
+          // Create comparable date-time strings
+          const dateTimeA = `${a.date}T${convertTimeTo24Hour(a.start_time)}`;
+          const dateTimeB = `${b.date}T${convertTimeTo24Hour(b.start_time)}`;
+
+          // Convert to timestamps for comparison
+          return new Date(dateTimeB) - new Date(dateTimeA);
+        });
+
         if (isRefreshing) {
-          setAppointmentsData(reverseData);
+          setAppointmentsData(sortedData);
         } else {
-          setAppointmentsData(prev => [...prev, ...reverseData]);
+          setAppointmentsData(prev => [...prev, ...sortedData]);
         }
 
         setTotalCount(response?.count || 0);
         setPage(pageNum);
       } catch (error) {
+        if (page === 1) {
+          setAppointmentsData([]);
+        }
         console.error('Error fetching appointments:', error);
       } finally {
         setLoading(false);
         setRefreshing(false);
       }
     },
-    [filters, selectedTab],
+    [filters, selectedTab, filterActive],
   );
+
+  const openFilter = useCallback(() => {
+    filterBottomSheetRef.current?.present();
+  }, []);
 
   // Handle tab change
   const handleTabChange = useCallback(tab => {
-    setSelectedTab(tab);
-    setAppointmentsData([]);
-    setPage(1);
-
+    setSearchText('');
+    setResetFilterData(Math.random()); // This is correct
     setFilters({
       search: '',
-      client: null,
-      paymentMode: null,
-      transactionId: '',
-      datesAfter: null,
-      datesBefore: null,
+      visitor: null,
+      payment_mode: null,
+      transaction_id: '',
     });
+    bottomSheetRef.current?.dismiss();
+    filterBottomSheetRef.current?.dismiss();
+
+    setAppointmentsData([]);
+    setSelectedTab(tab);
+    setPage(1);
+
+    setResetFilterData(Math.random()); // Remove this duplicate line
   }, []);
 
   // Initial load
   useEffect(() => {
-    fetchAppointments(1);
-  }, [fetchAppointments, selectedTab]);
+    // Only fetch if we have no data or if search text changed
+    if (page === 1 || filters.search !== '') {
+      fetchAppointments(1);
+    }
+  }, [filters, selectedTab]);
 
   // Handle refresh
   const handleRefresh = useCallback(() => {
@@ -208,7 +227,6 @@ export const useAppointmentsViewModel = route => {
   // Handle search
   const handleSearch = useCallback(text => {
     setSearchText(text);
-    setFilters(prev => ({...prev, search: text}));
   }, []);
 
   // Handle load more
@@ -220,81 +238,42 @@ export const useAppointmentsViewModel = route => {
 
   const handleApplyFilters = useCallback(
     newFilters => {
-      console.log('date before and after::', newFilters);
-
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const todayFormatted = today.toISOString().split('T')[0];
-
-      let datesAfter = newFilters.startDate
-        ? new Date(newFilters.startDate).toISOString().split('T')[0]
-        : null;
-      let datesBefore = newFilters.endDate
-        ? new Date(newFilters.endDate).toISOString().split('T')[0]
-        : null;
-
-      // Apply tab-specific date restrictions
-      if (selectedTab === 'today') {
-        datesAfter = todayFormatted;
-        datesBefore = todayFormatted;
-      } else if (selectedTab === 'past') {
-        // For past tab, only allow dates before today
-        if (datesAfter && new Date(datesAfter) >= today) {
-          datesAfter = null;
-        }
-      } else if (selectedTab === 'future') {
-        // For future tab, only allow dates after today
-        if (datesBefore && new Date(datesBefore) <= today) {
-          datesBefore = null;
-        }
-      }
-
       const mappedFilters = {
-        ...filters,
-        client: newFilters.caseWorker,
-        paymentMode: newFilters.attorney,
-        transactionId: newFilters.searchSecondText,
-        search: newFilters.searchText,
-        datesAfter: datesAfter,
-        datesBefore: datesBefore,
+        visitor: newFilters.caseWorker || null,
+        payment_mode: newFilters.attorney || null,
+        transaction_id: newFilters.searchSecondText || '',
       };
 
-      console.log('date before and datesBefore::', mappedFilters);
-
+      setFilterActive(
+        !!newFilters.searchText ||
+          !!newFilters.caseWorker ||
+          !!newFilters.attorney ||
+          !!newFilters.searchSecondText,
+      );
       setFilters(mappedFilters);
       setAppointmentsData([]);
       setPage(1);
     },
-    [filters, selectedTab],
+    [selectedTab],
   );
 
   const openBottomSheet = () => {
     bottomSheetRef.current?.present();
   };
 
-  // Memoized filtered appointments
-  const filteredAppointments = useMemo(() => {
-    if (!searchText) return appointmentsData;
-
-    const lowerCaseSearch = searchText.toLowerCase();
-    return appointmentsData.filter(
-      appointment =>
-        appointment.client_name?.toLowerCase().includes(lowerCaseSearch) ||
-        appointment.transaction_id?.toLowerCase().includes(lowerCaseSearch) ||
-        appointment.payment_mode?.toLowerCase().includes(lowerCaseSearch),
-    );
-  }, [searchText, appointmentsData]);
-
   return {
     searchText,
     filterData,
-    filteredAppointments,
+    appointmentsData,
     loading,
     refreshing,
     selectedTab,
     bottomSheetRef,
     filters,
     selectedType,
+    filterActive,
+    filterBottomSheetRef,
+    isResetFilterData,
     formattedDate,
     formattedTime,
     handleSearch,
@@ -304,5 +283,7 @@ export const useAppointmentsViewModel = route => {
     handleTabChange,
     openBottomSheet,
     handleSearchTypeSelect,
+    setFilterActive,
+    openFilter,
   };
 };

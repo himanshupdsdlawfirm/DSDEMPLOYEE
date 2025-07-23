@@ -165,6 +165,7 @@ export const styles = StyleSheet.create({
   hearingOfficerRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingRight:5,
   },
   userIcon: {
     height: 22,

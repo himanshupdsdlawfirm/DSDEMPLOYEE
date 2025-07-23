@@ -8,7 +8,7 @@ import {AppImages} from '../../../config/Images';
 
 const AppointmentItem = memo(({item, formattedDate, formattedTime}) => {
   console.log('appointment list item::', item);
-  
+
   return (
     <LinearGradient
       style={styles.appointmentContainer}
@@ -17,7 +17,9 @@ const AppointmentItem = memo(({item, formattedDate, formattedTime}) => {
       end={{x: 0.4, y: 0}}
       locations={[0, 0.6, 1]}
       useAngle={false}>
-      <TouchableOpacity style={styles.appointmentSubContainer}>
+      <TouchableOpacity
+        activeOpacity={1}
+        style={styles.appointmentSubContainer}>
         {item?.client_name && (
           <Text numberOfLines={1} style={styles.clientName}>
             {item?.client_name || 'No Name'}
@@ -33,7 +35,6 @@ const AppointmentItem = memo(({item, formattedDate, formattedTime}) => {
         </View>
 
         <View style={styles.tagsContainer}>
-          
           {item.appointmentType && (
             <View style={styles.tag}>
               <Text numberOfLines={1} style={styles.tagText}>
@@ -41,13 +42,13 @@ const AppointmentItem = memo(({item, formattedDate, formattedTime}) => {
               </Text>
             </View>
           )}
-          
-            <View style={styles.tag}>
-              <Text numberOfLines={1} style={styles.tagText}>
-                {'3 Guest'}
-              </Text>
-            </View>
-          
+
+          <View style={styles.tag}>
+            <Text numberOfLines={1} style={styles.tagText}>
+              {'3 Guest'}
+            </Text>
+          </View>
+
           {item.payment_mode && (
             <View style={styles.tag}>
               <Text numberOfLines={1} style={styles.tagText}>
@@ -90,7 +91,7 @@ const styles = {
   },
   appointmentTime: {
     marginVertical: 10,
-    marginLeft:5,
+    marginLeft: 5,
     fontSize: responsiveSize(16, 'font'),
     fontWeight: '400',
     color: colors.white,

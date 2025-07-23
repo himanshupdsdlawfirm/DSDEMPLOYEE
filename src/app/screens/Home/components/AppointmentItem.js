@@ -20,7 +20,9 @@ const AppointmentItem = ({item, index, isLast, formattedDate}) => {
       start={{x: 1, y: 1}}
       end={{x: 0.4, y: 0}}
       locations={[0, 0.6, 1]}>
-      <TouchableOpacity style={styles.appointmentSubContainer}>
+      <TouchableOpacity
+        activeOpacity={1}
+        style={styles.appointmentSubContainer}>
         <Text
           numberOfLines={1}
           style={{
@@ -31,20 +33,16 @@ const AppointmentItem = ({item, index, isLast, formattedDate}) => {
           }}>
           {item?.client_name}
         </Text>
-        {(item?.date ||
-          item?.start_time) && (
-            <View style={styles.dateTimeContainer}>
-              <Image
-                source={AppImages.calendarClock}
-                style={styles.smallIcon}
-              />
-              <Text style={styles.dateTimeText}>
-                {`${formattedDate(item?.date)} ${item?.start_time} - ${
-                  item?.end_time
-                }`}
-              </Text>
-            </View>
-          )}
+        {(item?.date || item?.start_time) && (
+          <View style={styles.dateTimeContainer}>
+            <Image source={AppImages.calendarClock} style={styles.smallIcon} />
+            <Text style={styles.dateTimeText}>
+              {`${formattedDate(item?.date)} ${item?.start_time} - ${
+                item?.end_time
+              }`}
+            </Text>
+          </View>
+        )}
         <View style={styles.tagsContainer}>
           <View style={styles.tag}>
             <Text style={styles.tagText}>{item?.appointmentType}</Text>

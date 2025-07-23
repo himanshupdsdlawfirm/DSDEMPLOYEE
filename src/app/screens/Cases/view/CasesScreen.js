@@ -1,4 +1,4 @@
-import React, {useCallback, useRef, useState, useEffect} from 'react';
+import React, {useCallback, useRef, useState, useEffect, useMemo} from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   TextInput,
   RefreshControl,
   ActivityIndicator,
+  Animated
 } from 'react-native';
 import {AppImages} from '../../../config/Images';
 import {LinearGradientHeader} from '../../../../components/common/LinerGradientHeader';
@@ -16,12 +17,15 @@ import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 import FilterBottomSheet from '../../../../components/common/FilterBottomSheet';
 import {colors} from '../../../config/theme';
 import LinearGradient from 'react-native-linear-gradient';
-import {dropdownApoointmentOptions} from '../../../config/StaticDataList';
 import {useCasesViewModel} from '../viewModel/useCasesViewModel';
 import {styles} from './Styles';
 import CustomBottomSheet from '../../../../components/common/CustomBottomSheet';
+import {NoDataFound} from '../../../../components/common/NoDataFound';
+import ToastNotification from '../../../../components/common/CustomToast';
 
 const CaseItem = React.memo(({item, formattedDate}) => {
+  console.log('case item is::', item);
+
   return (
     <View style={styles.caseCardContainer}>
       <LinearGradient
@@ -52,24 +56,59 @@ const CaseItem = React.memo(({item, formattedDate}) => {
               <Text style={styles.AppointmentTime}>{item?.status}</Text>
             </View>
           </View>
+          <View style={styles.clientDetailContainer}>
+            <View style={styles.clientContactRow}>
+              <Image
+                style={styles.userIcon}
+                source={AppImages.userAnimyPlaceholder}
+                resizeMode="contain"
+              />
+              <Text numberOfLines={1} style={styles.clientName}>
+                {item?.client_name}
+              </Text>
+              {item?.client_mobile_no && (
+                <>
+                  <Image style={styles.mobileIcon} source={AppImages.call} />
+                  <Text numberOfLines={1} style={styles.mobileNumber}>
+                    {item?.client_mobile_no}
+                  </Text>
+                </>
+              )}
+              {item?.client_alien_no && (
+                <>
+                  <Image
+                    style={styles.alienNumberIcon}
+                    source={AppImages.alienNumber}
+                  />
+                  <Text numberOfLines={1} style={styles.alienNumber}>
+                    {item?.client_alien_no}
+                  </Text>
+                </>
+              )}
+            </View>
+          </View>
           <View style={styles.AppointmentTabs}>
-            <View style={styles.Appointmentwith}>
-              <Text style={styles.amountLabel}>
-                {'Contract \n'}
-                <Text style={styles.amountValue}>
-                  {`$${item?.contract_amount || 0}`}
+            {item?.contract_amount && (
+              <View style={styles.Appointmentwith}>
+                <Text style={styles.amountLabel}>
+                  {'Contract \n'}
+                  <Text style={styles.amountValue}>
+                    {`$${item?.contract_amount || 0}`}
+                  </Text>
                 </Text>
-              </Text>
-            </View>
-            <View style={styles.paidContainer}>
-              <Text style={styles.amountLabel}>
-                {'Paid \n'}
-                <Text style={styles.amountValue}>
-                  {`$${item?.total_paid || 0}`}
+              </View>
+            )}
+            {item?.total_paid && (
+              <View style={styles.paidContainer}>
+                <Text style={styles.amountLabel}>
+                  {'Paid \n'}
+                  <Text style={styles.amountValue}>
+                    {`$${item?.total_paid || 0}`}
+                  </Text>
                 </Text>
-              </Text>
-            </View>
-            {item?.remaining_amount ? (
+              </View>
+            )}
+            {item?.remaining_amount && (
               <View style={styles.Appointmenttype}>
                 <Text style={styles.amountLabel}>
                   {'Due \n'}
@@ -78,23 +117,41 @@ const CaseItem = React.memo(({item, formattedDate}) => {
                   </Text>
                 </Text>
               </View>
-            ) : null}
-            <View style={styles.Appointmentwith}>
-              <Text style={styles.amountLabel}>
-                {'Retaining Date \n'}
-                <Text style={styles.amountValue}>
-                  {formattedDate(item?.retention_date)}
+            )}
+
+            {/* {item?.retention_date && (
+              <View style={styles.Appointmentwith}>
+                <Text style={styles.amountLabel}>
+                  {'Retained \n'}
+                  <Text style={styles.amountValue}>
+                    {formattedDate(item?.retention_date)}
+                  </Text>
                 </Text>
-              </Text>
-            </View>
-            <View style={styles.Appointmentwith}>
-              <Text style={styles.amountLabel}>
-                {'Filing Date \n'}
-                <Text style={styles.amountValue}>
-                  {formattedDate(item?.filing_date)}
+              </View>
+            )} */}
+
+            {/* {item?.filing_date && (
+              <View style={styles.Appointmentwith}>
+                <Text style={styles.amountLabel}>
+                  {'Filing \n'}
+                  <Text style={styles.amountValue}>
+                    {formattedDate(item?.filing_date)}
+                  </Text>
                 </Text>
-              </Text>
-            </View>
+              </View>
+            )} */}
+            {/* {item?.case_worker_name && (
+              <View style={styles.Appointmentwith}>
+                <Text style={styles.amountLabel}>
+                  {'Case Worker \n'}
+                  <Text style={styles.amountValue}>
+                    {item?.case_worker_name.length > 16
+                      ? `${item?.case_worker_name.slice(0, 14)}...`
+                      : `${item?.case_worker_name || ''}`}
+                  </Text>
+                </Text>
+              </View>
+            )} */}
           </View>
         </View>
       </LinearGradient>
@@ -106,18 +163,18 @@ const CasesScreen = ({navigation, route}) => {
   const {type} = route?.params || {};
 
   const {backScreen = undefined} = route?.params || {};
-  const filterBottomSheetRef = useRef(null);
-
-  console.log('route::', route.params);
 
   const {
     searchText,
-    filteredCases,
+    casesData,
     loading,
     refreshing,
     bottomSheetRef,
     selectedType,
     filterData,
+    toastConfig,
+    filterBottomSheetRef,
+    scrollRef,
     formattedDate,
     handleSearch,
     handleRefresh,
@@ -125,11 +182,28 @@ const CasesScreen = ({navigation, route}) => {
     handleApplyFilters,
     openBottomSheet,
     handleSearchTypeSelect,
+    showToast,
   } = useCasesViewModel({initialType: type});
+
+  const scaleValue = new Animated.Value(0.5);
+
+  // Animation for no data found
+  useEffect(() => {
+    if (casesData.length === 0 && !loading) {
+      Animated.spring(scaleValue, {
+        toValue: 1,
+        friction: 3,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      scaleValue.setValue(0.5);
+    }
+  }, [casesData, loading]);
 
   // Function to open filter
   const openFilter = useCallback(() => {
     filterBottomSheetRef.current?.present();
+    bottomSheetRef.current?.dismiss();
   }, []);
 
   const renderItem = useCallback(
@@ -161,6 +235,20 @@ const CasesScreen = ({navigation, route}) => {
         </TouchableOpacity>
       ))}
     </View>
+  );
+
+  const renderNoDataFound = useMemo(
+    () => (
+      <View style={styles.noDataContainer}>
+        <Animated.View style={{transform: [{scale: scaleValue}]}}>
+          <NoDataFound
+            noDataFoundText={'No cases found'}
+            noDataSubText={'Try adjusting your search or filters'}
+          />
+        </Animated.View>
+      </View>
+    ),
+    [scaleValue],
   );
 
   return (
@@ -207,13 +295,14 @@ const CasesScreen = ({navigation, route}) => {
         )}
 
         <BottomSheetModalProvider>
-          {loading && !refreshing && filteredCases.length === 0 ? (
+          {loading && !refreshing && casesData.length === 0 ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color={colors.white} />
             </View>
-          ) : filteredCases.length > 0 ? (
+          ) : casesData.length > 0 ? (
             <FlatList
-              data={filteredCases}
+              ref={scrollRef}
+              data={casesData}
               renderItem={renderItem}
               keyExtractor={(item, index) => index.toString()}
               contentContainerStyle={[
@@ -241,11 +330,9 @@ const CasesScreen = ({navigation, route}) => {
                 ) : null
               }
             />
-          ) : (
-            <View style={styles.noDataContainer}>
-              <Text style={styles.noDataText}>No cases found</Text>
-            </View>
-          )}
+          ) : !loading ? (
+            renderNoDataFound
+          ) : null}
 
           <FilterBottomSheet
             dropdownOptions={filterData}
@@ -269,6 +356,16 @@ const CasesScreen = ({navigation, route}) => {
               marginBottom: backScreen === 'Drawer' || type ? 10 : 90,
             }}
             secondInputPlaceholder="Enter judge name"
+            showToast={showToast}
+          />
+
+          <ToastNotification
+            visible={toastConfig.visible}
+            title={toastConfig.title}
+            message={toastConfig.message}
+            colorDark={toastConfig.colorDark}
+            colorLight={toastConfig.colorLight}
+            icon={toastConfig.icon}
           />
 
           <CustomBottomSheet

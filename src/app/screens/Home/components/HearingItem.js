@@ -21,7 +21,7 @@ const HearingItem = ({item, formattedDate}) => {
       <LinearGradient
         colors={[colors.hearingCardLinearOne, colors.hearingCardLinearTwo]}
         style={styles.hearingLinearCard}>
-        <TouchableOpacity style={styles.hearingItem}>
+        <TouchableOpacity activeOpacity={1} style={styles.hearingItem}>
           {/* Header */}
           <LinearGradient
             style={styles.headerGradient}
@@ -118,14 +118,14 @@ const HearingItem = ({item, formattedDate}) => {
             start={{x: 1, y: 0}}
             end={{x: 0.5, y: 0}}>
             <View style={styles.footerContent}>
-              {item?.paralegal_name ? (
+              {item?.attorney_name ? (
                 <View style={styles.footerRow}>
                   <Image
                     source={AppImages.userAnimyPlaceholder}
                     style={styles.userIcon}
                   />
                   <Text numberOfLines={1} style={styles.footerName}>
-                    {item?.paralegal_name}
+                    {item?.attorney_name}
                   </Text>
                 </View>
               ) : null}
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     overflow: 'hidden',
-    marginTop: 5,
+    paddingRight: 5,
   },
   userIcon: {
     height: 22,

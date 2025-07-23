@@ -6,6 +6,7 @@ export const end_points = {
     getEmployees: '/employees/',
     clientlist: '/client_with_cases_with_pagination_in_alphabetical_order/',
     case_worker_list: '/employee_list_associate_attorney/',
+    case_type:'/case_types/',
     snapshot: '/client-profiles/',
     cases: '/case_list_by_client_uuid/',
     hearingsById: '/hearing_by_case_id/',

@@ -22,6 +22,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import {useHearingsViewModel} from '../viewModel/useHearingsViewModel';
 import {styles} from './Style';
 import {responsiveSize} from '../../../utils/responsiveFontSize';
+import ToastNotification from '../../../../components/common/CustomToast';
 
 const HearingsScreen = ({navigation, route}) => {
   const {backScreen = undefined} = route?.params || {};
@@ -34,11 +35,16 @@ const HearingsScreen = ({navigation, route}) => {
     filteredHearings,
     loading,
     refreshing,
+    toastConfig,
+    filterActive,
+    filters,
+    scrollRef,
     formattedDate,
     handleRefresh,
     handleLoadMore,
     handleApplyFilters,
-    filters,
+    showToast,
+    setFilterActive,
   } = useHearingsViewModel();
 
   // Animation for no data found
@@ -55,7 +61,6 @@ const HearingsScreen = ({navigation, route}) => {
   }, [filteredHearings, loading]);
 
   const openFilter = useCallback(() => {
-    if (filteredHearings.length === 0) return;
     filterBottomSheetRef.current?.present();
   }, [filteredHearings.length]);
 
@@ -66,7 +71,7 @@ const HearingsScreen = ({navigation, route}) => {
           colors={[colors.hearingCardLinearOne, colors.hearingCardLinearTwo]}
           style={styles.hearingLinearCard}>
           {console.log('hearing item:', item)}
-          <TouchableOpacity style={styles.hearingItem}>
+          <TouchableOpacity activeOpacity={1} style={styles.hearingItem}>
             <LinearGradient
               style={styles.hearingDateContainer}
               colors={['#384651', '#051422']}
@@ -164,21 +169,21 @@ const HearingsScreen = ({navigation, route}) => {
               start={{x: 1, y: 0}}
               end={{x: 0.5, y: 0}}>
               <View style={styles.hearingTypeInner}>
-                {item?.paralegal_name && (
+                {item?.attorney_name && (
                   <View style={styles.hearingOfficerRow}>
                     <Image
                       style={styles.userIcon}
                       source={AppImages.userAnimyPlaceholder}
                     />
                     <Text numberOfLines={1} style={styles.hearingOfficerName}>
-                      {item.paralegal_name}
+                      {item?.attorney_name}
                     </Text>
                   </View>
                 )}
 
                 {item?.hearing_medium_attorney && (
                   <Text numberOfLines={1} style={styles.hearingTypeText}>
-                    {item.hearing_medium_attorney}
+                    {item?.hearing_medium_attorney}
                   </Text>
                 )}
                 {item?.hearingType && (
@@ -222,38 +227,21 @@ const HearingsScreen = ({navigation, route}) => {
       <ImageBackground source={AppImages.loginTheme} style={styles.container}>
         <BottomSheetModalProvider>
           <LinearGradientHeader
-            goBack={() => navigation.goBack()}
+            goBack={() => {
+              navigation.goBack(), setFilterActive(false);
+            }}
             showBackBtnContainer={true}
             showBackBtn={backScreen === 'Drawer'}
             leftImg={AppImages.backArrow}
             leftImgTint={colors.white}
             headerText="Hearings"
             isSecondEndImg={true}
-            isFilterShow={filteredHearings.length > 0}
-            isEndRightImg={filteredHearings.length > 0}
+            isFilterShow={filteredHearings.length > 0 || filterActive}
+            isEndRightImg={filteredHearings.length > 0 || filterActive}
             rightIcon={AppImages.filter}
             rightImgOnPress={openFilter}
             isHeaderBottomText={false}
           />
-
-          {/* {filteredHearings.length > 0 && (
-            <View style={styles.searchMainContainer}>
-              <View style={styles.searchContainer}>
-                <Image
-                  source={AppImages.searchIcon}
-                  style={styles.searchIcon}
-                />
-                <TextInput
-                  onChangeText={handleSearch}
-                  value={searchText}
-                  placeholder="Search by name, alien #, judge or court"
-                  placeholderTextColor={colors.gray}
-                  style={styles.searchInput}
-                  returnKeyType="search"
-                />
-              </View>
-            </View>
-          )} */}
 
           {loading && !refreshing && filteredHearings.length === 0 ? (
             <View style={styles.loadingContainer}>
@@ -261,6 +249,7 @@ const HearingsScreen = ({navigation, route}) => {
             </View>
           ) : filteredHearings.length > 0 ? (
             <FlatList
+              ref={scrollRef}
               numColumns={2}
               data={filteredHearings}
               renderItem={renderHearingItem}
@@ -320,6 +309,17 @@ const HearingsScreen = ({navigation, route}) => {
             bottomBtnStyle={{
               marginBottom: backScreen === 'Drawer' ? 10 : 90,
             }}
+            isHearingScreen={true}
+            showToast={showToast}
+          />
+
+          <ToastNotification
+            visible={toastConfig.visible}
+            title={toastConfig.title}
+            message={toastConfig.message}
+            colorDark={toastConfig.colorDark}
+            colorLight={toastConfig.colorLight}
+            icon={toastConfig.icon}
           />
         </BottomSheetModalProvider>
       </ImageBackground>

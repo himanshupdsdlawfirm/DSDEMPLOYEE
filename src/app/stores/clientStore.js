@@ -4,6 +4,7 @@ import {makeAutoObservable} from 'mobx';
 class ClientStore {
   caseWorker = []
   employeeAttorney = [];
+  caseType = []
 
   constructor() {
     makeAutoObservable(this);
@@ -13,6 +14,12 @@ class ClientStore {
     console.log('store list::', list);
     
     this.caseWorker = Array.isArray(list) ? list : [];
+  }
+
+  setCaseType(list) {
+    console.log('case type store list::', list);
+    
+    this.caseType = Array.isArray(list) ? list : [];
   }
 
   setAttorneyList(list) {

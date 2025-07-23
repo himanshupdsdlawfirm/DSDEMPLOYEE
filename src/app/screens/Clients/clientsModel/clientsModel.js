@@ -75,6 +75,24 @@ export class ClientModel {
     };
   }
 
+  static async getCaseType() {
+    const response = await ClientService.getCaseType();
+
+    // Ensure data is always an array (even if API returns an object)
+    const data = Array.isArray(response?.data)
+      ? response?.data
+      : response?.data
+      ? Object.values(response.data) // Convert object values to array
+      : []; // Fallback to empty array
+
+    return {
+      success: response?.success,
+      ...(!response?.success && {error: response?.error || ''}),
+      status: response?.success ? 200 : response?.status,
+      data: data, // Now guaranteed to be an array
+    };
+  }
+
   static async getSnapshot(id) {
     const response = await ClientService.getUserSnapshot(id);
 

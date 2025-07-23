@@ -1,13 +1,15 @@
 import {useState, useEffect, useCallback, useMemo, useRef} from 'react';
 import {CasesModel} from '../model/CasesModel';
-import {useNavigation} from '@react-navigation/native';
-import { dropdownApoointmentOptions, getAppointmentFilterData, getHearingFilterData } from '../../../config/StaticDataList';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {dropdownApoointmentOptions} from '../../../config/StaticDataList';
 
 export const useCasesViewModel = route => {
   const {initialType} = route || {};
   const navigation = useNavigation();
 
   const bottomSheetRef = useRef(null);
+  const filterBottomSheetRef = useRef(null);
+  const scrollRef = useRef(null);
 
   const filterData = dropdownApoointmentOptions();
 
@@ -26,6 +28,55 @@ export const useCasesViewModel = route => {
     startDate: null,
     endDate: null,
   });
+
+  const [toastConfig, setToastConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    colorDark: '',
+    colorLight: '',
+    icon: null,
+  });
+
+  // Debounce search and trigger API call
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      // Only update filters if search text has changed
+      if (filters.search !== searchText) {
+        setPage(1);
+        setCasesData([]);
+        setFilters(prev => ({...prev, search: searchText}));
+      }
+    }, 300);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchText]);
+
+  // Trigger API call when filters change
+  useEffect(() => {
+    fetchCases(1);
+  }, [filters]);
+
+  useFocusEffect(
+    useCallback(() => {
+      scrollRef.current?.scrollToOffset({offset: 0, animated: true});
+      return () => {};
+    }, []),
+  );
+
+  const showToast = useCallback(config => {
+    setToastConfig({
+      ...config,
+      visible: true,
+    });
+
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+      setToastConfig(prev => ({...prev, visible: false}));
+    }, 3000);
+  }, []);
 
   const openBottomSheet = () => {
     bottomSheetRef.current?.present();
@@ -92,18 +143,21 @@ export const useCasesViewModel = route => {
 
         const response = await CasesModel.getCasesList(params);
 
-        console.log('cases list res::', response);
+        console.log('case list is::', response);
 
-        if (isRefreshing) {
-          setCasesData(response.data);
+        if (isRefreshing || pageNum === 1) {
+          setCasesData(response.data || []);
         } else {
-          setCasesData(prev => [...prev, ...response.data]);
+          setCasesData(prev => [...prev, ...(response.data || [])]);
         }
 
-        setTotalCount(response.count);
+        setTotalCount(response.count || 0);
         setPage(pageNum);
       } catch (error) {
         console.error('Error fetching cases:', error);
+        if (pageNum === 1) {
+          setCasesData([]);
+        }
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -112,21 +166,17 @@ export const useCasesViewModel = route => {
     [filters],
   );
 
-  // Initial load
-  useEffect(() => {
-    fetchCases(1);
-  }, [fetchCases]);
-
   // Handle refresh
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
     fetchCases(1, true);
   }, [fetchCases]);
 
-  // Handle search
+  // Handle search - simplified to only update search text
   const handleSearch = useCallback(text => {
+    filterBottomSheetRef.current?.dismiss();
+    bottomSheetRef.current?.dismiss();
     setSearchText(text);
-    setFilters(prev => ({...prev, search: text}));
   }, []);
 
   // Handle load more
@@ -140,10 +190,10 @@ export const useCasesViewModel = route => {
   const handleApplyFilters = useCallback(
     newFilters => {
       const mappedFilters = {
-        search: searchText,
-        caseType: newFilters.caseType,
-        status: newFilters.status,
-        employeeAssigned: newFilters.employeeAssigned,
+        search: searchText, // Keep current search text
+        caseType: newFilters.caseWorker,
+        status: newFilters.hearingType,
+        employeeAssigned: newFilters.attorney,
         startDate: newFilters.startDate,
         endDate: newFilters.endDate,
       };
@@ -155,27 +205,17 @@ export const useCasesViewModel = route => {
     [searchText],
   );
 
-  // Memoized filtered cases
-  const filteredCases = useMemo(() => {
-    if (!searchText) return casesData;
-
-    const lowerCaseSearch = searchText.toLowerCase();
-    return casesData.filter(
-      caseItem =>
-        caseItem.case_type_name?.toLowerCase().includes(lowerCaseSearch) ||
-        caseItem.alien_number?.toLowerCase().includes(lowerCaseSearch) ||
-        caseItem.client_name?.toLowerCase().includes(lowerCaseSearch),
-    );
-  }, [searchText, casesData]);
-
   return {
     searchText,
-    filteredCases,
+    casesData, // Return casesData directly instead of filteredCases
     loading,
     refreshing,
     bottomSheetRef,
     selectedType,
     filterData,
+    toastConfig,
+    filterBottomSheetRef,
+    scrollRef,
     formattedDate,
     handleSearch,
     handleRefresh,
@@ -183,5 +223,6 @@ export const useCasesViewModel = route => {
     handleApplyFilters,
     openBottomSheet,
     handleSearchTypeSelect,
+    showToast,
   };
 };

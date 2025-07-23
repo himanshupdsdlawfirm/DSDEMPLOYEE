@@ -13,11 +13,16 @@ const apiClient = axios.create({
   },
 });
 
+
+
 apiClient.interceptors.request.use(
   async config => {
     const token = rootStore.authStore.token;
 
-    console.log('api token of main function::', token);
+    console.log('config of main function::', token);
+
+    console.log('SERVER SIDE API URL::', `${config.baseURL}${config.url}`);
+
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

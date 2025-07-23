@@ -10,6 +10,7 @@ const ClientItem = ({item, index, isLast}) => {
 
   return (
     <TouchableOpacity
+      activeOpacity={1}
       style={[
         styles.clientItem,
         {

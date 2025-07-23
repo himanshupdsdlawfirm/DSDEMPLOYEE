@@ -16,8 +16,6 @@ export class ClientService {
       const response = await ApiService.get(url);
       console.log('service client list::', response);
 
-      console.log('API filter main response::', response);
-
       return response;
     } catch (error) {
       console.error('ClientService Error:', error);
@@ -31,6 +29,20 @@ export class ClientService {
       const response = await ApiService.get(url);
 
       console.log('get case worker list::', response);
+
+      return response;
+    } catch (error) {
+      console.error('ClientService Error:', error);
+      throw error;
+    }
+  }
+
+  static async getCaseType() {
+    try {
+      const url = `${end_points.user.case_type}`;
+      const response = await ApiService.get(url);
+
+      console.log('get case type::', response);
 
       return response;
     } catch (error) {

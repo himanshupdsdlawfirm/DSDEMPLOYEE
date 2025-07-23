@@ -1,15 +1,20 @@
 // features/hearings/viewModel/hearingsViewModel.js
-import {useState, useEffect, useCallback, useMemo} from 'react';
+import {useState, useEffect, useCallback, useMemo, useRef} from 'react';
 import {getHearingFilterData} from '../../../config/StaticDataList';
 import {HearingModel} from '../model/hearingsModel';
+import {useFocusEffect} from '@react-navigation/native';
 
 export const useHearingsViewModel = () => {
+  const toastTimeoutRef = useRef(null);
+  const scrollRef = useRef(null);
+
   const [searchText, setSearchText] = useState('');
   const [hearingsData, setHearingsData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [filterActive, setFilterActive] = useState(false);
 
   const filterData = getHearingFilterData();
 
@@ -23,6 +28,46 @@ export const useHearingsViewModel = () => {
     startDate: null,
     endDate: null,
   });
+
+  const [toastConfig, setToastConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    colorDark: '',
+    colorLight: '',
+    icon: null,
+  });
+
+  // Initial load
+  useEffect(() => {
+    fetchHearings(1);
+  }, [fetchHearings]);
+
+  useFocusEffect(
+    useCallback(() => {
+      scrollRef.current?.scrollToOffset({offset: 0, animated: true});
+      return () => {};
+    }, []),
+  );
+
+  const showToast = useCallback(config => {
+    console.log('config data::', config);
+
+    // Clear any existing timeout
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+
+    setToastConfig({
+      ...config,
+      visible: true,
+    });
+
+    // Auto-hide after 3 seconds
+    toastTimeoutRef.current = setTimeout(() => {
+      setToastConfig(prev => ({...prev, visible: false}));
+    }, 3000);
+  }, []);
 
   // Format date helper
   const formattedDate = useCallback(dateString => {
@@ -115,11 +160,6 @@ export const useHearingsViewModel = () => {
     [filters],
   );
 
-  // Initial load
-  useEffect(() => {
-    fetchHearings(1);
-  }, [fetchHearings]);
-
   // Handle refresh
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
@@ -155,6 +195,7 @@ export const useHearingsViewModel = () => {
         endDate: newFilters.endDate,
       };
 
+      setFilterActive(true);
       setFilters(mappedFilters);
       setHearingsData([]);
       setPage(1);
@@ -182,11 +223,16 @@ export const useHearingsViewModel = () => {
     filteredHearings,
     loading,
     refreshing,
+    filters,
+    toastConfig,
+    filterActive,
+    scrollRef,
     formattedDate,
     handleSearch,
     handleRefresh,
     handleLoadMore,
     handleApplyFilters,
-    filters,
+    showToast,
+    setFilterActive,
   };
 };

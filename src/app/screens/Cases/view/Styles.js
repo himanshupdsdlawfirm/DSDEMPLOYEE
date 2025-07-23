@@ -55,14 +55,66 @@ export const styles = StyleSheet.create({
     marginLeft: 5,
     color: 'white',
   },
+
+  clientName: {
+    fontSize: responsiveSize(14),
+    fontWeight: '500',
+    color: colors.white,
+    flexShrink: 1,
+    width: '35%', // Set a maximum width
+  },
+  mobileNumber: {
+    fontSize: responsiveSize(12),
+    fontWeight: '400',
+    color: colors.white,
+    flexShrink: 1, // Allow shrinking if needed
+    maxWidth: '100%', // Set a maximum width
+  },
+  alienNumber: {
+    fontSize: responsiveSize(12),
+    fontWeight: '400',
+    color: colors.white,
+    flexShrink: 1, // Allow shrinking if needed
+    maxWidth: '25%', // Set a maximum width
+  },
+
+  userIcon: {
+    marginRight: 3,
+    height: 16,
+    width: 16,
+  },
+  clientDetailContainer: {
+    paddingVertical: 5,
+    width: '100%',
+  },
+  clientContactRow: {
+    flexDirection: 'row',
+    marginTop: 3,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  mobileIcon: {
+    marginRight: 3,
+    marginLeft: 10,
+    height: 14,
+    width: 14,
+    tintColor: colors.sheildIconColor,
+  },
+  alienNumberIcon: {
+    marginLeft: 10,
+    marginRight: 2,
+    height: 14,
+    width: 14,
+    tintColor: colors.sheildIconColor,
+  },
   AppointmentTabs: {
     flexDirection: 'row',
+    // backgroundColor:'red',
     flexWrap: 'wrap',
-    gap: 10,
+    gap: 7,
     rowGap: 10,
-    paddingTop: 20,
+    paddingTop: 15,
     paddingBottom: 5,
-    marginRight: 20,
   },
   Appointmentwith: {
     flexDirection: 'row',
@@ -118,7 +170,7 @@ export const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 15,
     marginTop: 30,
-    marginBottom:10,
+    marginBottom: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
