@@ -3,9 +3,16 @@ import { ApiService } from '../services/apiService';
 
 class UscisStore {
   cases = [];
+  case_name = ''
 
   constructor() {
     makeAutoObservable(this);
+  }
+
+  setCaseName(name) {
+    console.log('case type store list::', name);
+    
+    this.case_name = case_name ? case_name : null;
   }
 
   addCase(item) {
@@ -75,4 +82,4 @@ class UscisStore {
   // ... other store methods
 }
 
-export default AuthStore;
+export default UscisStore;

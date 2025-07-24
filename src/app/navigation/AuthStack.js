@@ -4,8 +4,6 @@ import LoginScreen from '../screens/Auth/Login';
 import RegisterScreen from '../screens/Auth/Register';
 import OtpScreen from '../screens/Auth/Otp';
 import DetailsScreen from '../screens/Detail';
-import AddCaseScreen from '../screens/USCISTracker/AddCase';
-import CaseListScreen from '../screens/USCISTracker/CaseList';
 import CaseDetailsScreen from '../screens/USCISTracker/CaseDetails';
 import BottomTabNavigator from './BottomTabNavigator';
 import SearchScreen from '../screens/Search';
@@ -14,6 +12,8 @@ import ClientsScreen from '../screens/Clients/view/ClientScreen';
 import HearingsScreen from '../screens/Hearings/view/HearingsScreen';
 import AppointmentsScreen from '../screens/Appointments/view/AppointmentsScreen';
 import CasesScreen from '../screens/Cases/view/CasesScreen';
+import AddCaseScreen from '../screens/USCISTracker/AddCase/view';
+import CaseListScreen from '../screens/USCISTracker/CaseList/view';
 
 const Stack = createNativeStackNavigator();
 

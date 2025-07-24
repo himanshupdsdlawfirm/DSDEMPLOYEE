@@ -15,6 +15,8 @@ export const end_points = {
     appointmentList: '/employee_appointments_list/',
     attorney_list: '/list_attorneys/',
     employee_appointments_list: '/employee_appointments_list/',
-    latest_cases: '/latest_cases/'
+    latest_cases: '/latest_cases/',
+    uscisAddCase: '/case-status/',
+    uscisCaseList: '/uscis/',
   },
 };

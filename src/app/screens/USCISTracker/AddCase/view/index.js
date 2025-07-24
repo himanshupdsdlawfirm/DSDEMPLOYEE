@@ -1,34 +1,40 @@
-import React, {useRef, useCallback, useState} from 'react';
-import {View, Text, StyleSheet, TextInput, ImageBackground} from 'react-native';
-import {colors} from '../../../config/theme';
-import ToastNotification from '../../../../components/common/CustomToast';
-import {AppImages} from '../../../config/Images';
-import {moderateScale} from '../../../utils/fontsize';
-import {CustomButton} from '../../../../components/common/CustomButton';
-import {LinearGradientHeader} from '../../../../components/common/LinerGradientHeader';
-import {AddCaseViewModel} from './viewModel/addCaseViewModel';
+// AddCaseScreen.js
+import React, {useRef, useState, useCallback} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  ImageBackground,
+  ActivityIndicator,
+} from 'react-native';
+import {colors} from '../../../../config/theme';
+import {AppImages} from '../../../../config/Images';
+import {moderateScale} from '../../../../utils/fontsize';
+import {CustomButton} from '../../../../../components/common/CustomButton';
+import {LinearGradientHeader} from '../../../../../components/common/LinerGradientHeader';
+import {useAddCaseViewModel} from '../viewModel/addCaseViewModel';
+import ToastNotification from '../../../../../components/common/CustomToast';
 
 const AddCaseScreen = ({navigation}) => {
-  const viewModel = useRef(new AddCaseViewModel()).current;
+  const {
+    caseNumber,
+    caseName,
+    error,
+    loading,
+    toastConfig,
+    setCaseNumber,
+    setCaseName,
+    handleAddCase,
+  } = useAddCaseViewModel();
 
-  const triggerUpdate = () => forceUpdate(prev => !prev);
-
-  const [_, forceUpdate] = useState(false);
-  const [isLoderOn, setLoderOn] = useState(false);
-
-  const handleAddCase = async () => {
-    setLoderOn(true)
-    const result = await viewModel.addCase();
-
-    console.log('result::', result);
-
-    forceUpdate(prev => !prev); // Trigger re-render
-
-    if (result.success) {
-      navigation.navigate('CaseList', {caseData: result.data});
-       setLoderOn(false);
+  const handleSubmit = useCallback(async () => {
+    const result = await handleAddCase();
+    if (result?.success) {
+      // navigation.navigate('CaseList', {caseData: result.data});
+      navigation.goBack();
     }
-  };
+  }, [handleAddCase, navigation]);
 
   return (
     <>
@@ -64,61 +70,61 @@ const AddCaseScreen = ({navigation}) => {
         <View style={styles.inputContainer}>
           <View style={styles.inputWrapper}>
             <TextInput
-              onChangeText={text => {
-                viewModel.setCaseNumber(text);
-                triggerUpdate(); // Notify View to update
-              }}
-              value={viewModel.caseNumber}
+              onChangeText={setCaseNumber}
+              value={caseNumber}
               placeholder={'ABC1234567890'}
               maxLength={13}
-              placeholderTextColor={viewModel.error ? '#E06158' : colors.gray}
+              placeholderTextColor={error ? '#E06158' : colors.gray}
               autoCapitalize={'none'}
               autoFocus={true}
               returnKeyType={'next'}
-              editable={true}
+              editable={!loading}
               keyboardType={'default'}
-              style={[styles.textInput, viewModel.error && styles.errorInput]}
+              style={[styles.textInput, error && styles.errorInput]}
             />
             <Text style={styles.inputLabel}>Case number</Text>
           </View>
 
           <TextInput
-            onChangeText={viewModel.setCaseName}
-            value={viewModel.caseName}
+            onChangeText={setCaseName}
+            value={caseName}
             placeholder={'Case Name (optional)'}
             placeholderTextColor={colors.gray}
             autoCapitalize={'none'}
             returnKeyType={'next'}
-            editable={true}
+            editable={!loading}
             keyboardType={'default'}
             style={[styles.caseNametextInput]}
           />
 
-          <CustomButton
-            btnText="Add Case"
-            btnOnPress={handleAddCase}
-            isBtnEnable={!viewModel.error && viewModel.caseNumber.length >= 13}
-            isEnable={!viewModel.error && viewModel.caseNumber.length >= 13}
-            isLoadingTrue = {isLoderOn}
-            btnViewStyle={[
-              styles.addButton,
-              {
-                backgroundColor:
-                  viewModel.error || viewModel.caseNumber.length < 13
-                    ? colors.gray
-                    : colors.themeColor,
-              },
-            ]}
-          />
+          {loading ? (
+            <ActivityIndicator size="large" color={colors.white} />
+          ) : (
+            <CustomButton
+              btnText="Add Case"
+              btnOnPress={handleSubmit}
+              isBtnEnable={!error && caseNumber.length >= 13}
+              isEnable={!error && caseNumber.length >= 13}
+              btnViewStyle={[
+                styles.addButton,
+                {
+                  backgroundColor:
+                    error || caseNumber.length < 13
+                      ? colors.gray
+                      : colors.themeTextColor,
+                },
+              ]}
+            />
+          )}
         </View>
       </ImageBackground>
 
       <ToastNotification
-        visible={viewModel.toastVisible}
-        title="Invalid Input"
-        message={viewModel.error}
-        colorLight={'#E06158'}
-        colorDark={'#FC867D'}
+        visible={toastConfig.visible}
+        title={toastConfig.title}
+        message={toastConfig.message}
+        colorLight={toastConfig.colorLight}
+        colorDark={toastConfig.colorDark}
       />
     </>
   );
@@ -127,12 +133,6 @@ const AddCaseScreen = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  title: {
-    justifyContent: 'center',
-    fontSize: moderateScale(20),
-    fontWeight: '600',
-    color: colors.themeTextColor,
   },
   descriptionContainer: {
     paddingVertical: 20,
@@ -214,12 +214,6 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: 'transparent',
-  },
-  addButtonText: {
-    fontSize: moderateScale(18),
-    textAlign: 'center',
-    color: colors.white,
-    fontWeight: '600',
   },
 });
 

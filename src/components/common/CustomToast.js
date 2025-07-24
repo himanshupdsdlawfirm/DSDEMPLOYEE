@@ -3,6 +3,7 @@ import {View, Text, Image} from 'react-native';
 import Animated, {FadeInUp, FadeOutUp} from 'react-native-reanimated';
 import LinearGradient from 'react-native-linear-gradient';
 import {colors} from '../../app/config/theme';
+import {AppImages} from '../../app/config/Images';
 
 function ToastNotification({
   visible,
@@ -35,7 +36,8 @@ function ToastNotification({
           flexDirection: 'row',
         }}>
         <Image
-          source={icon}
+          resizeMode="contain"
+          source={!icon ? AppImages.warning : icon}
           style={{
             width: 24,
             height: 30,
@@ -44,6 +46,7 @@ function ToastNotification({
         <View
           style={{
             height: 70,
+            width: '80%',
           }}>
           <Text style={{color: '#F6F4F4', fontWeight: 'bold', marginLeft: 10}}>
             {title}

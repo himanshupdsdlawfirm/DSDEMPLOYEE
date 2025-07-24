@@ -13,7 +13,12 @@ import {colors} from '../../../config/theme';
 import {moderateScale} from '../../../utils/fontsize';
 import {LinearGradientHeader} from '../../../../components/common/LinerGradientHeader';
 
-const CaseDetailsScreen = ({navigation}) => {
+const CaseDetailsScreen = ({navigation, route}) => {
+
+  const {data} = route.params;
+
+  console.log('previous ss data::', data);
+  
   // Mock data - replace with your actual data fetching
   const caseDetails = {
     id: 'EAC2101350505',

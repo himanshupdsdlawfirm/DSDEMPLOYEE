@@ -11,6 +11,8 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  Platform,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import {BottomSheetModal, BottomSheetScrollView} from '@gorhom/bottom-sheet';
 import RNPickerSelect from 'react-native-picker-select';
@@ -68,6 +70,17 @@ const FilterBottomSheet = forwardRef(({onApply, ...props}, ref) => {
 
   // Memoized snap points for performance
   const snapPoints = useMemo(() => ['80%'], []);
+
+  const PickerWrapper = ({children, onPress}) => {
+    if (Platform.OS === 'android') {
+      return children;
+    }
+    return (
+      <TouchableWithoutFeedback onPress={onPress}>
+        <View style={{flex: 1}}>{children}</View>
+      </TouchableWithoutFeedback>
+    );
+  };
 
   // Helper functions for date handling
   const getToday = () => {

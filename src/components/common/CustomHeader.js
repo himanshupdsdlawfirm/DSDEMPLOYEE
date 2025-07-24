@@ -19,7 +19,7 @@ const CustomHeader = ({
   return (
     <View style={[styles.headerContainer, headerStyle]}>
       {/* Left Image */}
-      <TouchableOpacity 
+      {/* <TouchableOpacity 
         onPress={onLeftPress} 
         style={[styles.imageContainer, leftImageContainerStyle]}
         disabled={!onLeftPress}
@@ -31,7 +31,7 @@ const CustomHeader = ({
             resizeMode="contain"
           />
         )}
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       {/* Center Image */}
       <TouchableOpacity 

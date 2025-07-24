@@ -1,51 +1,118 @@
-// viewModels/AddCaseViewModel.js
-import { AddCaseService } from '../../../../services/apiCalling/uscis/addCase';
-import { AddCaseModel } from '../model/addCaseModel';
+// addCaseViewModel.js
+import {useState, useCallback, useEffect, useRef} from 'react';
+import {AddCaseModel} from '../model/addCaseModel';
+import {showToast} from '../../../../../utils/toastUtils';
 
-export class AddCaseViewModel {
-  
-  constructor() {
-    this.model = new AddCaseModel();
-    this.error = '';
-    this.isLoading = false;
-  }
+export const useAddCaseViewModel = () => {
+  const model = useRef(new AddCaseModel()).current;
+  const [caseNumber, setCaseNumberState] = useState('');
+  const [caseName, setCaseNameState] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [toastConfig, setToastConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    colorDark: '',
+    colorLight: '',
+  });
 
-  get caseNumber() {
-    return this.model.caseNumber;
-  }
+  const toastTimeoutRef = useRef(null);
 
-  get caseName() {
-    return this.model.caseName;
-  }
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+    };
+  }, []);
 
-  setCaseNumber = (value) => {
-    this.model.caseNumber = value;
-    this.validate();
-  };
-
-  setCaseName = (value) => {
-    this.model.caseName = value;
-  };
-
-  validate = () => {
-    const isValid = this.model.validateCaseNumber();
-    this.error = isValid ? '' : 'Case number must be 13 characters';
-    return isValid;
-  };
-
-  addCase = async () => {
-    if (!this.validate()) return false;
-    
-    this.isLoading = true;
-    
-    try {
-      const response = await AddCaseService.getCaseStatus(this.model.caseNumber);
-      return { success: true, data: response };
-    } catch (error) {
-      this.error = error.message;
-      return { success: false };
-    } finally {
-      this.isLoading = false;
+  const showToast = useCallback(config => {
+    // Clear any existing timeout
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
     }
+
+    setToastConfig({
+      ...config,
+      visible: true,
+    });
+
+    // Auto-hide after 3 seconds
+    toastTimeoutRef.current = setTimeout(() => {
+      setToastConfig(prev => ({...prev, visible: false}));
+    }, 3000);
+  }, []);
+
+  const validateCaseNumber = useCallback(number => {
+    const isValid = number.length >= 13;
+    setError(isValid ? '' : 'Case number must be 13 characters');
+    return isValid;
+  }, []);
+
+  const setCaseNumber = useCallback(
+    text => {
+      model.caseNumber = text;
+      setCaseNumberState(text);
+      validateCaseNumber(text);
+    },
+    [model, validateCaseNumber],
+  );
+
+  const setCaseName = useCallback(
+    text => {
+      model.caseName = text;
+      setCaseNameState(text);
+    },
+    [model],
+  );
+
+  const handleAddCase = useCallback(async () => {
+    if (!validateCaseNumber(caseNumber)) {
+      showToast({
+        title: 'Invalid Input',
+        message: 'Case number must be 13 characters',
+        colorLight: '#E06158',
+        colorDark: '#FC867D',
+      });
+      return {success: false};
+    }
+
+    setLoading(true);
+    try {
+      const response = await model.addCase();
+      if (response.success) {
+        return {success: true, data: response.data};
+      } else {
+        showToast({
+          title: 'Error',
+          message: response.error || 'Failed to add case',
+          colorLight: '#E06158',
+          colorDark: '#FC867D',
+        });
+        return {success: false};
+      }
+    } catch (err) {
+      showToast({
+        title: 'Error',
+        message: err.message || 'Failed to add case',
+        colorLight: '#E06158',
+        colorDark: '#FC867D',
+      });
+      return {success: false};
+    } finally {
+      setLoading(false);
+    }
+  }, [caseNumber, model, showToast, validateCaseNumber]);
+
+  return {
+    caseNumber,
+    caseName,
+    error,
+    loading,
+    toastConfig,
+    setCaseNumber,
+    setCaseName,
+    handleAddCase,
   };
-}
+};

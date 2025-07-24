@@ -13,16 +13,13 @@ const apiClient = axios.create({
   },
 });
 
-
-
 apiClient.interceptors.request.use(
   async config => {
     const token = rootStore.authStore.token;
 
-    console.log('config of main function::', token);
+    console.log('API Service Token::', token);
 
-    console.log('SERVER SIDE API URL::', `${config.baseURL}${config.url}`);
-
+    console.log('API Service URL::', `${config.baseURL}${config.url}`);
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -52,6 +49,7 @@ apiClient.interceptors.response.use(
 
 export const ApiService = {
   async makeRequest(config) {
+
     try {
       const isConnected = await checkNetworkConnection();
       if (!isConnected) {

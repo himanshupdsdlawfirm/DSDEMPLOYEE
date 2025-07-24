@@ -1,48 +1,32 @@
 import {ApiService} from '../../apiService';
+import {end_points} from '../../endpoints';
 
 export class AddCaseService {
-  static async getAccessToken() {
+  static async getCaseStatus(caseNumber) {
     try {
-      const params = new URLSearchParams();
-      params.append('grant_type', 'client_credentials');
-      params.append('client_id', 'bN3at0YDMGRmKhfSq5ZvwLCHIAzFgkvU');
-      params.append('client_secret', 'GzCUm3jpfd0Z7j3s');
-
-      // Make sure to use the raw URLSearchParams string without JSON.stringify
-      const response = await ApiService.post(
-        '/oauth/accesstoken',
-        params.toString(), // This should NOT be wrapped in quotes
-        {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          Accept: 'application/json',
-        },
+      const response = await ApiService.get(
+        `${end_points.user.uscisAddCase}${caseNumber}/`,
       );
 
-      console.log('Token response:', response);
-
       if (response.success) {
-        return response.data.access_token;
+        return response.data;
       } else {
-        throw new Error(response.error || 'Failed to get access token');
+        throw new Error(response.error || 'Failed to get case status');
       }
     } catch (error) {
-      console.error('Token Error:', error.response?.data || error.message);
-      throw error;
+      console.error('Case Status Error:', error);
+      throw error; // Re-throw the original error
     }
   }
 
-  static async getCaseStatus(caseNumber) {
+  static async postUscisCaseIntoServer(payload) {
     try {
-      const token = await this.getAccessToken();
-      console.log('token::', token);
-
-      const response = await ApiService.get(
-        `/case-status/${caseNumber}`,
-        {}, // params
-        {
-          Authorization: `Bearer ${token}`,
-        },
+      const response = await ApiService.post(
+        `${end_points.user.uscisCaseList}`,
+        JSON.stringify(payload),
       );
+
+      console.log('post uscis res::', response);
 
       if (response.success) {
         return response.data;
