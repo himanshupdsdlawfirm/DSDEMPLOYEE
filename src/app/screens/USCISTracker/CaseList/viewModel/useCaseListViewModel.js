@@ -1,7 +1,7 @@
-// caseListViewModel.js
 import {useState, useCallback, useEffect, useRef} from 'react';
 import {CaseListModel} from '../model/caseListModel';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import { AppImages } from '../../../../config/Images';
 
 export const useCaseListViewModel = () => {
   const model = useRef(new CaseListModel()).current;
@@ -14,22 +14,30 @@ export const useCaseListViewModel = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [totalCases, setTotalCases] = useState(0);
   const [toastConfig, setToastConfig] = useState({
     visible: false,
     title: '',
     message: '',
     colorDark: '',
     colorLight: '',
+    icon: null
   });
 
-  useEffect(() => {
-    fetchCases();
-    return () => {
-      if (toastTimeoutRef.current) {
-        clearTimeout(toastTimeoutRef.current);
-      }
-    };
-  }, []);
+  // Constants for pagination
+  const PAGE_SIZE = 20; // Number of items per page
+  const INITIAL_PAGE = 1;
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchCases(INITIAL_PAGE);
+      return () => {
+        if (toastTimeoutRef.current) {
+          clearTimeout(toastTimeoutRef.current);
+        }
+      };
+    }, []),
+  );
 
   const showToast = useCallback(config => {
     if (toastTimeoutRef.current) {
@@ -47,22 +55,36 @@ export const useCaseListViewModel = () => {
   }, []);
 
   const fetchCases = useCallback(
-    async (pageNum = 1, isRefreshing = false) => {
+    async (pageNum = INITIAL_PAGE, isRefreshing = false) => {
       try {
+        if (pageNum === INITIAL_PAGE && cases.length > 0 && !isRefreshing) {
+          return; // Don't fetch first page if we already have data
+        }
+
         isRefreshing ? setRefreshing(true) : setLoading(true);
 
         const response = await model.getCases();
 
-        console.log('uscis case list response::', response);
-
         if (response.success) {
-          if (isRefreshing || pageNum === 1) {
-            setCases(response.data);
-            if (isRefreshing) setPage(1);
+          const allCases = response.data || [];
+          setTotalCases(allCases.length);
+
+          // Implement client-side pagination
+          const startIndex = (pageNum - 1) * PAGE_SIZE;
+          const paginatedCases = allCases.slice(
+            startIndex,
+            startIndex + PAGE_SIZE,
+          );
+
+          if (isRefreshing || pageNum === INITIAL_PAGE) {
+            setCases(paginatedCases);
+            setPage(INITIAL_PAGE);
           } else {
-            setCases(prev => [...prev, ...response.data]);
+            setCases(prev => [...prev, ...paginatedCases]);
           }
-          setHasMore(response.hasMore);
+
+          // Check if there are more items to load
+          setHasMore(startIndex + PAGE_SIZE < allCases.length);
         } else {
           showToast({
             title: 'Error',
@@ -82,7 +104,7 @@ export const useCaseListViewModel = () => {
         isRefreshing ? setRefreshing(false) : setLoading(false);
       }
     },
-    [model, showToast],
+    [model, showToast, cases.length],
   );
 
   const fetchCaseDetail = useCallback(
@@ -92,11 +114,8 @@ export const useCaseListViewModel = () => {
 
         const response = await model.getCaseDetail(1, case_number);
 
-        console.log('uscis case detail response::', response);
-
         if (response.success) {
-            navigation.navigate('CaseDetails', {data: response?.data});
-       
+          navigation.navigate('CaseDetails', {data: response?.data});
         } else {
           showToast({
             title: 'Error',
@@ -120,13 +139,14 @@ export const useCaseListViewModel = () => {
   );
 
   const onRefresh = useCallback(() => {
-    fetchCases(1, true);
+    fetchCases(INITIAL_PAGE, true);
   }, [fetchCases]);
 
   const loadMoreCases = useCallback(() => {
     if (!loading && hasMore) {
-      fetchCases(page + 1);
-      setPage(prev => prev + 1);
+      const nextPage = page + 1;
+      fetchCases(nextPage);
+      setPage(nextPage);
     }
   }, [loading, hasMore, page, fetchCases]);
 
@@ -141,11 +161,14 @@ export const useCaseListViewModel = () => {
 
         if (response.success) {
           setCases(prev => prev.filter(item => item.id !== caseId));
+          setTotalCases(prev => prev - 1);
+          fetchCases();
           showToast({
             title: 'Success',
             message: 'Case deleted successfully',
             colorLight: '#50ad6d',
             colorDark: '#50ad6d',
+            icon: AppImages.trash
           });
         } else {
           showToast({

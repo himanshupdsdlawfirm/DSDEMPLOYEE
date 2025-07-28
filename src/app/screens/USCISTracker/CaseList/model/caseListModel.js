@@ -23,6 +23,7 @@ export class CaseListModel {
       // Transform API data to match our UI structure
       const transformedData = response.data.map(item => ({
         caseName: item?.CaseName,
+        caseUniqueId: item?.id,
         receipt_number: item?.recipt_number,
         status: item?.status,
         caseDate:

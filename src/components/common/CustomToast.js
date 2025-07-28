@@ -41,6 +41,7 @@ function ToastNotification({
           style={{
             width: 24,
             height: 30,
+            tintColor:colors.white
           }}
         />
         <View

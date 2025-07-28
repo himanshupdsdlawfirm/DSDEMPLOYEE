@@ -9,14 +9,16 @@ import {
   ActivityIndicator,
   ImageBackground,
   Dimensions,
+  Animated
 } from 'react-native';
 import {AppImages} from '../../../../config/Images';
-import {colors, fonts} from '../../../../config/theme';
+import {colors} from '../../../../config/theme';
 import {LinearGradientHeader} from '../../../../../components/common/LinerGradientHeader';
 import {SwipeListView} from 'react-native-swipe-list-view';
 import ToastNotification from '../../../../../components/common/CustomToast';
 import {useCaseListViewModel} from '../viewModel/useCaseListViewModel';
 import {responsiveSize} from '../../../../utils/responsiveFontSize';
+import { NoDataFound } from '../../../../../components/common/NoDataFound';
 
 const {width} = Dimensions.get('window');
 
@@ -30,25 +32,80 @@ const CaseListScreen = ({navigation}) => {
     onRefresh,
     loadMoreCases,
     deleteCase,
-    fetchCaseDetail
+    fetchCaseDetail,
   } = useCaseListViewModel();
+
+   // Add animation value for NoDataFound
+  const scaleValue = new Animated.Value(0.5);
+
+  // Add animation effect
+  React.useEffect(() => {
+    if (cases.length === 0 && !loading) {
+      Animated.spring(scaleValue, {
+        toValue: 1,
+        friction: 3,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      scaleValue.setValue(0.5);
+    }
+  }, [cases, loading]);
+
+  // Add renderNoDataFound function
+  const renderNoDataFound = () => (
+    <View style={styles.noDataContainer}>
+      <Animated.View style={{transform: [{scale: scaleValue}]}}>
+        <NoDataFound
+          noDataFoundText={'No cases found'}
+          noDataSubText={'Try refreshing or adding a new case'}
+        />
+      </Animated.View>
+    </View>
+  );
 
   const renderHiddenItem = (data, rowMap) => (
     <View style={styles.rowBack}>
+       { console.log('delete item::', data)}
       <View style={styles.underlayContainer}>
         <TouchableOpacity
           style={styles.deleteButton}
-          onPress={() => deleteCase(data.item.id, rowMap)}>
+          onPress={() => deleteCase(data.item.caseUniqueId, rowMap)}>
           <Text style={styles.deleteText}>Delete</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 
+  const getStatusColor = status => {
+    if (!status) return '#1a73e8'; // Default blue
+
+    const lowerText = status.toLowerCase();
+
+    if (lowerText.includes('sent') && lowerText.includes('request'))
+      return 'orange';
+    if (lowerText.includes('denied')) return '#ea4335'; // Red
+    if (
+      lowerText.includes('produced') ||
+      lowerText.includes('approved') ||
+      lowerText.includes('delivered')
+    )
+      return '#34a853'; // Green
+    if (
+      lowerText.includes('received') ||
+      lowerText.includes('transferred') ||
+      lowerText.includes('request for evidence') ||
+      lowerText.includes('reopen') ||
+      lowerText.includes('response') ||
+      lowerText.includes('reopened')
+    )
+      return '#1a73e8'; // Blue
+    return '#1a73e8'; // Default blue
+  };
+
   const renderItem = ({item}) => (
     <TouchableOpacity
       activeOpacity={1}
-      onPress={() => fetchCaseDetail(1,false,item.receipt_number)}
+      onPress={() => fetchCaseDetail(1, false, item.receipt_number)}
       style={styles.frontViewContainer}>
       <View style={styles.caseItem}>
         {console.log('case list itsm is::', item)}
@@ -79,13 +136,22 @@ const CaseListScreen = ({navigation}) => {
             )}
           </View>
           <View style={styles.caseIdContainer}>
+            
             <Text style={styles.lastChange}>
-              Last Change: {item.lastChange}
+              {item.lastChange ? `Last Change: ${item.lastChange}`: ''}
             </Text>
             <Text style={styles.caseFileId}>{item.caseFileId}</Text>
           </View>
         </View>
       </View>
+      {/* {loading && 
+      <View style={{
+        position:'absolute',
+        alignSelf:'center'
+      }}>
+        <ActivityIndicator size="small" color={colors.white} />
+      </View>
+      } */}
     </TouchableOpacity>
   );
 
@@ -96,21 +162,6 @@ const CaseListScreen = ({navigation}) => {
         <ActivityIndicator size="small" color={colors.white} />
       </View>
     );
-  };
-
-  const getStatusColor = status => {
-    switch (status) {
-      case 'Approved':
-        return colors.green;
-      case 'Pending':
-        return colors.yellow;
-      case 'Rejected':
-        return colors.red;
-      case 'Interview Scheduled':
-        return colors.blue;
-      default:
-        return colors.gray;
-    }
   };
 
   return (
@@ -132,35 +183,43 @@ const CaseListScreen = ({navigation}) => {
         secondRightIcon={AppImages.refreshIcon}
       />
 
-      <SwipeListView
-        data={cases}
-        renderItem={renderItem}
-        renderHiddenItem={renderHiddenItem}
-        keyExtractor={item => item.id}
-        leftOpenValue={75}
-        rightOpenValue={-75}
-        disableRightSwipe={true}
-        stopLeftSwipe={75}
-        stopRightSwipe={-75}
-        swipeToOpenPercent={30}
-        swipeToClosePercent={30}
-        closeOnRowPress={true}
-        closeOnRowBeginSwipe={false}
-        closeOnScroll={true}
-        useNativeDriver={false}
-        contentContainerStyle={styles.listContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.white}
-          />
-        }
-        onEndReached={loadMoreCases}
-        onEndReachedThreshold={0.1}
-        ListFooterComponent={renderFooter}
-        style={styles.swipeList}
-      />
+      {loading && !refreshing && cases.length === 0 ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.white} />
+        </View>
+      ) : cases.length > 0 ? (
+        <SwipeListView
+          data={cases}
+          renderItem={renderItem}
+          renderHiddenItem={renderHiddenItem}
+          keyExtractor={item => item.id}
+          leftOpenValue={75}
+          rightOpenValue={-75}
+          disableRightSwipe={true}
+          stopLeftSwipe={75}
+          stopRightSwipe={-75}
+          swipeToOpenPercent={30}
+          swipeToClosePercent={30}
+          closeOnRowPress={true}
+          closeOnRowBeginSwipe={false}
+          closeOnScroll={true}
+          useNativeDriver={false}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.white}
+            />
+          }
+          onEndReached={loadMoreCases}
+          onEndReachedThreshold={0.1}
+          ListFooterComponent={renderFooter}
+          style={styles.swipeList}
+        />
+      ) : (
+        renderNoDataFound()
+      )}
 
       <ToastNotification
         visible={toastConfig.visible}
@@ -168,6 +227,7 @@ const CaseListScreen = ({navigation}) => {
         message={toastConfig.message}
         colorLight={toastConfig.colorLight}
         colorDark={toastConfig.colorDark}
+        icon = {toastConfig.icon}
       />
     </ImageBackground>
   );
@@ -265,6 +325,16 @@ const styles = StyleSheet.create({
   },
   footer: {
     paddingVertical: 20,
+    alignItems: 'center',
+  },
+  noDataContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
   },
 });

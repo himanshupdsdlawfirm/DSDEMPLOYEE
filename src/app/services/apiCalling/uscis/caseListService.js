@@ -8,16 +8,14 @@ export class CaseListService {
       const url = `${end_points.user.uscisCaseList}`;
       const response = await ApiService.get(url);
 
+      console.log('uscis case list response url::', url);
+      console.log('uscis case list response first::', response);
 
-      console.log('uscis case list response url::',url);
-      console.log('uscis case list response first::',response);
-      
-      
       return {
         success: response.success,
         data: response.data || [],
         has_more: !!response.data,
-        error: response.error
+        error: response.error,
       };
     } catch (error) {
       console.error('CaseListService Error:', error);
@@ -30,16 +28,14 @@ export class CaseListService {
       const url = `${end_points.user.uscisAddCase}${case_number}/`;
       const response = await ApiService.get(url);
 
+      console.log('uscis case detail response url::', url);
+      console.log('uscis case detail response first::', response);
 
-      console.log('uscis case detail response url::',url);
-      console.log('uscis case detail response first::',response);
-      
-      
       return {
         success: response.success,
         data: response.data || [],
         has_more: !!response.data,
-        error: response.error
+        error: response.error,
       };
     } catch (error) {
       console.error('CaseListService Error:', error);
@@ -49,12 +45,14 @@ export class CaseListService {
 
   async deleteCase(caseId) {
     try {
-      const url = `${end_points.uscis.caseList}${caseId}/`;
+      const url = `${end_points.user.uscisCaseList}${caseId}`;
       const response = await ApiService.delete(url);
-      
+
+      console.log('case item delete res::', response);
+
       return {
         success: response.success,
-        error: response.error
+        error: response.error,
       };
     } catch (error) {
       console.error('CaseListService Error:', error);
