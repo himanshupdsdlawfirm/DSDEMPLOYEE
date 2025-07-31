@@ -118,14 +118,13 @@ export const useAppointmentsViewModel = route => {
       try {
         setLoading(true);
 
-        // Clear data if it's the first page
         if (pageNum === 1) {
           setAppointmentsData([]);
         }
 
         const params = {
           page: pageNum,
-          date: selectedTab, // Send the current tab as API parameter
+          date: selectedTab,
           search: filters.search || '',
           visitor: filters.visitor,
           payment_mode: filters.payment_mode,
@@ -146,23 +145,47 @@ export const useAppointmentsViewModel = route => {
         const response = await AppointmentModel.getAppointmentList(params);
         const res = response?.data || [];
 
-        // Sort appointments by date and time (most recent first)
+        // Sort appointments based on tab
+        // Sort appointments based on tab
         const sortedData = res.sort((a, b) => {
-          // Convert time from "02:10 PM" to "14:10" format for proper parsing
-          const convertTimeTo24Hour = timeStr => {
-            const [time, modifier] = timeStr.split(' ');
+          // Helper function to create full datetime string for comparison
+          const getDateTime = item => {
+            const [time, modifier] = item.start_time.split(' ');
             let [hours, minutes] = time.split(':');
-            if (hours === '12') hours = '00';
-            if (modifier === 'PM') hours = parseInt(hours, 10) + 12;
-            return `${hours}:${minutes}`;
+            hours = parseInt(hours, 10);
+            minutes = parseInt(minutes, 10);
+
+            if (modifier === 'PM' && hours !== 12) hours += 12;
+            if (modifier === 'AM' && hours === 12) hours = 0;
+
+            // Pad single digit hours/minutes
+            hours = hours.toString().padStart(2, '0');
+            minutes = minutes.toString().padStart(2, '0');
+
+            return `${item.date}T${hours}:${minutes}:00`;
           };
 
-          // Create comparable date-time strings
-          const dateTimeA = `${a.date}T${convertTimeTo24Hour(a.start_time)}`;
-          const dateTimeB = `${b.date}T${convertTimeTo24Hour(b.start_time)}`;
+          const aDateTime = getDateTime(a);
+          const bDateTime = getDateTime(b);
 
-          // Convert to timestamps for comparison
-          return new Date(dateTimeB) - new Date(dateTimeA);
+          console.log('selectedTabselectedTab::',selectedTab);
+          
+
+          // For upcoming: sort by datetime descending (most recent first)
+          if (selectedTab === 'future') {
+            return new Date(bDateTime) - new Date(aDateTime);
+          }
+          // For today: sort by time only (earliest first)
+          else if (selectedTab === 'today') {
+            return (
+              new Date(`1970-01-01T${aDateTime.split('T')[1]}`) -
+              new Date(`1970-01-01T${bDateTime.split('T')[1]}`)
+            );
+          }
+          // For past: sort by datetime descending (most recent first)
+          else {
+            return new Date(bDateTime) - new Date(aDateTime);
+          }
         });
 
         if (isRefreshing) {
@@ -183,7 +206,7 @@ export const useAppointmentsViewModel = route => {
         setRefreshing(false);
       }
     },
-    [filters, selectedTab, filterActive],
+    [filters, selectedTab, filterActive, page],
   );
 
   const openFilter = useCallback(() => {

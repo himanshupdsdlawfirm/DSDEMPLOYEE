@@ -60,6 +60,12 @@ const HearingsScreen = ({navigation, route}) => {
     }
   }, [filteredHearings, loading]);
 
+  useEffect(() => {
+    if (filteredHearings.length > 0) {
+      setFilterActive(prev => prev || false);
+    }
+  }, [filteredHearings]);
+
   const openFilter = useCallback(() => {
     filterBottomSheetRef.current?.present();
   }, [filteredHearings.length]);
@@ -70,7 +76,6 @@ const HearingsScreen = ({navigation, route}) => {
         <LinearGradient
           colors={[colors.hearingCardLinearOne, colors.hearingCardLinearTwo]}
           style={styles.hearingLinearCard}>
-          {console.log('hearing item:', item)}
           <TouchableOpacity activeOpacity={1} style={styles.hearingItem}>
             <LinearGradient
               style={styles.hearingDateContainer}
@@ -242,6 +247,8 @@ const HearingsScreen = ({navigation, route}) => {
             rightImgOnPress={openFilter}
             isHeaderBottomText={false}
           />
+
+          {console.log('filteredHearings::', filteredHearings)}
 
           {loading && !refreshing && filteredHearings.length === 0 ? (
             <View style={styles.loadingContainer}>

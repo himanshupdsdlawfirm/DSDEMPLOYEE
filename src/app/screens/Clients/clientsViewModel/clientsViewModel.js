@@ -176,6 +176,9 @@ export const useClientsViewModel = route => {
           retention_date_before: formatDate(filters.endDate),
         };
 
+        console.log('clients param:', params);
+        
+
         // Clean params
         Object.keys(params).forEach(key => {
           if (

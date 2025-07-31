@@ -161,7 +161,7 @@ const HomeScreen = () => {
               {appointmentsData.length > 0 && (
                 <FlatList
                   horizontal
-                  data={appointmentsData.slice(0, 20)}
+                  data={appointmentsData.reverse().slice(0, 20)}
                   renderItem={renderAppointmentItem}
                   keyExtractor={keyExtractor}
                   contentContainerStyle={styles.appointmentList}

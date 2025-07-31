@@ -9,6 +9,9 @@ import {AppImages} from '../../../config/Images';
 const AppointmentItem = memo(({item, formattedDate, formattedTime}) => {
   console.log('appointment list item::', item);
 
+  const guestCount = item?.additional_guest.split(',').map(name => name.trim());
+  const totalGuestCount = guestCount.length;
+
   return (
     <LinearGradient
       style={styles.appointmentContainer}
@@ -42,17 +45,26 @@ const AppointmentItem = memo(({item, formattedDate, formattedTime}) => {
               </Text>
             </View>
           )}
-
-          <View style={styles.tag}>
-            <Text numberOfLines={1} style={styles.tagText}>
-              {'3 Guest'}
-            </Text>
-          </View>
+          {totalGuestCount > 0 && (
+            <View style={styles.tag}>
+              <Text numberOfLines={1} style={styles.tagText}>
+                {`${totalGuestCount} Guest`}
+              </Text>
+            </View>
+          )}
 
           {item.payment_mode && (
             <View style={styles.tag}>
               <Text numberOfLines={1} style={styles.tagText}>
                 {item?.payment_mode}
+              </Text>
+            </View>
+          )}
+
+          {item.staff_member_name && (
+            <View style={styles.tag}>
+              <Text numberOfLines={1} style={styles.tagText}>
+                {item?.staff_member_name}
               </Text>
             </View>
           )}

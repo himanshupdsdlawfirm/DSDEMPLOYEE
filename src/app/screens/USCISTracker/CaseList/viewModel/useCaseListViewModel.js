@@ -5,10 +5,8 @@ import { AppImages } from '../../../../config/Images';
 
 export const useCaseListViewModel = () => {
   const model = useRef(new CaseListModel()).current;
-
   const toastTimeoutRef = useRef(null);
   const navigation = useNavigation();
-
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);

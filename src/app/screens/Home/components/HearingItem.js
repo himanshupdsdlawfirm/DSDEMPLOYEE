@@ -14,7 +14,6 @@ import LinearGradient from 'react-native-linear-gradient';
 import {responsiveSize} from '../../../utils/responsiveFontSize';
 
 const HearingItem = ({item, formattedDate}) => {
-  console.log('hearing item home::', item);
 
   return (
     <View style={styles.hearingContainer}>

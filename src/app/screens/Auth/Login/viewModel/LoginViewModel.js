@@ -55,7 +55,7 @@ export const useLoginViewModel = () => {
         const response = res?.data;
 
         console.log('user login response::', response);
-        
+
         rootStore.authStore.setToken(response?.token);
         rootStore.authStore.setUserId(response?.userId);
         rootStore.authStore.setIsSuperUser(response?.is_superuser);
@@ -68,7 +68,8 @@ export const useLoginViewModel = () => {
           if (getEmployeeByIdResponse.success) {
             console.log('response token::', getEmployeeByIdResponse);
             rootStore.authStore.setUserDeatil(getEmployeeByIdResponse?.data);
-            navigation.navigate('Otp', {email});
+            // navigation.navigate('Otp', {email});
+            navigation.navigate('MainTabs');
           }
         } catch (error) {
           showToast(error.message);

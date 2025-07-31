@@ -48,6 +48,9 @@ export const getHearingFilterData = () => {
     value: `${client?.id}`, // Use id as the value
   }));
 
+  console.log('case worker list::', caseWorkerList);
+  
+
   return {
     categoryOne: caseWorkerList,
     categoryTwo: attorneyList,
@@ -83,10 +86,13 @@ export const getClientListFilterData = () => {
   // Add a default "Type" option at the beginning
   caseWorkerList.unshift({label: 'Type', value: null});
 
+  console.log('cloientb data :::', caseWorkerList);
+  
+
   return {
     categoryOne: [
-      {label: 'Created', value: true},
-      {label: 'Not Created', value: false},
+      {label: 'Yes', value: true},
+      {label: 'No', value: false},
     ],
     categoryTwo: [
       {label: 'Active', value: false},

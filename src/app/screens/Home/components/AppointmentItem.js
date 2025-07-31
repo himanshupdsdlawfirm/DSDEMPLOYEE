@@ -7,6 +7,9 @@ import LinearGradient from 'react-native-linear-gradient';
 import {responsiveSize} from '../../../utils/responsiveFontSize';
 
 const AppointmentItem = ({item, index, isLast, formattedDate}) => {
+  const guestCount = item?.additional_guest.split(',').map(name => name.trim());
+  const totalGuestCount = guestCount.length;
+
   return (
     <LinearGradient
       style={[
@@ -44,15 +47,26 @@ const AppointmentItem = ({item, index, isLast, formattedDate}) => {
           </View>
         )}
         <View style={styles.tagsContainer}>
-          <View style={styles.tag}>
-            <Text style={styles.tagText}>{item?.appointmentType}</Text>
-          </View>
-          <View style={styles.tag}>
-            <Text style={styles.tagText}>{'3 Guest'}</Text>
-          </View>
-          <View style={styles.tag}>
-            <Text style={styles.tagText}>{item?.payment_mode}</Text>
-          </View>
+          {item?.appointmentType && (
+            <View style={styles.tag}>
+              <Text style={styles.tagText}>{item?.appointmentType}</Text>
+            </View>
+          )}
+          {totalGuestCount > 0 && (
+            <View style={styles.tag}>
+              <Text style={styles.tagText}>{`${totalGuestCount} Guest`}</Text>
+            </View>
+          )}
+          {item?.payment_mode && (
+            <View style={styles.tag}>
+              <Text style={styles.tagText}>{item?.payment_mode}</Text>
+            </View>
+          )}
+          {item?.staff_member_name && (
+            <View style={styles.tag}>
+              <Text style={styles.tagText}>{item?.staff_member_name}</Text>
+            </View>
+          )}
         </View>
       </TouchableOpacity>
     </LinearGradient>

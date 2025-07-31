@@ -100,7 +100,7 @@ const CaseListScreen = ({navigation}) => {
     )
       return '#1a73e8'; // Blue
     return '#1a73e8'; // Default blue
-  };
+  };  
 
   const renderItem = ({item}) => (
     <TouchableOpacity

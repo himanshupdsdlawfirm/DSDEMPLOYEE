@@ -223,7 +223,7 @@ const AppointmentsScreen = ({navigation, route}) => {
             </View>
           ) : appointmentsData.length > 0 ? (
             <FlatList
-              data={appointmentsData}
+              data={selectedTab === 'future' ? appointmentsData.reverse() : appointmentsData}
               renderItem={renderAppointmentItem}
               keyExtractor={(item, index) => index.toString()}
               contentContainerStyle={styles.appointmentList}

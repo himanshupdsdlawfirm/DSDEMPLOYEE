@@ -14,7 +14,9 @@ export const useHearingsViewModel = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const [filterActive, setFilterActive] = useState(false);
+  // const [filterActive, setFilterActive] = useState(false);
+
+
 
   const filterData = getHearingFilterData();
 
@@ -29,6 +31,17 @@ export const useHearingsViewModel = () => {
     endDate: null,
   });
 
+    const [filterActive, setFilterActive] = useState(
+    () =>
+      filters.caseWorker ||
+      filters.attorney ||
+      filters.hearingType ||
+      filters.hearingStatus ||
+      filters.judgeName ||
+      filters.startDate ||
+      filters.endDate,
+  );
+
   const [toastConfig, setToastConfig] = useState({
     visible: false,
     title: '',
@@ -37,37 +50,6 @@ export const useHearingsViewModel = () => {
     colorLight: '',
     icon: null,
   });
-
-  // Initial load
-  useEffect(() => {
-    fetchHearings(1);
-  }, [fetchHearings]);
-
-  useFocusEffect(
-    useCallback(() => {
-      scrollRef.current?.scrollToOffset({offset: 0, animated: true});
-      return () => {};
-    }, []),
-  );
-
-  const showToast = useCallback(config => {
-    console.log('config data::', config);
-
-    // Clear any existing timeout
-    if (toastTimeoutRef.current) {
-      clearTimeout(toastTimeoutRef.current);
-    }
-
-    setToastConfig({
-      ...config,
-      visible: true,
-    });
-
-    // Auto-hide after 3 seconds
-    toastTimeoutRef.current = setTimeout(() => {
-      setToastConfig(prev => ({...prev, visible: false}));
-    }, 3000);
-  }, []);
 
   // Format date helper
   const formattedDate = useCallback(dateString => {
@@ -136,13 +118,9 @@ export const useHearingsViewModel = () => {
           }
         });
 
-        console.log('hearing params are::', params);
-
         const response = await HearingModel.getHearingList(params);
 
-        console.log('hearing res are::', response);
-
-        if (isRefreshing) {
+        if (isRefreshing || pageNum === 1) {
           setHearingsData(response.data);
         } else {
           setHearingsData(prev => [...prev, ...response.data]);
@@ -159,6 +137,35 @@ export const useHearingsViewModel = () => {
     },
     [filters],
   );
+
+  // Initial load and when filters change
+  useEffect(() => {
+    fetchHearings(1, true);
+  }, [fetchHearings]);
+
+  useFocusEffect(
+    useCallback(() => {
+      scrollRef.current?.scrollToOffset({offset: 0, animated: true});
+      return () => {};
+    }, []),
+  );
+
+  const showToast = useCallback(config => {
+    // Clear any existing timeout
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+
+    setToastConfig({
+      ...config,
+      visible: true,
+    });
+
+    // Auto-hide after 3 seconds
+    toastTimeoutRef.current = setTimeout(() => {
+      setToastConfig(prev => ({...prev, visible: false}));
+    }, 3000);
+  }, []);
 
   // Handle refresh
   const handleRefresh = useCallback(() => {
@@ -182,8 +189,6 @@ export const useHearingsViewModel = () => {
   // Handle filter apply
   const handleApplyFilters = useCallback(
     newFilters => {
-      console.log('newFilters::', newFilters);
-
       const mappedFilters = {
         search: searchText,
         caseWorker: newFilters.caseWorker,
@@ -195,10 +200,17 @@ export const useHearingsViewModel = () => {
         endDate: newFilters.endDate,
       };
 
-      setFilterActive(true);
+      const isAnyFilterActive =
+        mappedFilters.caseWorker ||
+        mappedFilters.attorney ||
+        mappedFilters.hearingType ||
+        mappedFilters.hearingStatus ||
+        mappedFilters.judgeName ||
+        mappedFilters.startDate ||
+        mappedFilters.endDate;
+
+      setFilterActive(isAnyFilterActive);
       setFilters(mappedFilters);
-      setHearingsData([]);
-      setPage(1);
     },
     [searchText],
   );

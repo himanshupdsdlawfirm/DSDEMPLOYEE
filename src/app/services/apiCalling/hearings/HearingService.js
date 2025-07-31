@@ -14,7 +14,12 @@ export class HearingService {
         queryString ? `?${queryString}` : ''
       }`;
 
+            console.log('hearing res url::', url);
+
+
       const response = await ApiService.get(url);
+
+      console.log('hearing res are2::', response);
 
       return response;
     } catch (error) {

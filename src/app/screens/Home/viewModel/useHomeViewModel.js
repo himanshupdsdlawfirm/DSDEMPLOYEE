@@ -22,13 +22,13 @@ export const useHomeViewModel = () => {
     fetchAppointmentList();
   }, []);
 
-   useFocusEffect(
-      useCallback(() => {
-        navigation.closeDrawer();
-        scrollRef.current?.scrollToOffset({ offset: 0, animated: true });
-        return () => {};
-      }, []),
-    );
+  useFocusEffect(
+    useCallback(() => {
+      navigation.closeDrawer();
+      scrollRef.current?.scrollToOffset({offset: 0, animated: true});
+      return () => {};
+    }, []),
+  );
 
   // Format date helper
   const formattedDate = useCallback(dateString => {
@@ -86,23 +86,29 @@ export const useHomeViewModel = () => {
 
       // Sort appointments by date and time (most recent first)
       const sortedData = res.sort((a, b) => {
-        // Convert time from "02:10 PM" to "14:10" format for proper parsing
-        const convertTimeTo24Hour = timeStr => {
-          const [time, modifier] = timeStr.split(' ');
+        // Helper function to create full datetime string for comparison
+        const getDateTime = item => {
+          const [time, modifier] = item.start_time.split(' ');
           let [hours, minutes] = time.split(':');
-          if (hours === '12') hours = '00';
-          if (modifier === 'PM') hours = parseInt(hours, 10) + 12;
-          return `${hours}:${minutes}`;
+          hours = parseInt(hours, 10);
+          minutes = parseInt(minutes, 10);
+
+          if (modifier === 'PM' && hours !== 12) hours += 12;
+          if (modifier === 'AM' && hours === 12) hours = 0;
+
+          // Pad single digit hours/minutes
+          hours = hours.toString().padStart(2, '0');
+          minutes = minutes.toString().padStart(2, '0');
+
+          return `${item.date}T${hours}:${minutes}:00`;
         };
 
-        // Create comparable date-time strings
-        const dateTimeA = `${a.date}T${convertTimeTo24Hour(a.start_time)}`;
-        const dateTimeB = `${b.date}T${convertTimeTo24Hour(b.start_time)}`;
+        const aDateTime = getDateTime(a);
+        const bDateTime = getDateTime(b);
 
-        // Convert to timestamps for comparison
-        return new Date(dateTimeB) - new Date(dateTimeA);
+        return new Date(bDateTime) - new Date(aDateTime);
       });
-
+      
       setAppointmentsData(sortedData);
 
       rootStore.homeStore.setClientList(res);
@@ -155,7 +161,6 @@ export const useHomeViewModel = () => {
     }
   };
 
-
   const handleSearchPress = () =>
     navigation.navigate('AppointmentList', {type: 'HomeSearch'});
   const handleViewAllClients = () => navigation.navigate('ClientList');
@@ -167,7 +172,7 @@ export const useHomeViewModel = () => {
 
   return {
     clientsData,
-    appointmentsData, 
+    appointmentsData,
     hearingsData,
     scrollRef,
     handleSearchPress,
